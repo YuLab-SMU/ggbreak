@@ -65,6 +65,12 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     axis_break <- attr(x, 'axis_break')
     axis <- axis_break$axis
     breaks <- axis_break$breaks
+    has_theme <- length(x$theme) != 0
+    if (has_theme) {
+        xlab_param <- x$theme$axis.title.x
+        ylab_param <- x$theme$axis.title.y
+    }
+
     xlab <- x$label$x
     ylab <- x$label$y
     x <- x + xlab(NULL) + ylab(NULL)
@@ -86,9 +92,18 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     }
 
     g <- ggplotify::as.ggplot(g) +
-        xlab(xlab) + ylab(ylab) +
-        theme(axis.title = element_text()) 
-    return(g)
+        xlab(xlab) + ylab(ylab)
+
+    if (has_theme) {
+        g <- g + theme(axis.title.x = do.call(element_text, xlab_param),
+                       axis.title.y = do.call(element_text, ylab_param))
+    } else {
+        g <- g + theme(axis.title.x = element_text(vjust = 1),
+                       axis.title.y = element_text(angle = 90, vjust = 1)) 
+
+    }
+        
+    print(g)
 }
 
 ##' @method plot ggbreak
