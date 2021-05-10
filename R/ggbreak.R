@@ -59,6 +59,7 @@ ggplot_add.ggbreak_params <- function(object, plot, object_name) {
 ##' @importFrom ggplot2 ylab
 ##' @importFrom ggplot2 theme
 ##' @importFrom ggplot2 element_blank
+##' @importFrom ggplot2 element_text
 ##' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
     axis_break <- attr(x, 'axis_break')
@@ -85,7 +86,8 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     }
 
     g <- ggplotify::as.ggplot(g) +
-        xlab(xlab) + ylab(ylab)
+        xlab(xlab) + ylab(ylab) +
+        theme(axis.title = element_text()) 
     return(g)
 }
 
