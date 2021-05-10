@@ -1,0 +1,20 @@
+Package: ggbreak
+Title: Set axis break for 'ggplot2'
+Version: 0.0.1
+Authors@R: 
+    person("Guangchuang", "Yu",
+           email = "guangchuangyu@gmail.com",
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0002-6485-8781")
+           )
+Description: An implementation of scale functions for setting axis breaks of a 'gg' plot.
+Imports:
+  grid,
+  ggplot2,
+  ggplotify,
+  cowplot
+License: Artistic-2.0
+Encoding: UTF-8
+URL: https://github.com/YuLab-SMU/ggbreak
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
