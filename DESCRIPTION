@@ -1,5 +1,5 @@
 Package: ggbreak
-Title: Set axis break for 'ggplot2'
+Title: Set Axis Break for 'ggplot2'
 Version: 0.0.1
 Authors@R: 
     person("Guangchuang", "Yu",
