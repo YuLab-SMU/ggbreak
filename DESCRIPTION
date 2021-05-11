@@ -1,12 +1,10 @@
 Package: ggbreak
-Title: Set Axis Break for 'ggplot2'
-Version: 0.0.1
-Authors@R: 
-    person("Guangchuang", "Yu",
-           email = "guangchuangyu@gmail.com",
-           role = c("aut", "cre", "cph"),
-           comment = c(ORCID = "0000-0002-6485-8781")
-           )
+Title: Set Axis Breaks for 'ggplot2'
+Version: 0.0.1.991
+Authors@R: c(
+       person("Guangchuang", "Yu",     email = "guangchuangyu@gmail.com", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
+       person("Shuangbin", "Xu",       email = "xshuangbin@163.com",      role = "aut", comment = c(ORCID="0000-0003-3513-5362"))
+       )
 Description: An implementation of scale functions for setting axis breaks of a 'gg' plot.
 Imports:
   grid,
