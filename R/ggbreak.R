@@ -33,6 +33,3 @@ scale_break <- function(axis, breaks) {
     structure(list(axis = axis, breaks = breaks),
               class = "ggbreak_params")
 }
-
-
-
