@@ -24,22 +24,32 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first")
     subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other")
     subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last")
+    coord_fun <- check_coord_flip(plot=x, axis=axis) 
     if(axis == 'x') {
-        p1 <- x + coord_cartesian(xlim = c(breaks[[1]][1], breaks[[1]][2])) + subplottheme1
+        p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1
         pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) 
-                            x + coord_cartesian(xlim=c(i[1], i[2])) + 
+                            x + do.call(coord_fun, list(xlim=c(i[1], i[2]))) + 
                             subplottheme2)
-        pp2 <- x + coord_cartesian(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2])) + 
+        pp2 <- x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + 
                subplottheme3
-        g <- do.call(plot_grid, list(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1))
+        arglist <- switch(coord_fun,
+                         coord_flip=list(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1),
+                         coord_cartesian=list(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1)
+                    )
+        g <- do.call(plot_grid, arglist)
     } else {
         breaks <- rev(breaks)
-        p1 <- x + coord_cartesian(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2])) + subplottheme1
-        pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) x + coord_cartesian(ylim=c(i[1], i[2])) +
+        p1 <- x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + subplottheme1
+        pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) 
+                      x + do.call(coord_fun, list(ylim=c(i[1], i[2]))) +
                             subplottheme2)
-        pp2 <- x + coord_cartesian(ylim = c(breaks[[1]][1], breaks[[1]][2])) +
+        pp2 <- x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]))) +
                subplottheme3
-        g <- do.call(plot_grid, list(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1))
+        arglist <- switch(coord_fun,
+                          coord_flip=list(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1),
+                          coord_cartesian=list(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1)
+                    ) 
+        g <- do.call(plot_grid, arglist)
     }
 
     g <- ggplotify::as.ggplot(g) 
@@ -47,32 +57,4 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     g <- set_axis_label(g, xlab = xlab, ylab = ylab, p2 = x)
         
     print(g)
-}
-
-subplot_theme <- function(plot, axis, type){
-    switch(type,
-           first = strip_theme(plot=plot, axis=axis),
-           other = axis_theme(plot=plot, axis=axis) + 
-                   strip_theme(plot, axis=axis),
-           last = axis_theme(plot=plot, axis=axis))
-}
-
-axis_theme <- function(plot, axis){
-    axis_theme <- switch(axis, 
-                        x = theme(axis.text.y=element_blank(),
-                                  axis.ticks.y=element_blank()),
-                        y = theme(axis.text.x=element_blank(),
-                                  axis.ticks.x=element_blank())
-                  )
-    return(axis_theme)
-}
-
-strip_theme <- function(plot, axis){
-    sp_theme <- switch(axis, 
-                      x = theme(strip.background.y=element_blank(),
-                                strip.text.y=element_blank()),
-                      y = theme(strip.background.x=element_blank(),
-                                strip.text.x=element_blank())
-                )
-    return(sp_theme)
 }
