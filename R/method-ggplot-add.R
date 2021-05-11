@@ -17,3 +17,9 @@ ggplot_add.ggbreak_params <- function(object, plot, object_name) {
     class(plot) <- c("ggbreak", class(plot))
     return(plot)
 }
+
+##' @method ggplot_add ggbreak
+##' @export
+ggplot_add.ggbreak <- function(object, plot, object_name) {
+    ggplot_add(print(object), print(plot), object_name)
+}
