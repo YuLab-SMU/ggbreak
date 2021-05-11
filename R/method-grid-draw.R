@@ -34,11 +34,10 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
                             subplottheme2)
         pp2 <- x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + 
                subplottheme3
-        arglist <- switch(coord_fun,
-                         coord_flip=list(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1),
-                         coord_cartesian=list(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1)
+        g <- switch(coord_fun,
+                    coord_flip=plot_grid(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1),
+                    coord_cartesian=plot_grid(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1)
                     )
-        g <- do.call(plot_grid, arglist)
     } else {
         breaks <- rev(breaks)
         p1 <- x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + subplottheme1
@@ -47,11 +46,10 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
                             subplottheme2)
         pp2 <- x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]))) +
                subplottheme3
-        arglist <- switch(coord_fun,
-                          coord_flip=list(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1),
-                          coord_cartesian=list(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1)
-                    ) 
-        g <- do.call(plot_grid, arglist)
+        g <- switch(coord_fun,
+                    coord_flip = plot_grid(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1),
+                    coord_cartesian = plot_grid(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1)
+               )
     }
 
     g <- ggplotify::as.ggplot(g) 
