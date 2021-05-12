@@ -62,3 +62,33 @@ check_coord_flip <- function(plot, axis){
     }
     return ("coord_cartesian")
 }
+
+compute_relative_range <- function(breaks, scales, rng){
+    baserange <- abs(diff(breaks[[1]]))
+    relranges <- mapply(compute_relative_range_, 
+                     breaks_=breaks[-1], 
+                     scales_=scales, 
+                     MoreArgs=list(baserange_=baserange), 
+                     #baserange_ = baserange,
+                     SIMPLIFY=FALSE)
+    relranges <- c(baserange, unname(unlist(relranges)))
+    if (rng$flagrev=="reverse"){
+        relranges <- rev(relranges)
+    }
+    return(relranges)
+}
+
+compute_relative_range_ <- function(breaks_, scales_, baserange_){
+    scales_ <- unlist(scales_)
+    if (scales_=="fixed"){
+        return(abs(diff(breaks_)))
+    }
+    if (scales_=="free"){
+        scales_ = 1
+    }
+    if (!is.numeric(scales_) || length(scales_) > 1){
+        abort("The scales must be a numeric or one of 'fixed', 'free' !")
+    }
+    relrange <- baserange_ * scales_
+    return (relrange)
+}

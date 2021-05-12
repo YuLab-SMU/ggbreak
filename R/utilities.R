@@ -66,11 +66,13 @@ extract_axis_break <- function(object){
     if (inherits(object, "ggbreak_params")){
         axis <- object$axis
         breaks <- object$breaks
+        scales <- object$scales
     }else{
         axis <- object[[1]]$axis
         breaks <- lapply(object, function(i)i$breaks)
+        scales <- lapply(object, function(i)i$scales) 
     }
-    return(list(axis=axis, breaks=breaks))
+    return(list(axis=axis, breaks=breaks, scales=scales))
 }
 
 theme_no_margin <- getFromNamespace("theme_no_margin", "aplot")

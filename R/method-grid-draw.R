@@ -11,9 +11,10 @@
 ##' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
     axis_break <- attr(x, 'axis_break')
-    axis_break <- extract_axis_break(object=axis_break)
-    axis <- axis_break$axis
-    breaks <- axis_break$breaks
+    axis_breaks <- extract_axis_break(object=axis_break)
+    axis <- axis_breaks$axis
+    breaks <- axis_breaks$breaks
+    scales <- axis_breaks$scales
     rng <- ggrange2(x, axis)
     breaks <- combine_range(breaks, rng)
 
@@ -27,6 +28,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     coord_fun <- check_coord_flip(plot=x, axis=axis) 
     newxlab <- switch(coord_fun, coord_flip=ylab, coord_cartesian=xlab)
     newylab <- switch(coord_fun, coord_flip=xlab, coord_cartesian=ylab)
+    relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng)
     if(axis == 'x') {
         p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1
         pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) 
@@ -39,8 +41,14 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         #            coord_cartesian=plot_grid(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1)
         #            )
         g <- switch(coord_fun,
-                    coord_flip = plot_list(gglist=c(list(pp2), pp1, list(p1)), ncol=1, guides = 'collect'),
-                    coord_cartesian = plot_list(gglist=c(list(p1), pp1, list(pp2)), nrow=1, guides = 'collect')
+                    coord_flip = plot_list(gglist=c(list(pp2), pp1, list(p1)), 
+                                           ncol=1,
+                                           heights=c(relrange[-1], relrange[1]),
+                                           guides = 'collect'),
+                    coord_cartesian = plot_list(gglist=c(list(p1), pp1, list(pp2)), 
+                                                nrow=1, 
+                                                widths=relrange,
+                                                guides = 'collect')
                     )
     } else {
         breaks <- rev(breaks)
@@ -55,8 +63,14 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         #            coord_cartesian = plot_grid(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1)
         #       )
         g <- switch(coord_fun,
-                    coord_flip = plot_list(gglist=c(list(p1), pp1, list(pp2)), nrow=1, guides = 'collect'),
-                    coord_cartesian = plot_list(gglist=c(list(pp2), pp1, list(p1)), ncol=1, guides = 'collect')
+                    coord_flip = plot_list(gglist=c(list(p1), pp1, list(pp2)), 
+                                           nrow=1, 
+                                           widths=relrange,
+                                           guides = 'collect'),
+                    coord_cartesian = plot_list(gglist=c(list(pp2), pp1, list(p1)), 
+                                                ncol=1, 
+                                                heights=c(relrange[-1], relrange[1]),
+                                                guides = 'collect')
                )
     }
 

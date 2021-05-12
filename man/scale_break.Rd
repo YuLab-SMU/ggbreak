@@ -5,12 +5,17 @@
 \alias{scale_y_break}
 \title{scale_x_break}
 \usage{
-scale_x_break(breaks)
+scale_x_break(breaks, scales = "fixed")
 
-scale_y_break(breaks)
+scale_y_break(breaks, scales = "fixed")
 }
 \arguments{
 \item{breaks}{break point}
+
+\item{scales, }{relative width or height of subplots,
+default is "fixed". If scale is 'free', all subplots have
+equal width or height. It also can be any number to set
+relative width or height compare to first subplot.}
 }
 \value{
 gg object
