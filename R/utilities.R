@@ -7,10 +7,11 @@ ggrange2 <- function (plot, var) {
     list(axis_range=axis_range, flagrev=flagrev)
 }
 
-
-set_axis_label <- function(p, xlab, ylab, p2 = NULL) {
-    p <- p + xlab(xlab) + ylab(ylab) +
-        theme(axis.title = element_text())
+#' @importFrom ggplot2 labs
+set_label <- function(p, totallabs, p2 = NULL) {
+    p <- p + 
+         do.call(labs, totallabs) +
+         theme(axis.title = element_text())
 
     if (is.null(p2)) {
         has_theme <- FALSE
@@ -19,17 +20,39 @@ set_axis_label <- function(p, xlab, ylab, p2 = NULL) {
     }
 
     if (has_theme) {
-        xlab_param <- list(p2$theme$axis.title.x)
-        ylab_param <- list(p2$theme$axis.title.y)
+        xlab_param <- if(length(p2$theme$axis.title.x)>0){p2$theme$axis.title.x}else{defte$axis.title.x}
+        ylab_param <- if(length(p2$theme$axis.title.y)>0){p2$theme$axis.title.y}else{defte$axis.title.y}
+        title_param <- if(length(p2$theme$plot.title)>0){p2$theme$plot.title}else{defte$plot.title}
+        title_pos_param <- if(length(p2$theme$plot.title.position)>0){p2$theme$plot.title.position}else{defte$plot.title.position}
+        subtitle_param <- if(length(p2$theme$plot.subtitle)>0){p2$theme$plot.subtitle}else{defte$plot.subtitle}
+        cap_param <- if(length(p2$theme$plot.caption)>0){p2$theme$plot.caption}else{defte$plot.caption}
+        cap_pos_param <- if(length(p2$theme$plot.caption.position)>0){p2$theme$plot.caption.position}else{defte$plot.caption.position}
+        tag_param <- if(length(p2$theme$plot.tag)>0){p2$theme$plot.tag}else{defte$plot.tag}
+        tag_pos_param <- if(length(p2$theme$plot.tag.position)>0){p2$theme$plot.tag.position}else{defte$plot.tag.position}
         
-        p <- p + theme(axis.title.x = do.call(element_text, xlab_param),
-                       axis.title.y = do.call(element_text, ylab_param))
+        p <- p + theme(axis.title.x = xlab_param,
+                       axis.title.y = ylab_param,
+                       plot.title = title_param,
+                       plot.title.position = title_pos_param, 
+                       plot.subtitle = subtitle_param,
+                       plot.caption = cap_param,
+                       plot.caption.position = cap_pos_param,
+                       plot.tag = tag_param,
+                       plot.tag.position = tag_pos_param
+                      )
     } else {
-        p <- p + theme(axis.title.x = element_text(vjust = 1),
-                       axis.title.y = element_text(angle = 90, vjust = 1)) 
+        p <- p + defte #theme(axis.title.x = element_text(vjust = 1),
+                 #      axis.title.y = element_text(angle = 90, vjust = 1)) 
     }
     return(p)
 }
+
+extract_totallabs <- function(plot){
+    alllabs <- plot$labels
+    totallabs <- alllabs[names(alllabs) %in% c("x", "y", "title", "subtitle", "caption", "tag")]
+    totallabs
+}
+
 
 combine_range <- function(breaks, rangeres){
     if (rangeres$flagrev=="reverse"){
@@ -76,3 +99,6 @@ extract_axis_break <- function(object){
 }
 
 theme_no_margin <- getFromNamespace("theme_no_margin", "aplot")
+
+#' @importFrom ggplot2 theme_gray
+defte <- ggplot2::theme_gray()

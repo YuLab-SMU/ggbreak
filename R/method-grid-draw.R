@@ -18,16 +18,20 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     rng <- ggrange2(x, axis)
     breaks <- combine_range(breaks, rng)
 
-    xlab <- x$label$x
-    ylab <- x$label$y
-    x <- x + xlab(NULL) + ylab(NULL)
+    #xlab <- x$label$x
+    #ylab <- x$label$y
+    #x <- x + xlab(NULL) + ylab(NULL)
+    totallabs <- extract_totallabs(plot=x)
+    if (length(totallabs) > 0){
+        x$labels[names(totallabs)] <- NULL
+    }
     nbreaks <- length(breaks)
     subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first")
     subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other")
     subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last")
     coord_fun <- check_coord_flip(plot=x, axis=axis) 
-    newxlab <- switch(coord_fun, coord_flip=ylab, coord_cartesian=xlab)
-    newylab <- switch(coord_fun, coord_flip=xlab, coord_cartesian=ylab)
+    newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
+    newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
     relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng)
     if(axis == 'x') {
         p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1
@@ -75,7 +79,8 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     }
 
     g <- ggplotify::as.ggplot(g) 
-
-    g <- set_axis_label(g, xlab = newxlab, ylab = newylab, p2 = x)
+    totallabs$x <- newxlab
+    totallabs$y <- newylab
+    g <- set_label(g, totallabs = totallabs, p2 = x)
     print(g)
 }
