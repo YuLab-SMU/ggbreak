@@ -19,8 +19,8 @@ set_axis_label <- function(p, xlab, ylab, p2 = NULL) {
     }
 
     if (has_theme) {
-        xlab_param <- p2$theme$axis.title.x
-        ylab_param <- p2$theme$axis.title.y
+        xlab_param <- list(p2$theme$axis.title.x)
+        ylab_param <- list(p2$theme$axis.title.y)
         
         p <- p + theme(axis.title.x = do.call(element_text, xlab_param),
                        axis.title.y = do.call(element_text, ylab_param))
@@ -73,3 +73,4 @@ extract_axis_break <- function(object){
     return(list(axis=axis, breaks=breaks))
 }
 
+theme_no_margin <- getFromNamespace("theme_no_margin", "aplot")

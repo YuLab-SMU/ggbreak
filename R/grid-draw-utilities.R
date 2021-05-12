@@ -1,14 +1,16 @@
 subplot_theme <- function(plot, axis, type){
     type <- check_strip_pos(plot=plot, type=type)
     axis <- check_theme_coflip(plot=plot, axis=axis)
-    switch(type,
-           first = strip_theme(plot=plot, axis=axis),
-           other = axis_theme(plot=plot, axis=axis) + 
-                   strip_theme(plot, axis=axis),
-           last = axis_theme(plot=plot, axis=axis),
-           #internalfirst = axis_theme(plot=plot, axis=axis) + 
-           #    strip_theme(plot=plot, axis=axis),
-           internallast = list())
+    te <- switch(type,
+                 first = strip_theme(plot=plot, axis=axis),
+                 other = axis_theme(plot=plot, axis=axis) + 
+                         strip_theme(plot, axis=axis),
+                 last = axis_theme(plot=plot, axis=axis),
+                 #internalfirst = axis_theme(plot=plot, axis=axis) + 
+                 #    strip_theme(plot=plot, axis=axis),
+                 internallast = list()) 
+    te <- te + theme_no_margin()
+    return(te)
 }
 
 axis_theme <- function(plot, axis){

@@ -10,7 +10,7 @@ Imports:
   grid,
   ggplot2,
   ggplotify,
-  cowplot,
+  aplot,
   rlang
 License: Artistic-2.0
 Encoding: UTF-8

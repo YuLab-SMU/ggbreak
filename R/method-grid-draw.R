@@ -1,13 +1,13 @@
 ##' @importFrom grid grid.draw
 ##' @method grid.draw ggbreak
 ##' @importFrom ggplotify as.ggplot
-##' @importFrom cowplot plot_grid
 ##' @importFrom ggplot2 coord_cartesian
 ##' @importFrom ggplot2 xlab
 ##' @importFrom ggplot2 ylab
 ##' @importFrom ggplot2 theme
 ##' @importFrom ggplot2 element_blank
 ##' @importFrom ggplot2 element_text
+##' @importFrom aplot plot_list
 ##' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
     axis_break <- attr(x, 'axis_break')
@@ -34,9 +34,13 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
                             subplottheme2)
         pp2 <- x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + 
                subplottheme3
+        #g <- switch(coord_fun,
+        #            coord_flip=plot_grid(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1),
+        #            coord_cartesian=plot_grid(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1)
+        #            )
         g <- switch(coord_fun,
-                    coord_flip=plot_grid(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1),
-                    coord_cartesian=plot_grid(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1)
+                    coord_flip = plot_list(gglist=c(list(pp2), pp1, list(p1)), ncol=1, guides = 'collect'),
+                    coord_cartesian = plot_list(gglist=c(list(p1), pp1, list(pp2)), nrow=1, guides = 'collect')
                     )
     } else {
         breaks <- rev(breaks)
@@ -46,15 +50,18 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
                             subplottheme2)
         pp2 <- x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]))) +
                subplottheme3
+        #g <- switch(coord_fun,
+        #            coord_flip = plot_grid(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1),
+        #            coord_cartesian = plot_grid(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1)
+        #       )
         g <- switch(coord_fun,
-                    coord_flip = plot_grid(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1),
-                    coord_cartesian = plot_grid(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1)
+                    coord_flip = plot_list(gglist=c(list(p1), pp1, list(pp2)), nrow=1, guides = 'collect'),
+                    coord_cartesian = plot_list(gglist=c(list(pp2), pp1, list(p1)), ncol=1, guides = 'collect')
                )
     }
 
     g <- ggplotify::as.ggplot(g) 
 
     g <- set_axis_label(g, xlab = newxlab, ylab = newylab, p2 = x)
-        
     print(g)
 }
