@@ -10,6 +10,7 @@
 ##' @importFrom aplot plot_list
 ##' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
+    class(x) <- class(x)[class(x) != "ggbreak"]
     axis_break <- attr(x, 'axis_break')
     axis_breaks <- extract_axis_break(object=axis_break)
     axis <- axis_breaks$axis
