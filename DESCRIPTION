@@ -9,7 +9,7 @@ Description: An implementation of scale functions for setting axis breaks of a '
 Imports:
   grid,
   ggplot2,
-  ggplotify,
+  ggplotify (>= 0.0.7),
   aplot,
   rlang
 License: Artistic-2.0
