@@ -24,15 +24,15 @@ set_label <- function(p, totallabs, p2 = NULL) {
     } else {
         x <- NULL
     }
-    xlab_param <- get_theme_params(x=p2, i="axis.title.x")
-    ylab_param <- get_theme_params(x=p2, i="axis.title.y")
-    title_param <- get_theme_params(x=p2, i="plot.title")
-    title_pos_param <- get_theme_params(x=p2, i="plot.title.position")
-    subtitle_param <- get_theme_params(x=p2, i="plot.subtitle")
-    cap_param <- get_theme_params(x=p2, i="plot.caption")
-    cap_pos_param <- get_theme_params(x=p2, i="plot.caption.position")
-    tag_param <- get_theme_params(x=p2, i="plot.tag")
-    tag_pos_param <- get_theme_params(x=p2, i="plot.tag.position")
+    xlab_param <- get_theme_params(x=x, i="axis.title.x")
+    ylab_param <- get_theme_params(x=x, i="axis.title.y")
+    title_param <- get_theme_params(x=x, i="plot.title")
+    title_pos_param <- get_theme_params(x=x, i="plot.title.position")
+    subtitle_param <- get_theme_params(x=x, i="plot.subtitle")
+    cap_param <- get_theme_params(x=x, i="plot.caption")
+    cap_pos_param <- get_theme_params(x=x, i="plot.caption.position")
+    tag_param <- get_theme_params(x=x, i="plot.tag")
+    tag_pos_param <- get_theme_params(x=x, i="plot.tag.position")
     p <- p + theme(axis.title.x = xlab_param,
                    axis.title.y = ylab_param,
                    plot.title = title_param,
