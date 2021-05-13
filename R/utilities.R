@@ -24,25 +24,10 @@ set_label <- function(p, totallabs, p2 = NULL) {
     } else {
         x <- NULL
     }
-    xlab_param <- get_theme_params(x=x, i="axis.title.x")
-    ylab_param <- get_theme_params(x=x, i="axis.title.y")
-    title_param <- get_theme_params(x=x, i="plot.title")
-    title_pos_param <- get_theme_params(x=x, i="plot.title.position")
-    subtitle_param <- get_theme_params(x=x, i="plot.subtitle")
-    cap_param <- get_theme_params(x=x, i="plot.caption")
-    cap_pos_param <- get_theme_params(x=x, i="plot.caption.position")
-    tag_param <- get_theme_params(x=x, i="plot.tag")
-    tag_pos_param <- get_theme_params(x=x, i="plot.tag.position")
-    p <- p + theme(axis.title.x = xlab_param,
-                   axis.title.y = ylab_param,
-                   plot.title = title_param,
-                   plot.title.position = title_pos_param,
-                   plot.subtitle = subtitle_param,
-                   plot.caption = cap_param,
-                   plot.caption.position = cap_pos_param,
-                   plot.tag = tag_param,
-                   plot.tag.position = tag_pos_param
-                  )
+    labs_params <- c("axis.title.x","axis.title.y", "plot.title", "plot.title.position", "plot.subtitle",
+                    "plot.caption", "plot.caption.position", "plot.tag", "plot.tag.position")
+    labs_params <- setNames(lapply(labs_params, function(i)get_theme_params(x=x,i=i)), labs_params)
+    p <- p + do.call(theme, labs_params)
     return(p)
 }
 
