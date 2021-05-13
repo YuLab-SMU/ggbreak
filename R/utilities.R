@@ -20,30 +20,29 @@ set_label <- function(p, totallabs, p2 = NULL) {
     }
 
     if (has_theme) {
-        xlab_param <- if(length(p2$theme$axis.title.x)>0){p2$theme$axis.title.x}else{defte$axis.title.x}
-        ylab_param <- if(length(p2$theme$axis.title.y)>0){p2$theme$axis.title.y}else{defte$axis.title.y}
-        title_param <- if(length(p2$theme$plot.title)>0){p2$theme$plot.title}else{defte$plot.title}
-        title_pos_param <- if(length(p2$theme$plot.title.position)>0){p2$theme$plot.title.position}else{defte$plot.title.position}
-        subtitle_param <- if(length(p2$theme$plot.subtitle)>0){p2$theme$plot.subtitle}else{defte$plot.subtitle}
-        cap_param <- if(length(p2$theme$plot.caption)>0){p2$theme$plot.caption}else{defte$plot.caption}
-        cap_pos_param <- if(length(p2$theme$plot.caption.position)>0){p2$theme$plot.caption.position}else{defte$plot.caption.position}
-        tag_param <- if(length(p2$theme$plot.tag)>0){p2$theme$plot.tag}else{defte$plot.tag}
-        tag_pos_param <- if(length(p2$theme$plot.tag.position)>0){p2$theme$plot.tag.position}else{defte$plot.tag.position}
-        
-        p <- p + theme(axis.title.x = xlab_param,
-                       axis.title.y = ylab_param,
-                       plot.title = title_param,
-                       plot.title.position = title_pos_param, 
-                       plot.subtitle = subtitle_param,
-                       plot.caption = cap_param,
-                       plot.caption.position = cap_pos_param,
-                       plot.tag = tag_param,
-                       plot.tag.position = tag_pos_param
-                      )
+        x <- p2
     } else {
-        p <- p + defte #theme(axis.title.x = element_text(vjust = 1),
-                 #      axis.title.y = element_text(angle = 90, vjust = 1)) 
+        x <- NULL
     }
+    xlab_param <- get_theme_params(x=p2, i="axis.title.x")
+    ylab_param <- get_theme_params(x=p2, i="axis.title.y")
+    title_param <- get_theme_params(x=p2, i="plot.title")
+    title_pos_param <- get_theme_params(x=p2, i="plot.title.position")
+    subtitle_param <- get_theme_params(x=p2, i="plot.subtitle")
+    cap_param <- get_theme_params(x=p2, i="plot.caption")
+    cap_pos_param <- get_theme_params(x=p2, i="plot.caption.position")
+    tag_param <- get_theme_params(x=p2, i="plot.tag")
+    tag_pos_param <- get_theme_params(x=p2, i="plot.tag.position")
+    p <- p + theme(axis.title.x = xlab_param,
+                   axis.title.y = ylab_param,
+                   plot.title = title_param,
+                   plot.title.position = title_pos_param,
+                   plot.subtitle = subtitle_param,
+                   plot.caption = cap_param,
+                   plot.caption.position = cap_pos_param,
+                   plot.tag = tag_param,
+                   plot.tag.position = tag_pos_param
+                  )
     return(p)
 }
 
@@ -100,5 +99,11 @@ extract_axis_break <- function(object){
 
 theme_no_margin <- getFromNamespace("theme_no_margin", "aplot")
 
-#' @importFrom ggplot2 theme_gray
-defte <- ggplot2::theme_gray()
+#' @importFrom ggplot2 theme_get
+get_theme_params = function(x, i) {
+    if (!inherits(x, "theme")) x <- x$theme
+    if (length(x) == 0) {
+        x <- ggplot2::theme_get()
+    }
+    x[[i]]
+}
