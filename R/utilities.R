@@ -26,8 +26,7 @@ set_label <- function(p, totallabs, p2 = NULL) {
     }
     labs_params <- c("axis.title.x","axis.title.y", "plot.title", "plot.title.position", "plot.subtitle",
                     "plot.caption", "plot.caption.position", "plot.tag", "plot.tag.position")
-    labs_params <- setNames(lapply(labs_params, function(i)get_theme_params(x=x,i=i)), labs_params)
-    p <- p + do.call(theme, labs_params)
+    p <- p + theme_fp(x=x, i=labs_params)
     return(p)
 }
 
@@ -91,4 +90,10 @@ get_theme_params = function(x, i) {
         x <- ggplot2::theme_get()
     }
     x[[i]]
+}
+
+theme_fp <- function(x, i) {
+    params <- lapply(i, function(j)get_theme_params(x=x,i=j))
+    names(params) <- i
+    do.call(theme, params)
 }
