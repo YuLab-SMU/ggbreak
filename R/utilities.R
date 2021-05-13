@@ -89,11 +89,10 @@ get_theme_params = function(x, i) {
     if (length(x) == 0) {
         x <- ggplot2::theme_get()
     }
-    x[[i]]
+    x[i]
 }
 
 theme_fp <- function(x, i) {
-    params <- lapply(i, function(j)get_theme_params(x=x,i=j))
-    names(params) <- i
+    params <- get_theme_params(x, i)
     do.call(theme, params)
 }
