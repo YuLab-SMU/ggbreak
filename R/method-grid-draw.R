@@ -32,7 +32,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     coord_fun <- check_coord_flip(plot=x, axis=axis) 
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
-    relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng)
+    relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng, coord_fun=coord_fun, axis=axis)
     if(axis == 'x') {
         p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1
         pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) 
