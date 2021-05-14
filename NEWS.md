@@ -1,5 +1,6 @@
-# ggbreak 0.0.2.991
+# ggbreak 0.0.2.992
 
++ add vignette (2021-05-14, Fri)
 + support `coord_flip`, `facet_grid` and `facet_wrap` (2021-05-14, Fri)
 + support `legend` and all labels (x, y, title, subtitle, caption and tag)
 
