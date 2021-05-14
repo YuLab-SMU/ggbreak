@@ -118,20 +118,7 @@ p <- ggplot(d, aes(x=x, y=y)) +
                 strip.position="right",
                 nrow=2
                 ) +
-     coord_flip() +
-     theme_bw() +
-     theme(
-           legend.position = c(0.8, 0.8),
-           strip.placement = "outside",
-           axis.title.x=element_text(size=10),
-           plot.title = element_text(size = 22),
-           plot.subtitle = element_text(size = 16),
-           plot.tag = element_text(size = 10),
-           plot.title.position = "plot",
-           plot.tag.position = "topright",
-           plot.caption = element_text(face="bold.italic"),
-
-     )
+     coord_flip()
 pg <- p +
   scale_y_break(c(7, 17), scales="free") +
   scale_y_break(c(19, 21), scales="free")
@@ -150,7 +137,20 @@ print(pg)
 ### Feature 8: Supports all plot labels
 
 ```{r message=FALSE}
-pg + labs(title="test title", subtitle="test subtitle", tag="A tag", caption="A caption")
+pg + labs(title="test title", subtitle="test subtitle", tag="A tag", caption="A caption") +
+     theme_bw() +
+     theme(
+           legend.position = c(0.8, 0.8),
+           strip.placement = "outside",
+           axis.title.x=element_text(size=10),
+           plot.title = element_text(size = 22),
+           plot.subtitle = element_text(size = 16),
+           plot.tag = element_text(size = 10),
+           plot.title.position = "plot",
+           plot.tag.position = "topright",
+           plot.caption = element_text(face="bold.italic"),
+
+     )
 ```
 
 ## Wrap plot
