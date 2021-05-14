@@ -21,5 +21,7 @@ ggplot_add.ggbreak_params <- function(object, plot, object_name) {
 ##' @method ggplot_add ggbreak
 ##' @export
 ggplot_add.ggbreak <- function(object, plot, object_name) {
-    ggplot_add(print(object), print(plot), object_name)
+    ggplot_add(as.ggplot(print(object)),
+               as.ggplot(print(plot)),
+               object_name)
 }
