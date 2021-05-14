@@ -37,16 +37,16 @@ School of Basic Medical Sciences, Southern Medical University
 
 
 
-## Installation
+## :arrow_double_down: Installation
 
-<!--
+
 Get the released version from CRAN:
 
 ```r
 install.packages("ggbreak")
 ```
 
--->
+
 
 Or the development version from github:
 

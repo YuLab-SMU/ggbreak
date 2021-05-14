@@ -1,3 +1,8 @@
+# ggbreak 0.0.2.991
+
++ support `coord_flip`, `facet_grid` and `facet_wrap` (2021-05-14, Fri)
++ support `legend` and all labels (x, y, title, subtitle, caption and tag)
+
 # ggbreak 0.0.2
 
 + compatible with `patchwork`, now p1 + p2 (or other operations) will align two ggbreak plot (2021-05-11, Tue)  

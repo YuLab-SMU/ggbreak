@@ -79,9 +79,9 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
                )
     }
 
-    g <- ggplotify::as.ggplot(g) 
-    totallabs$x <- newxlab
-    totallabs$y <- newylab
+    totallabs$x <- NULL
+    totallabs$y <- NULL
+    g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
     g <- set_label(g, totallabs = totallabs, p2 = x)
     print(g)
 }

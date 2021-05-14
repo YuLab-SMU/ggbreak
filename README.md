@@ -21,16 +21,13 @@ School of Basic Medical Sciences, Southern Medical University
 [![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://saythanks.io/to/GuangchuangYu)
 [![](https://img.shields.io/badge/follow%20me%20on-WeChat-green.svg)](https://guangchuangyu.github.io/blog_images/biobabble.jpg)
 
-## Installation
+## :arrow\_double\_down: Installation
 
-<!--
 Get the released version from CRAN:
 
-```r
+``` r
 install.packages("ggbreak")
 ```
-
--->
 
 Or the development version from github:
 
