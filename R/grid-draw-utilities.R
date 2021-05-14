@@ -93,9 +93,13 @@ compute_relative_range_ <- function(breaks_, scales_, baserange_){
     if (scales_=="free"){
         scales_ = 1
     }
-    if (!is.numeric(scales_) || length(scales_) > 1){
+    if (!is_numeric(scales_) || length(scales_) > 1){
         abort("The scales must be a numeric or one of 'fixed', 'free' !")
     }
-    relrange <- baserange_ * scales_
+    relrange <- baserange_ * as.numeric(scales_)
     return (relrange)
+}
+
+is_numeric <- function(x) {
+    !anyNA(suppressWarnings(as.numeric(x)))
 }

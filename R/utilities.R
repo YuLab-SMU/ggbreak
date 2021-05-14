@@ -39,7 +39,7 @@ extract_totallabs <- function(plot){
 
 combine_range <- function(breaks, rangeres, scales){
     if (rangeres$flagrev=="reverse"){
-        rangeres$axis_range <- sort(abs(rangeres$axis_range))
+        rangeres$axis_range <- rev(-1 * (rangeres$axis_range))
     }
     res <- merge_intervals(breaks, scales)
     newbreaks <- res$breaks
@@ -60,7 +60,7 @@ merge_intervals <- function(breaks, scales){
     newbreaks <- list()
     newscales <- list()
     breaks <- lapply(breaks, function(i) sort(i))
-    ind <- rank(unlist(lapply(breaks, function(i)i[[1]])))
+    ind <- order(unlist(lapply(breaks, function(i)i[1])))
     scales <- scales[ind]
     breaks <- breaks[ind]
     
