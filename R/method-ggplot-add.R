@@ -5,12 +5,15 @@
 ggplot_add.ggbreak_params <- function(object, plot, object_name) {
     if (inherits(plot, "ggbreak")){
         origin_axis_break <- attr(plot, 'axis_break')
-        if (origin_axis_break$axis != object$axis){
+        origin_axis <- ifelse(inherits(origin_axis_break, "ggbreak_params"), 
+                              origin_axis_break$axis, 
+                              origin_axis_break[[1]]$axis)
+        if (origin_axis != object$axis){
             rlang::abort("The truncation of different axis is not be supported simultaneously.
                          The ", origin_axis_break$axis," axis of original plot has been
                          truncated.")
         }else{
-            object <- list(origin_axis_break, object)
+            object <- list.add(origin_axis_break, object)
         }
     }
     attr(plot, 'axis_break') <- object

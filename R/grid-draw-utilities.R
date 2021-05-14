@@ -16,9 +16,11 @@ subplot_theme <- function(plot, axis, type){
 axis_theme <- function(plot, axis){
     axis_theme <- switch(axis, 
                         x = theme(axis.text.y=element_blank(),
-                                  axis.ticks.y=element_blank()),
+                                  axis.ticks.y=element_blank(),
+                                  axis.line.y=element_blank()),
                         y = theme(axis.text.x=element_blank(),
-                                  axis.ticks.x=element_blank())
+                                  axis.ticks.x=element_blank(),
+                                  axis.line.x=element_blank())
                   )
     return(axis_theme)
 }
@@ -63,26 +65,28 @@ check_coord_flip <- function(plot, axis){
     return ("coord_cartesian")
 }
 
-compute_relative_range <- function(breaks, scales, rng, coord_fun, axis){
-    baserange <- abs(diff(breaks[[1]]))
-    relranges <- mapply(compute_relative_range_, 
-                     breaks_=breaks[-1], 
+compute_relative_range <- function(breaks, scales, rng){
+    if(rng$flagrev=="reverse"){
+        baserange <- abs(diff(rev(breaks)[[1]]))
+        otherbk <- breaks[-length(breaks)]
+    }else{ 
+        baserange <- abs(diff(breaks[[1]]))
+        otherbk <- breaks[-1]
+    }
+    relranges <- unlist(mapply(compute_relative_range_, 
+                     breaks_= otherbk, 
                      scales_=scales, 
                      MoreArgs=list(baserange_=baserange), 
                      #baserange_ = baserange,
-                     SIMPLIFY=FALSE)
-    relranges <- c(baserange, unname(unlist(relranges)))
-    if (coord_fun=="coord_flip" && axis=="x"){
-        relranges <- c(relranges[1], rev(relranges[-1]))
+                     SIMPLIFY=FALSE))
+    if (rng$flagrev == "reverse"){
+        return (c(relranges, baserange)) 
+    }else{
+        return (c(baserange, relranges))
     }
-    if (rng$flagrev=="reverse" && coord_fun!="coord_flip" && axis =="y"){
-        relranges <- c(relranges[1], rev(relranges[-1]))
-    }
-    return(relranges)
 }
 
 compute_relative_range_ <- function(breaks_, scales_, baserange_){
-    scales_ <- unlist(scales_)
     if (scales_=="fixed"){
         return(abs(diff(breaks_)))
     }
