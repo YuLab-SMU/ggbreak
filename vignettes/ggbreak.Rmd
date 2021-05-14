@@ -34,13 +34,13 @@ library(patchwork)
 
 ## Introduction
 
-This package was first designed to set break points as I need to [truncate plot to shrink outlier long branch of a phylogenetic tree](https://yulab-smu.top/treedata-book/faq.html#shrink-outlier-long-branch).
+This package was first designed to set break points to truncate plot as I need to [shrink outlier long branch of a phylogenetic tree](https://yulab-smu.top/treedata-book/faq.html#shrink-outlier-long-branch).
 
 
 Axis break or a so call gap plot is useful for data are not normal and contain outliers. Sometimes we can transform the data (e.g. using log if the data was log normal distributed) to solve this problem. But this is not always granted. The data may just simply contains outliers and these outliers are meaningful. A simple gap plot can solve this issue well to present the data in details with both normal and extreme data. 
 
 
-To create a gap plot is to break down the plot into pieces and align them together with or without ignoring subplots. Our methods are fully compatible with `ggplot2`, so that after breaking axis, users can still use `+` operator to add geometric layers.
+This package provides several scale functions to break down a 'gg' plot into pieces and align them together with (gap plot) or without (wrap plot or cut plot) ignoring subplots. Our methods are fully compatible with `ggplot2`, so that after breaking axis, users can still use `+` operator to add geometric layers.
 
 ## Gap plot
 
@@ -152,3 +152,8 @@ print(pg)
 ```{r message=FALSE}
 pg + labs(title="test title", subtitle="test subtitle", tag="A tag", caption="A caption")
 ```
+
+## Wrap plot
+
+## Cut plot
+
