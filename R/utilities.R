@@ -7,10 +7,11 @@ ggrange2 <- function (plot, var) {
     list(axis_range=axis_range, flagrev=flagrev)
 }
 
-
-set_axis_label <- function(p, xlab, ylab, p2 = NULL) {
-    p <- p + xlab(xlab) + ylab(ylab) +
-        theme(axis.title = element_text())
+#' @importFrom ggplot2 labs
+set_label <- function(p, totallabs, p2 = NULL) {
+    p <- p + 
+         do.call(labs, totallabs) +
+         theme(axis.title = element_text())
 
     if (is.null(p2)) {
         has_theme <- FALSE
@@ -19,17 +20,22 @@ set_axis_label <- function(p, xlab, ylab, p2 = NULL) {
     }
 
     if (has_theme) {
-        xlab_param <- p2$theme$axis.title.x
-        ylab_param <- p2$theme$axis.title.y
-        
-        p <- p + theme(axis.title.x = do.call(element_text, xlab_param),
-                       axis.title.y = do.call(element_text, ylab_param))
+        x <- p2
     } else {
-        p <- p + theme(axis.title.x = element_text(vjust = 1),
-                       axis.title.y = element_text(angle = 90, vjust = 1)) 
+        x <- NULL
     }
+    labs_params <- c("axis.title.x","axis.title.y", "plot.title", "plot.title.position", "plot.subtitle",
+                    "plot.caption", "plot.caption.position", "plot.tag", "plot.tag.position")
+    p <- p + theme_fp(x=x, i=labs_params)
     return(p)
 }
+
+extract_totallabs <- function(plot){
+    alllabs <- plot$labels
+    totallabs <- alllabs[names(alllabs) %in% c("x", "y", "title", "subtitle", "caption", "tag")]
+    totallabs
+}
+
 
 combine_range <- function(breaks, rangeres){
     if (rangeres$flagrev=="reverse"){
@@ -66,10 +72,27 @@ extract_axis_break <- function(object){
     if (inherits(object, "ggbreak_params")){
         axis <- object$axis
         breaks <- object$breaks
+        scales <- object$scales
     }else{
         axis <- object[[1]]$axis
         breaks <- lapply(object, function(i)i$breaks)
+        scales <- lapply(object, function(i)i$scales) 
     }
-    return(list(axis=axis, breaks=breaks))
+    return(list(axis=axis, breaks=breaks, scales=scales))
 }
 
+theme_no_margin <- getFromNamespace("theme_no_margin", "aplot")
+
+#' @importFrom ggplot2 theme_get
+get_theme_params = function(x, i) {
+    if (!inherits(x, "theme")) x <- x$theme
+    if (length(x) == 0) {
+        x <- ggplot2::theme_get()
+    }
+    x[i]
+}
+
+theme_fp <- function(x, i) {
+    params <- get_theme_params(x, i)
+    do.call(theme, params)
+}

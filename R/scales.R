@@ -4,11 +4,15 @@
 ##' @title scale_x_break
 ##' @rdname scale_break
 ##' @param breaks break point
+##' @param scales, relative width or height of subplots,
+##' default is "fixed". If scale is 'free', all subplots have 
+##' equal width or height. It also can be any number to set 
+##' relative width or height compare to first subplot.
 ##' @return gg object
 ##' @export
 ##' @author Guangchuang Yu
-scale_x_break <- function(breaks) {
-    scale_break('x', breaks)
+scale_x_break <- function(breaks, scales="fixed") {
+    scale_break('x', breaks, scales)
 }
 
 ##' @title scale_y_break
@@ -25,11 +29,11 @@ scale_x_break <- function(breaks) {
 ##' p <- ggplot(d, aes(x, y)) + geom_col()
 ##' x <- p+scale_y_break(c(7, 17 ) )
 ##' print(x)
-scale_y_break <- function(breaks) {
-    scale_break('y', breaks)
+scale_y_break <- function(breaks, scales="fixed") {
+    scale_break('y', breaks, scales)
 }
 
-scale_break <- function(axis, breaks) {
-    structure(list(axis = axis, breaks = breaks),
+scale_break <- function(axis, breaks, scales) {
+    structure(list(axis = axis, breaks = breaks, scales=scales),
               class = "ggbreak_params")
 }

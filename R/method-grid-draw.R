@@ -1,44 +1,87 @@
 ##' @importFrom grid grid.draw
 ##' @method grid.draw ggbreak
 ##' @importFrom ggplotify as.ggplot
-##' @importFrom cowplot plot_grid
 ##' @importFrom ggplot2 coord_cartesian
 ##' @importFrom ggplot2 xlab
 ##' @importFrom ggplot2 ylab
 ##' @importFrom ggplot2 theme
 ##' @importFrom ggplot2 element_blank
 ##' @importFrom ggplot2 element_text
+##' @importFrom aplot plot_list
 ##' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
+    class(x) <- class(x)[class(x) != "ggbreak"]
     axis_break <- attr(x, 'axis_break')
-    axis_break <- extract_axis_break(object=axis_break)
-    axis <- axis_break$axis
-    breaks <- axis_break$breaks
+    axis_breaks <- extract_axis_break(object=axis_break)
+    axis <- axis_breaks$axis
+    breaks <- axis_breaks$breaks
+    scales <- axis_breaks$scales
     rng <- ggrange2(x, axis)
-	breaks <- combine_range(breaks, rng)
+    breaks <- combine_range(breaks, rng)
 
-    xlab <- x$label$x
-    ylab <- x$label$y
-    x <- x + xlab(NULL) + ylab(NULL)
-	#relrange <- unlist(lapply(breaks, function(i) abs(diff(i))))
+    #xlab <- x$label$x
+    #ylab <- x$label$y
+    #x <- x + xlab(NULL) + ylab(NULL)
+    totallabs <- extract_totallabs(plot=x)
+    if (length(totallabs) > 0){
+        x$labels[names(totallabs)] <- NULL
+    }
+    nbreaks <- length(breaks)
+    subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first")
+    subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other")
+    subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last")
+    coord_fun <- check_coord_flip(plot=x, axis=axis) 
+    newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
+    newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
+    relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng, coord_fun=coord_fun, axis=axis)
     if(axis == 'x') {
-        p1 <- x + coord_cartesian(xlim = c(breaks[[1]][1], breaks[[1]][2]))
-        pp <- lapply(breaks[-1], function(i) x + coord_cartesian(xlim=c(i[1], i[2])) + 
-                            theme(axis.text.y=element_blank(),axis.ticks.y=element_blank()))
-        g <- do.call(plot_grid, list(plotlist=c(list(p1), pp), align="h", nrow=1))#, rel_widths=relrange))
+        p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1
+        pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) 
+                            x + do.call(coord_fun, list(xlim=c(i[1], i[2]))) + 
+                            subplottheme2)
+        pp2 <- x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + 
+               subplottheme3
+        #g <- switch(coord_fun,
+        #            coord_flip=plot_grid(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1),
+        #            coord_cartesian=plot_grid(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1)
+        #            )
+        g <- switch(coord_fun,
+                    coord_flip = plot_list(gglist=c(list(pp2), pp1, list(p1)), 
+                                           ncol=1,
+                                           heights=c(relrange[-1], relrange[1]),
+                                           guides = 'collect'),
+                    coord_cartesian = plot_list(gglist=c(list(p1), pp1, list(pp2)), 
+                                                nrow=1, 
+                                                widths=relrange,
+                                                guides = 'collect')
+                    )
     } else {
-        p1 <- x + coord_cartesian(ylim = c(breaks[[1]][1], breaks[[1]][2]))
-        pp <- lapply(rev(breaks[-1]), function(i) x + coord_cartesian(ylim=c(i[1], i[2])) +
-                            theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()))
-        #relrange <- c(relrange[-1], relrange[1])
-        g <- do.call(plot_grid, list(plotlist=c(pp,list(p1)), align="v", ncol=1))#, rel_heights=relrange))
+        breaks <- rev(breaks)
+        p1 <- x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + subplottheme1
+        pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) 
+                      x + do.call(coord_fun, list(ylim=c(i[1], i[2]))) +
+                            subplottheme2)
+        pp2 <- x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]))) +
+               subplottheme3
+        #g <- switch(coord_fun,
+        #            coord_flip = plot_grid(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1),
+        #            coord_cartesian = plot_grid(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1)
+        #       )
+        g <- switch(coord_fun,
+                    coord_flip = plot_list(gglist=c(list(p1), pp1, list(pp2)), 
+                                           nrow=1, 
+                                           widths=relrange,
+                                           guides = 'collect'),
+                    coord_cartesian = plot_list(gglist=c(list(pp2), pp1, list(p1)), 
+                                                ncol=1, 
+                                                heights=c(relrange[-1], relrange[1]),
+                                                guides = 'collect')
+               )
     }
 
     g <- ggplotify::as.ggplot(g) 
-
-    g <- set_axis_label(g, xlab = xlab, ylab = ylab, p2 = x)
-        
+    totallabs$x <- newxlab
+    totallabs$y <- newylab
+    g <- set_label(g, totallabs = totallabs, p2 = x)
     print(g)
 }
-
-
