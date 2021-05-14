@@ -37,35 +37,52 @@ extract_totallabs <- function(plot){
 }
 
 
-combine_range <- function(breaks, rangeres){
+combine_range <- function(breaks, rangeres, scales){
     if (rangeres$flagrev=="reverse"){
         rangeres$axis_range <- sort(abs(rangeres$axis_range))
     }
-    newbreaks <- merge_intervals(breaks)
+    res <- merge_intervals(breaks, scales)
+    newbreaks <- res$breaks
+    newscales <- res$scales
     newbreaks <- c(rangeres$axis_range[1], unlist(newbreaks), rangeres$axis_range[2])
     newbreaks <- lapply(data.frame(matrix(newbreaks, nrow=2)), function(i)i)
     if (rangeres$flagrev=="reverse"){
         newbreaks <- lapply(newbreaks, function(i)rev(i))
-        return(rev(newbreaks))
+        return(list(breaks=rev(newbreaks), scales=rev(newscales)))
     }
-    return(newbreaks)
+    return(list(breaks=newbreaks, scales=newscales))
 }
 
-merge_intervals <- function(breaks){
+merge_intervals <- function(breaks, scales){
     if (!inherits(breaks, "list")){
         breaks <- list(breaks)
     }
-    out <- list()
+    newbreaks <- list()
+    newscales <- list()
     breaks <- lapply(breaks, function(i) sort(i))
-    breaks <- breaks[rank(unlist(lapply(breaks, function(i)i[[1]])))]
-    for (i in breaks){
-        if (length(out) > 1 && i[1] <= out[[length(out)]][2]){
-            out[[length(out)]][2] <- max(out[[length(out)]][2], i[2])
+    ind <- rank(unlist(lapply(breaks, function(i)i[[1]])))
+    scales <- scales[ind]
+    breaks <- breaks[ind]
+    
+    for (i in seq_len(length(breaks))){
+        if (length(newbreaks) >= 1 && breaks[[i]][1] <= newbreaks[[length(newbreaks)]][2]){
+            newbreaks[[length(newbreaks)]][2] <- max(newbreaks[[length(newbreaks)]][2], breaks[[i]][2])
+            mergescales <- c(scales[[i]], newscales[[length(newscales)]])
+            if (any("fixed" %in% mergescales)){
+                newscales[[length(newscales)]] <- "fixed"
+            }
+            if ((!"fixed" %in% mergescales) && any("free" %in% mergescales)){
+                newscales[[length(newscales)]] <- "free"
+            }
+            if (is.numeric(mergescales)){
+                newscales[[length(newscales)]] <- max(mergescales)
+            }
         }else{
-            out <- c(out, list(i))
+            newbreaks <- c(newbreaks, list(breaks[[i]]))
+            newscales <- c(newscales, list(scales[[i]]))
         }
     }
-    return(out)
+    return(list(breaks=newbreaks, scales=unlist(newscales)))
 }
 
 extract_axis_break <- function(object){
@@ -95,4 +112,12 @@ get_theme_params = function(x, i) {
 theme_fp <- function(x, i) {
     params <- get_theme_params(x, i)
     do.call(theme, params)
+}
+
+list.add <- function(obj, ...){
+    if (inherits(obj, "ggbreak_params")){
+        c(list(obj), list(...))
+    }else{
+        c(obj, list(...))
+    }
 }

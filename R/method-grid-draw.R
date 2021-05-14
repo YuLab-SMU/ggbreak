@@ -16,12 +16,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     axis <- axis_breaks$axis
     breaks <- axis_breaks$breaks
     scales <- axis_breaks$scales
-    rng <- ggrange2(x, axis)
-    breaks <- combine_range(breaks, rng)
+    rng <- ggrange2(plot=x, var=axis)
+    res <- combine_range(breaks, rng, scales)
+    breaks <- res$breaks
+    scales <- res$scales
 
-    #xlab <- x$label$x
-    #ylab <- x$label$y
-    #x <- x + xlab(NULL) + ylab(NULL)
     totallabs <- extract_totallabs(plot=x)
     if (length(totallabs) > 0){
         x$labels[names(totallabs)] <- NULL
@@ -33,7 +32,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     coord_fun <- check_coord_flip(plot=x, axis=axis) 
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
-    relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng, coord_fun=coord_fun, axis=axis)
+    relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng)
     if(axis == 'x') {
         p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1
         pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) 
@@ -46,9 +45,9 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         #            coord_cartesian=plot_grid(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1)
         #            )
         g <- switch(coord_fun,
-                    coord_flip = plot_list(gglist=c(list(pp2), pp1, list(p1)), 
+                    coord_flip = plot_list(gglist=c(list(pp2), rev(pp1), list(p1)), 
                                            ncol=1,
-                                           heights=c(relrange[-1], relrange[1]),
+                                           heights=c(rev(relrange[-1]), relrange[1]),
                                            guides = 'collect'),
                     coord_cartesian = plot_list(gglist=c(list(p1), pp1, list(pp2)), 
                                                 nrow=1, 
@@ -68,13 +67,13 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         #            coord_cartesian = plot_grid(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1)
         #       )
         g <- switch(coord_fun,
-                    coord_flip = plot_list(gglist=c(list(p1), pp1, list(pp2)), 
+                    coord_flip = plot_list(gglist=c(list(p1), rev(pp1), list(pp2)), 
                                            nrow=1, 
                                            widths=relrange,
                                            guides = 'collect'),
                     coord_cartesian = plot_list(gglist=c(list(pp2), pp1, list(p1)), 
                                                 ncol=1, 
-                                                heights=c(relrange[-1], relrange[1]),
+                                                heights=c(rev(relrange[-1]), relrange[1]),
                                                 guides = 'collect')
                )
     }
