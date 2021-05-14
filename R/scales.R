@@ -37,3 +37,12 @@ scale_break <- function(axis, breaks, scales) {
     structure(list(axis = axis, breaks = breaks, scales=scales),
               class = "ggbreak_params")
 }
+
+#' @title scale_wrap
+#' @param n the number of subplot pieces.
+#' @return gg object
+#' @export 
+scale_wrap <- function(n){
+    structure(list(n = n), 
+              class = "wrap_params")
+}

@@ -58,7 +58,7 @@ check_theme_coflip <- function(plot, axis){
 }
 
 #' @importFrom ggplot2 coord_flip
-check_coord_flip <- function(plot, axis){
+check_coord_flip <- function(plot){
     if (inherits(plot, "gg") && inherits(plot$coordinates, "CoordFlip")){
         return("coord_flip")
     }
@@ -102,4 +102,8 @@ compute_relative_range_ <- function(breaks_, scales_, baserange_){
 
 is_numeric <- function(x) {
     !anyNA(suppressWarnings(as.numeric(x)))
+}
+
+extract_wrap_breaks <- function(){
+
 }
