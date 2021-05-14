@@ -16,9 +16,11 @@ subplot_theme <- function(plot, axis, type){
 axis_theme <- function(plot, axis){
     axis_theme <- switch(axis, 
                         x = theme(axis.text.y=element_blank(),
-                                  axis.ticks.y=element_blank()),
+                                  axis.ticks.y=element_blank(),
+                                  axis.line.y=element_blank()),
                         y = theme(axis.text.x=element_blank(),
-                                  axis.ticks.x=element_blank())
+                                  axis.ticks.x=element_blank(),
+                                  axis.line.x=element_blank())
                   )
     return(axis_theme)
 }
