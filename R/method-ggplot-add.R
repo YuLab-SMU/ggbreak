@@ -28,3 +28,20 @@ ggplot_add.ggbreak <- function(object, plot, object_name) {
                as.ggplot(print(plot)),
                object_name)
 }
+
+##' @method ggplot_add wrap_params
+##' @export
+ggplot_add.wrap_params <- function(object, plot, object_name){
+    attr(plot, "axis_wrap") <- object
+    class(plot) <- c("ggwrap", class(plot))
+    return(plot)
+}
+
+##' @method ggplot_add ggwrap
+##' @export
+ggplot_add.ggwrap <- function(object, plot, object_name){
+    ggplot_add(as.ggplot(print(object)),
+               as.ggplot(print(plot)),
+               object_name
+    )
+}

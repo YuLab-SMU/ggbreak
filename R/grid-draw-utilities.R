@@ -58,7 +58,7 @@ check_theme_coflip <- function(plot, axis){
 }
 
 #' @importFrom ggplot2 coord_flip
-check_coord_flip <- function(plot, axis){
+check_coord_flip <- function(plot){
     if (inherits(plot, "gg") && inherits(plot$coordinates, "CoordFlip")){
         return("coord_flip")
     }
@@ -93,9 +93,17 @@ compute_relative_range_ <- function(breaks_, scales_, baserange_){
     if (scales_=="free"){
         scales_ = 1
     }
-    if (!is.numeric(scales_) || length(scales_) > 1){
+    if (!is_numeric(scales_) || length(scales_) > 1){
         abort("The scales must be a numeric or one of 'fixed', 'free' !")
     }
-    relrange <- baserange_ * scales_
+    relrange <- baserange_ * as.numeric(scales_)
     return (relrange)
+}
+
+is_numeric <- function(x) {
+    !anyNA(suppressWarnings(as.numeric(x)))
+}
+
+extract_wrap_breaks <- function(){
+
 }
