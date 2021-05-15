@@ -45,3 +45,20 @@ ggplot_add.ggwrap <- function(object, plot, object_name){
                object_name
     )
 }
+
+##' @method ggplot_add ggcut_params
+##' @export
+ggplot_add.ggcut_params <- function(object, plot, object_name){
+    attr(plot, "axis_cut") <- object
+    class(plot) <- c("ggcut", class(plot))
+    return (plot)
+}
+
+##' @method ggplot_add ggcut
+##' @export
+ggplot_add.ggcut <- function(object, plot, object_name){
+    ggplot_add(as.ggplot(print(object)),
+               as.ggplot(print(plot)),
+               object_name
+    )
+}

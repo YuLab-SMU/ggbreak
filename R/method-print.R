@@ -9,3 +9,9 @@ print.ggbreak <- function(x, ...) {
 print.ggwrap <- function(x, ...){
     grid.draw.ggwrap(x)
 }
+
+##' @method print ggcut
+##' @export
+print.ggcut <- function(x, ...){
+    grid.draw.ggcut(x)
+}

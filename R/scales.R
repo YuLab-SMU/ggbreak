@@ -46,3 +46,41 @@ scale_wrap <- function(n){
     structure(list(n = n), 
               class = "wrap_params")
 }
+
+
+#' @title scale_x_cut
+#' @param breaks a numeric or numeric vector, the points to be divided
+#' @param which integer, the position of subplots specific scales.
+#' @param scales numeric, relative width or height of subplots.
+#' @rdname scale_cut
+#' @return gg object
+#' @export
+scale_x_cut <- function(breaks, which=NULL, scales=NULL){
+    scale_cut(
+        axis = "x",
+        breaks = breaks,
+        which = which,
+        scales = scales
+    )
+}
+
+#' @title scale_y_cut
+#' @rdname scale_cut
+#' @export
+scale_y_cut <- function(breaks, which=NULL, scales=NULL){
+    scale_cut(
+        axis = "y",
+        breaks = breaks,
+        which = which,
+        scales = scales
+    )
+
+}
+
+scale_cut <- function(axis, breaks, which=NULL, scales=NULL){
+    structure(list(axis = axis, 
+                   breaks = breaks, 
+                   which = which, 
+                   scales = scales),
+    class = "ggcut_params")
+}

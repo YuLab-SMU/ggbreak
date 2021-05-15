@@ -98,6 +98,33 @@ extract_axis_break <- function(object){
     return(list(axis=axis, breaks=breaks, scales=scales))
 }
 
+compute_ggcut_breaks_relrange <- function(ggcut_params, rngrev){
+    if (rngrev$flagrev == "reverse"){
+        rngrev$axis_range <- rev(-1 * (rngrev$axis_range))
+    }
+    breaks <- ggcut_params$breaks
+    if (any(breaks < rngrev$axis_range[1]) || any(breaks > rngrev$axis_range[2])){
+        abort("Some breaks are not in the plot range. Please check all breaks!")
+    }
+    if (length(breaks) > 1){
+        breaks <- c(rngrev$axis_range[1], sort(breaks), rngrev$axis_range[2])
+        breaks <- lapply(seq_len(length(breaks)-1), function(i) c(breaks[i], breaks[i+1]))
+    }else{
+        breaks <- list(c(rngrev$axis_range[1], breaks), 
+                       c(breaks, rngrev$axis_range[2]))
+    }
+    relrange <- rep(1, length(breaks))
+    if (!is.null(ggcut_params$which) && !is.null(ggcut_params$scales)){
+        relrange[ggcut_params$which] <- ggcut_params$scales
+    }
+    if (rngrev$flagrev == "reverse"){
+        breaks <- rev(lapply(breaks, function(i) rev(i)))
+        #relrange <- rev(relrange)
+    }
+    return(list(breaks=breaks, relrange=relrange))
+}
+
+
 theme_no_margin <- getFromNamespace("theme_no_margin", "aplot")
 
 #' @importFrom ggplot2 theme_get
