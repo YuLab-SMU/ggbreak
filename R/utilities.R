@@ -2,9 +2,12 @@
 ##' @importFrom ggplot2 ggplot_build
 ggrange2 <- function (plot, var) {
     var <- paste0("panel_scales_", var)
-    axis_range <- ggplot_build(plot)$layout[[var]][[1]]$range$range
-    flagrev <- ggplot_build(plot)$layout[[var]][[1]]$trans$name
-    list(axis_range=axis_range, flagrev=flagrev)
+    gb <- ggplot_build(plot)
+    axis_range <- gb$layout[[var]][[1]]$range$range
+    flagrev <- gb$layout[[var]][[1]]$trans$name
+    transfun <- gb$layout[[var]][[1]]$trans$transform
+    inversefun <- gb$layout[[var]][[1]]$trans$inverse
+    list(axis_range=axis_range, flagrev=flagrev, transfun=transfun, inversefun=inversefun)
 }
 
 #' @importFrom ggplot2 labs
@@ -40,6 +43,20 @@ extract_totallabs <- function(plot){
 combine_range <- function(breaks, rangeres, scales){
     if (rangeres$flagrev=="reverse"){
         rangeres$axis_range <- rev(-1 * (rangeres$axis_range))
+    }
+    if (rangeres$flagrev=="date"){
+        if (is.list(breaks)){
+            breaks <- lapply(breaks, function(i) as.Date(i))
+        }else{
+            breaks <- as.Date(breaks)
+        }
+    }
+    if (!rangeres$flagrev %in% c("identity", "reverse")){
+        if (is.list(breaks)){
+            breaks <- lapply(breaks, function(i) rangeres$transfun(i))
+        }else{
+            breaks <- rangeres$transfun(breaks)
+        }
     }
     res <- merge_intervals(breaks, scales)
     newbreaks <- res$breaks
@@ -154,3 +171,9 @@ list.add <- function(obj, ...){
         c(obj, list(...))
     }
 }
+
+
+numeric2Date <- function(x) {
+    as.Date(x, origin="1970-01-01")
+}
+

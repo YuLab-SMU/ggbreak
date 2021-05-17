@@ -33,6 +33,9 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
     relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng)
+    if (!rng$flagrev %in% c("identity","reverse")){
+        breaks <- lapply(breaks, function(i)rng$inversefun(i))
+    }
     if(axis == 'x') {
         p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1
         pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) 
@@ -101,6 +104,9 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
         rng <- rev(-1 * (rng))
     }
     breaks <- seq(rng[1], rng[2], length.out=nstep + 1)
+    if (!rngrev$flagrev %in% c("identity", "reverse")){
+        breaks <- rngrev$inversefun(breaks)
+    }
     gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
     pg <- plot_list(gg, ncol=1, guides="collect")
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
@@ -129,7 +135,9 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     coord_fun <- check_coord_flip(plot=x)
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
-
+    if (!rngrev$flagrev %in% c("identity", "reverse")){
+        breaks <- rngrev$inversefun(breaks)
+    }
     if(axis == 'x') {
         p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1
         pp1 <- lapply(breaks[-c(1, nbreaks)], function(i)

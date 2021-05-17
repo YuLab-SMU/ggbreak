@@ -155,5 +155,15 @@ pg + labs(title="test title", subtitle="test subtitle", tag="A tag", caption="A 
 
 ## Wrap plot
 
+The `scale_wrap()` function wraps a 'gg' plot over multiple rows to make plots with long x axes easier to read.
+
+```{r fig.width=6, fig.height=8}
+p <- ggplot(economics, aes(x=date, y = unemploy, colour = uempmed)) +
+  geom_line()
+
+p + scale_wrap(n=4)
+
+```
+
 ## Cut plot
 
