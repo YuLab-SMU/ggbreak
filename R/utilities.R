@@ -103,6 +103,12 @@ compute_ggcut_breaks_relrange <- function(ggcut_params, rngrev){
         rngrev$axis_range <- rev(-1 * (rngrev$axis_range))
     }
     breaks <- ggcut_params$breaks
+    if (rngrev$flagrev == "date"){
+        breaks <- as.Date(breaks)
+    }
+    if (!rngrev$flagrev %in% c("identity", "reverse")){
+        breaks <- rngrev$transfun(breaks)
+    }
     if (any(breaks < rngrev$axis_range[1]) || any(breaks > rngrev$axis_range[2])){
         abort("Some breaks are not in the plot range. Please check all breaks!")
     }
