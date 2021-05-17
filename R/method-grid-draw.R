@@ -101,8 +101,9 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
         rng <- rev(-1 * (rng))
     }
     breaks <- seq(rng[1], rng[2], length.out=nstep + 1)
-    if (rngrev$flagrev == "date") {
-        breaks = numeric2Date(breaks)
+    if (rngrev$flagrev %in% c("identity", "reverse")){
+        #breaks = numeric2Date(breaks)
+        breaks <- rngrev$transfun(breaks)
     }
     gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
     pg <- plot_list(gg, ncol=1, guides="collect")

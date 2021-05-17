@@ -2,9 +2,11 @@
 ##' @importFrom ggplot2 ggplot_build
 ggrange2 <- function (plot, var) {
     var <- paste0("panel_scales_", var)
-    axis_range <- ggplot_build(plot)$layout[[var]][[1]]$range$range
-    flagrev <- ggplot_build(plot)$layout[[var]][[1]]$trans$name
-    list(axis_range=axis_range, flagrev=flagrev)
+    gb <- ggplot_build(plot)
+    axis_range <- gb$layout[[var]][[1]]$range$range
+    flagrev <- gb$layout[[var]][[1]]$trans$name
+    transfun <- gb$layout[[var]][[1]]$trans$transform
+    list(axis_range=axis_range, flagrev=flagrev, transfun=transfun)
 }
 
 #' @importFrom ggplot2 labs
@@ -41,6 +43,13 @@ combine_range <- function(breaks, rangeres, scales){
     if (rangeres$flagrev=="reverse"){
         rangeres$axis_range <- rev(-1 * (rangeres$axis_range))
     }
+    if (rangeres$flagrev=="date"){
+        breaks <- lapply(breaks, function(i), as.Date(i))
+    }
+    if (!rangeres$flagrev %in% c("identity", "reverse")){
+        breaks <- lapply(breaks, function(i), rangeres$transfun(i))
+    }
+
     res <- merge_intervals(breaks, scales)
     newbreaks <- res$breaks
     newscales <- res$scales
