@@ -21,13 +21,6 @@ ggplot_add.ggbreak_params <- function(object, plot, object_name) {
     return(plot)
 }
 
-##' @method ggplot_add ggbreak
-##' @export
-ggplot_add.ggbreak <- function(object, plot, object_name) {
-    ggplot_add(as.ggplot(print(object)),
-               as.ggplot(print(plot)),
-               object_name)
-}
 
 ##' @method ggplot_add wrap_params
 ##' @export
@@ -37,14 +30,6 @@ ggplot_add.wrap_params <- function(object, plot, object_name){
     return(plot)
 }
 
-##' @method ggplot_add ggwrap
-##' @export
-ggplot_add.ggwrap <- function(object, plot, object_name){
-    ggplot_add(as.ggplot(print(object)),
-               as.ggplot(print(plot)),
-               object_name
-    )
-}
 
 ##' @method ggplot_add ggcut_params
 ##' @export
@@ -54,11 +39,19 @@ ggplot_add.ggcut_params <- function(object, plot, object_name){
     return (plot)
 }
 
-##' @method ggplot_add ggcut
+##' @method ggplot_add ggbreak
 ##' @export
-ggplot_add.ggcut <- function(object, plot, object_name){
+ggplot_add.ggbreak <- function(object, plot, object_name) {
     ggplot_add(as.ggplot(print(object)),
                as.ggplot(print(plot)),
-               object_name
-    )
+               object_name)
 }
+
+##' @method ggplot_add ggwrap
+##' @export
+ggplot_add.ggwrap <- ggplot_add.ggbreak
+
+
+##' @method ggplot_add ggcut
+##' @export
+ggplot_add.ggcut <- ggplot_add.ggbreak

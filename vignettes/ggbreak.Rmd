@@ -82,7 +82,7 @@ p2 + scale_x_break(c(18, 21))
 p1 + scale_x_break(c(7, 17), scales = 1.5) + scale_x_break(c(18, 21), scales=2)
 ```
 
-### Feature 4: support reverse scale
+### Feature 4: Support reverse scale
 
 ```{r fig.keep='last'}
 g <- ggplot(d, aes(x, y)) + geom_col()
@@ -91,15 +91,24 @@ g2 <- g + scale_y_break(c(7, 17), scales = 1.5) +
 g + g2
 ```
 
+### Feature 5: Compatible with scale transform functions
 
-### Feature 5: Compatible with `coord_flip`
+Users can apply scale transform functions, such as `scale_x_log10` and `scale_x_sqrt`, to axis break plot.
+
+```{r fig.keep='last', fig.width=10, fig.height=5}
+p2 <- p1 + scale_x_break(c(7, 17)) 
+p3 <- p1 + scale_x_break(c(7, 17)) + scale_x_log10()
+p2 + p3
+```
+
+### Feature 6: Compatible with `coord_flip`
 
 ```{r message=FALSE}
 g + coord_flip() + scale_y_break(c(7, 18))
 ```
 
 
-### Feature 6: Compatible with `facet_grid` and `facet_wrap`
+### Feature 7: Compatible with `facet_grid` and `facet_wrap`
 
 ```{r message=FALSE}
 set.seed(2019-01-19)
@@ -127,7 +136,7 @@ print(pg)
 
 
 
-### Feature 7: Compatible with legend
+### Feature 8: Compatible with legend
 
 ```{r message=FALSE}
 pg <- pg + aes(fill=group)
