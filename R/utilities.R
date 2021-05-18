@@ -40,7 +40,7 @@ extract_totallabs <- function(plot){
 }
 
 
-combine_range <- function(breaks, rangeres, scales){
+combine_range <- function(breaks, rangeres, scales, ticklabs){
     if (rangeres$flagrev=="reverse"){
         rangeres$axis_range <- rev(-1 * (rangeres$axis_range))
     }
@@ -58,33 +58,39 @@ combine_range <- function(breaks, rangeres, scales){
             breaks <- rangeres$transfun(breaks)
         }
     }
-    res <- merge_intervals(breaks, scales)
+    res <- merge_intervals(breaks, scales, ticklabs)
     newbreaks <- res$breaks
     newscales <- res$scales
+    newticklabs <- res$ticklabs
     newbreaks <- c(rangeres$axis_range[1], unlist(newbreaks), rangeres$axis_range[2])
     newbreaks <- lapply(data.frame(matrix(newbreaks, nrow=2)), function(i)i)
     if (rangeres$flagrev=="reverse"){
         newbreaks <- lapply(newbreaks, function(i)rev(i))
-        return(list(breaks=rev(newbreaks), scales=rev(newscales)))
+        return(list(breaks=rev(newbreaks), scales=rev(newscales), ticklabs=rev(newticklabs)))
     }
-    return(list(breaks=newbreaks, scales=newscales))
+    return(list(breaks=newbreaks, scales=newscales, ticklabs=newticklabs))
 }
 
-merge_intervals <- function(breaks, scales){
+merge_intervals <- function(breaks, scales, ticklabs){
     if (!inherits(breaks, "list")){
         breaks <- list(breaks)
     }
+    if (!inherits(ticklabs, "list")){
+        ticklabs <- list(ticklabs)
+    }
     newbreaks <- list()
     newscales <- list()
+    newticklabs <- list()
     breaks <- lapply(breaks, function(i) sort(i))
     ind <- order(unlist(lapply(breaks, function(i)i[1])))
     scales <- scales[ind]
     breaks <- breaks[ind]
-    
+    ticklabs <- ticklabs[ind]
     for (i in seq_len(length(breaks))){
         if (length(newbreaks) >= 1 && breaks[[i]][1] <= newbreaks[[length(newbreaks)]][2]){
             newbreaks[[length(newbreaks)]][2] <- max(newbreaks[[length(newbreaks)]][2], breaks[[i]][2])
             mergescales <- c(scales[[i]], newscales[[length(newscales)]])
+            mergeticks <- c(list(ticklabs[[i]], list(newticklabs[[length(newticklabs)]])))
             if (any("fixed" %in% mergescales)){
                 newscales[[length(newscales)]] <- "fixed"
             }
@@ -94,12 +100,14 @@ merge_intervals <- function(breaks, scales){
             if (is.numeric(mergescales)){
                 newscales[[length(newscales)]] <- max(mergescales)
             }
+            newticklabs[[length(newticklabs)]] <- mergeticks[[which.max(unlist(lapply(mergeticks, function(i)length(i))))]]
         }else{
             newbreaks <- c(newbreaks, list(breaks[[i]]))
             newscales <- c(newscales, list(scales[[i]]))
+            newticklabs <- c(newticklabs, list(ticklabs[[i]]))
         }
     }
-    return(list(breaks=newbreaks, scales=unlist(newscales)))
+    return(list(breaks=newbreaks, scales=unlist(newscales), ticklabs=newticklabs))
 }
 
 extract_axis_break <- function(object){
@@ -107,12 +115,14 @@ extract_axis_break <- function(object){
         axis <- object$axis
         breaks <- object$breaks
         scales <- object$scales
+        ticklabs <- object$ticklabels
     }else{
         axis <- object[[1]]$axis
         breaks <- lapply(object, function(i)i$breaks)
         scales <- lapply(object, function(i)i$scales) 
+        ticklabs <- lapply(object, function(i)i$ticklabels)
     }
-    return(list(axis=axis, breaks=breaks, scales=scales))
+    return(list(axis=axis, breaks=breaks, scales=scales, ticklabs=ticklabs))
 }
 
 compute_ggcut_breaks_relrange <- function(ggcut_params, rngrev){
