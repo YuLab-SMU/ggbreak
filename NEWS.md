@@ -1,5 +1,6 @@
-# ggbreak 0.0.2.993
+# ggbreak 0.0.2.994
 
++ `scale_x_cut` and `scale_y_cut` functions (2021-05-18, Tue)
 + `scale_wrap` function and support of using date object as axis (2021-05-15, Sat)
 + add vignette (2021-05-14, Fri)
 + support `coord_flip`, `facet_grid` and `facet_wrap` (2021-05-14, Fri)

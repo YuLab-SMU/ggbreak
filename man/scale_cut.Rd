@@ -12,7 +12,7 @@ scale_y_cut(breaks, which = NULL, scales = NULL)
 \arguments{
 \item{breaks}{a numeric or numeric vector, the points to be divided}
 
-\item{which}{integer, the position of subplots specific scales.}
+\item{which}{integer, the position of subplots to scales, started from left to right or top to bottom.}
 
 \item{scales}{numeric, relative width or height of subplots.}
 }
@@ -23,4 +23,15 @@ gg object
 scale_x_cut
 
 scale_y_cut
+}
+\examples{
+library(ggplot2)
+library(ggbreak)
+set.seed(2019-01-19)
+d <- data.frame(
+     x = 1:20,
+     y = c(rnorm(5) + 4, rnorm(5) + 20, rnorm(5) + 5, rnorm(5) + 22)
+ )
+p <- ggplot(d, aes(x, y)) + geom_col()
+p + scale_y_cut(breaks=c(7, 18), which=c(1, 3), scales=c(3, 0.5))
 }

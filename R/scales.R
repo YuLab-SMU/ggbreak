@@ -39,9 +39,17 @@ scale_break <- function(axis, breaks, scales) {
 }
 
 #' @title scale_wrap
+#'
+#' This scale function wraps a 'gg' plot over multiple rows to make plots with long x axes easier to read.
 #' @param n the number of subplot pieces.
 #' @return gg object
-#' @export 
+#' @export
+#' @examples
+#' library(ggplot2)
+#' library(ggbreak)
+#' p <- ggplot(economics, aes(x=date, y = unemploy, colour = uempmed)) +
+#'      geom_line()
+#' p + scale_wrap(n=4)
 scale_wrap <- function(n){
     structure(list(n = n), 
               class = "wrap_params")
@@ -50,7 +58,7 @@ scale_wrap <- function(n){
 
 #' @title scale_x_cut
 #' @param breaks a numeric or numeric vector, the points to be divided
-#' @param which integer, the position of subplots specific scales.
+#' @param which integer, the position of subplots to scales, started from left to right or top to bottom.
 #' @param scales numeric, relative width or height of subplots.
 #' @rdname scale_cut
 #' @return gg object
@@ -67,6 +75,16 @@ scale_x_cut <- function(breaks, which=NULL, scales=NULL){
 #' @title scale_y_cut
 #' @rdname scale_cut
 #' @export
+#' @examples
+#' library(ggplot2)
+#' library(ggbreak)
+#' set.seed(2019-01-19)
+#' d <- data.frame(
+#'      x = 1:20,
+#'      y = c(rnorm(5) + 4, rnorm(5) + 20, rnorm(5) + 5, rnorm(5) + 22)
+#'  )
+#' p <- ggplot(d, aes(x, y)) + geom_col()
+#' p + scale_y_cut(breaks=c(7, 18), which=c(1, 3), scales=c(3, 0.5))
 scale_y_cut <- function(breaks, which=NULL, scales=NULL){
     scale_cut(
         axis = "y",
