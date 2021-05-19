@@ -66,7 +66,8 @@ combine_range <- function(breaks, rangeres, scales, ticklabs){
     newbreaks <- lapply(data.frame(matrix(newbreaks, nrow=2)), function(i)i)
     if (rangeres$flagrev=="reverse"){
         newbreaks <- lapply(newbreaks, function(i)rev(i))
-        return(list(breaks=rev(newbreaks), scales=rev(newscales), ticklabs=rev(newticklabs)))
+        return(list(breaks=rev(newbreaks), scales=rev(newscales), 
+                    ticklabs=c(rev(newticklabs[-length(newticklabs)]), newticklabs[length(newticklabs)])))
     }
     return(list(breaks=newbreaks, scales=newscales, ticklabs=newticklabs))
 }

@@ -7,6 +7,8 @@
 ##' @importFrom ggplot2 theme
 ##' @importFrom ggplot2 element_blank
 ##' @importFrom ggplot2 element_text
+##' @importFrom ggplot2 scale_x_continuous
+##' @importFrom ggplot2 scale_y_continuous
 ##' @importFrom aplot plot_list
 ##' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
@@ -45,9 +47,14 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     }
     if(axis == 'x') {
         p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1
+
         pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) 
                             x + do.call(coord_fun, list(xlim=c(i[1], i[2]))) + 
                             subplottheme2)
+        
+        pp2 <- x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) +
+               subplottheme3
+
         if (length(ticklabs) > 1){
             newticklabs <- ticklabs[-length(ticklabs)]
             for (i in seq_len(length(newticklabs))){
@@ -60,19 +67,22 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
                 }
             }
         }
-        pp2 <- x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + 
-               subplottheme3
-        if (!is.null(scaleind) && !is.null(ticklabs[[length(ticklabs)]])){
+
+        if (!is.null(scaleind) && !is.null(ticklabs[[length(ticklabs)]]) && rng$flagrev != "reverse"){
             pp2$scales$scales[[scaleind]]$breaks <- ticklabs[[length(ticklabs)]]
             pp2$scales$scales[[scaleind]]$labels <- ticklabs[[length(ticklabs)]]
         }
-        if (is.null(scaleind) && !is.null(ticklabs[[length(ticklabs)]])){
+        if (is.null(scaleind) && !is.null(ticklabs[[length(ticklabs)]]) && rng$flagrev != "reverse"){
             pp2 <- pp2 + scale_x_continuous(breaks=ticklabs[[length(ticklabs)]], labels=ticklabs[[length(ticklabs)]])
         }
-        #g <- switch(coord_fun,
-        #            coord_flip=plot_grid(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1),
-        #            coord_cartesian=plot_grid(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1)
-        #            )
+        if (!is.null(scaleind) && !is.null(ticklabs[[length(ticklabs)]]) && rng$flagrev == "reverse"){
+            p1$scales$scales[[scaleind]]$breaks <- ticklabs[[length(ticklabs)]]
+            p1$scales$scales[[scaleind]]$labels <- ticklabs[[length(ticklabs)]]
+        }
+        if (is.null(scaleind) && !is.null(ticklabs[[length(ticklabs)]]) && rng$flagrev == "reverse"){
+            p1 <- p1 + scale_x_continuous(breaks = ticklabs[[length(ticklabs)]], labels=ticklabs[[length(ticklabs)]])
+        }
+        
         g <- switch(coord_fun,
                     coord_flip = plot_list(gglist=c(list(pp2), rev(pp1), list(p1)), 
                                            ncol=1,
@@ -86,12 +96,16 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     } else {
         breaks <- rev(breaks)
         ticklabs <- rev(ticklabs)
+
         p1 <- x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + subplottheme1
+
         pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) 
                       x + do.call(coord_fun, list(ylim=c(i[1], i[2]))) +
                             subplottheme2)
+
         pp2 <- x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]))) +
                subplottheme3
+        
         if (length(ticklabs) > 1){
             newticklabs <- ticklabs[-1]
             for (i in seq_len(length(newticklabs))){
@@ -104,17 +118,22 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
                 }
             }
         }
-        if (!is.null(scaleind) && !is.null(ticklabs[[1]])){
+
+        if (!is.null(scaleind) && !is.null(ticklabs[[1]]) && rng$flagrev != "reverse"){
             pp2$scales$scales[[scaleind]]$breaks <- ticklabs[[1]]
             pp2$scales$scales[[scaleind]]$labels <- ticklabs[[1]]
         }
-        if (is.null(scaleind) && !is.null(ticklabs[[1]])){
+        if (is.null(scaleind) && !is.null(ticklabs[[1]]) && rng$flagrev != "reverse"){
             pp2 <- pp2 + scale_y_continuous(breaks=ticklabs[[1]], labels=ticklabs[[1]])
         }
-        #g <- switch(coord_fun,
-        #            coord_flip = plot_grid(plotlist=c(list(p1), pp1, list(pp2)), align="h", nrow=1),
-        #            coord_cartesian = plot_grid(plotlist=c(list(pp2), pp1, list(p1)), align="v", ncol=1)
-        #       )
+        if (!is.null(scaleind) && !is.null(ticklabs[[1]]) && rng$flagrev == "reverse"){
+            p1$scales$scales[[scaleind]]$breaks <- ticklabs[[1]]
+            p1$scales$scales[[scaleind]]$labels <- ticklabs[[1]]
+        }
+        if (is.null(scaleind) && !is.null(ticklabs[[1]]) && rng$flagrev == "reverse"){
+            p1 <- p1 + scale_y_continuous(breaks=ticklabs[[1]], labels=ticklabs[[1]])
+        }
+        
         g <- switch(coord_fun,
                     coord_flip = plot_list(gglist=c(list(p1), rev(pp1), list(pp2)), 
                                            nrow=1, 
