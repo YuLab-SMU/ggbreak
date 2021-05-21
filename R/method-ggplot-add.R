@@ -55,3 +55,13 @@ ggplot_add.ggwrap <- ggplot_add.ggbreak
 ##' @method ggplot_add ggcut
 ##' @export
 ggplot_add.ggcut <- ggplot_add.ggbreak
+
+##' @method ggplot_add gg
+##' @export
+ggplot_add.gg <- function(object, plot, object_name){
+    if (inherits(plot, "ggbreak") || inherits(plot, "ggcut") || inherits(plot, "ggwrap")){
+        ggplot_add(as.ggplot(print(object)), as.ggplot(print(plot)), object_name)
+    }else{
+        NextMethod()
+    }
+}
