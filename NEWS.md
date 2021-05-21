@@ -1,5 +1,6 @@
 # ggbreak 0.0.3
 
++ compatible with `patchwork` for axis break plots + gg plot (2021-05-21, Fri)
 + supports setting axis tick labels (2021-05-20, Tue)
 + `scale_x_cut` and `scale_y_cut` functions (2021-05-18, Tue)
 + `scale_wrap` function and support of using date object as axis (2021-05-15, Sat)

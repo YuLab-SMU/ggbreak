@@ -1,3 +1,10 @@
+---
+html_preview: false
+output:
+  md_document:
+    variant: gfm
+---
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # ggbreak: set axis breaks for ‘ggplot2’
@@ -35,8 +42,7 @@ Or the development version from github:
 remotes::install_github("GuangchuangYu/ggbreak")
 ```
 
-<!--
 ## Vignette
 
-For more details, please refer to the [online vignette](https://cran.r-project.org/package=ggbreak/vignettes/ggbreak.html).
--->
+For more details, please refer to the [online
+vignette](https://cran.r-project.org/web/packages/ggbreak/vignettes/ggbreak.html).

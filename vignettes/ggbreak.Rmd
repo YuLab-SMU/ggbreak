@@ -193,6 +193,22 @@ p +
      scale_y_break(c(19,21), scales=1, ticklabels=c(21, 22, 23))
 ```
 
+### Feature 11: Compatible with patchwork
+
+```{r message=FALSE, fig.width=8, fig.height=5, fig.keep="last"}
+library(patchwork)
+
+set.seed(2019-01-19)
+d <- data.frame(
+               x = 1:20,
+               y = c(rnorm(5) + 4, rnorm(5) + 20, rnorm(5) + 5, rnorm(5) + 22)
+)
+
+p <- ggplot(d, aes(x, y)) + geom_col()
+x <- p+scale_y_break(c(7, 17 ))
+
+x + p
+```
 
 ## Wrap plot
 

@@ -54,8 +54,6 @@ Or the development version from github:
 remotes::install_github("GuangchuangYu/ggbreak")
 ```
 
-<!--
 ## Vignette
 
-For more details, please refer to the [online vignette](https://cran.r-project.org/package=ggbreak/vignettes/ggbreak.html).
--->
+For more details, please refer to the [online vignette](https://cran.r-project.org/web/packages/ggbreak/vignettes/ggbreak.html).
