@@ -152,9 +152,9 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     g <- set_label(g, totallabs = totallabs, p2 = x)
     if (recording){
         print(g)
-    }else{
-        invisible(g)
     }
+    
+    invisible(g)
 }
 
 ##' @method grid.draw ggwrap
@@ -181,9 +181,10 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
     if (recording){
         print(g)
-    }else{
-        return(g)
     }
+
+    invisible(g)
+
 }
 
 #' @method grid.draw ggcut
@@ -253,7 +254,8 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     g <- set_label(g, totallabs = totallabs, p2 = x)
     if (recording){
         print(g)
-    }else{
-        return(g)
     }
+    
+    invisible(g)
+
 }
