@@ -42,9 +42,15 @@ ggplot_add.ggcut_params <- function(object, plot, object_name){
 ##' @method ggplot_add ggbreak
 ##' @export
 ggplot_add.ggbreak <- function(object, plot, object_name) {
-    ggplot_add(as.ggplot(print(object)),
-               as.ggplot(print(plot)),
+    if (inherits(plot, "ggbreak") || inherits(plot, "ggcut") || inherits(plot, "ggwrap"))
+        ggplot_add(as.ggplot(grid.draw(object, recording=FALSE)),
+                   as.ggplot(grid.draw(plot, recording=FALSE)),
                object_name)
+    else{
+        ggplot_add(as.ggplot(grid.draw(object, recording=FALSE)),
+                   as.ggplot(plot),
+               object_name)
+    }
 }
 
 ##' @method ggplot_add ggwrap
@@ -60,7 +66,7 @@ ggplot_add.ggcut <- ggplot_add.ggbreak
 ##' @export
 ggplot_add.gg <- function(object, plot, object_name){
     if (inherits(plot, "ggbreak") || inherits(plot, "ggcut") || inherits(plot, "ggwrap")){
-        ggplot_add(as.ggplot(print(object)), as.ggplot(print(plot)), object_name)
+        ggplot_add(as.ggplot(object), as.ggplot(grid.draw(plot, recording=FALSE)), object_name)
     }else{
         NextMethod()
     }
