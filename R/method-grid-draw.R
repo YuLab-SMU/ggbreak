@@ -179,7 +179,7 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
     gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
     pg <- plot_list(gg, ncol=1, guides="collect")
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
-    if (plot){
+    if (recording){
         print(g)
     }else{
         return(g)
