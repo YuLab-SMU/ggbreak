@@ -150,7 +150,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     totallabs$y <- NULL
     g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
     g <- set_label(g, totallabs = totallabs, p2 = x)
-    print(g)
+    if (recording){
+        print(g)
+    }
+    
+    invisible(g)
 }
 
 ##' @method grid.draw ggwrap
@@ -175,7 +179,12 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
     gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
     pg <- plot_list(gg, ncol=1, guides="collect")
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
-    print (g)
+    if (recording){
+        print(g)
+    }
+
+    invisible(g)
+
 }
 
 #' @method grid.draw ggcut
@@ -243,5 +252,10 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     totallabs$y <- NULL
     g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
     g <- set_label(g, totallabs = totallabs, p2 = x)
-    print(g)
+    if (recording){
+        print(g)
+    }
+    
+    invisible(g)
+
 }
