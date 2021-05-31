@@ -10,6 +10,15 @@ ggrange2 <- function (plot, var) {
     list(axis_range=axis_range, flagrev=flagrev, transfun=transfun, inversefun=inversefun)
 }
 
+check_legend_position <- function(plot){
+    if (!is.null(plot$theme$legend.position)){
+        tm <- theme(legend.position=plot$theme$legend.position)
+    }else{
+        tm <- theme()
+    }
+    return (tm)
+}
+
 #' @importFrom ggplot2 labs
 set_label <- function(p, totallabs, p2 = NULL) {
     p <- p + 

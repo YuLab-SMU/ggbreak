@@ -37,6 +37,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
     relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng)
+    legendpos <- check_legend_position(plot=x)
     if (!rng$flagrev %in% c("identity","reverse")){
         breaks <- lapply(breaks, function(i)rng$inversefun(i))
     }
@@ -87,11 +88,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
                     coord_flip = plot_list(gglist=c(list(pp2), rev(pp1), list(p1)), 
                                            ncol=1,
                                            heights=c(rev(relrange[-1]), relrange[1]),
-                                           guides = 'collect'),
+                                           guides = 'collect') & legendpos,
                     coord_cartesian = plot_list(gglist=c(list(p1), pp1, list(pp2)), 
                                                 nrow=1, 
                                                 widths=relrange,
-                                                guides = 'collect')
+                                                guides = 'collect') & legendpos
                     )
     } else {
         breaks <- rev(breaks)
@@ -138,11 +139,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
                     coord_flip = plot_list(gglist=c(list(p1), rev(pp1), list(pp2)), 
                                            nrow=1, 
                                            widths=relrange,
-                                           guides = 'collect'),
+                                           guides = 'collect') & legendpos,
                     coord_cartesian = plot_list(gglist=c(list(pp2), pp1, list(p1)), 
                                                 ncol=1, 
                                                 heights=c(rev(relrange[-1]), relrange[1]),
-                                                guides = 'collect')
+                                                guides = 'collect') & legendpos
                )
     }
 
@@ -176,8 +177,9 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
     if (!rngrev$flagrev %in% c("identity", "reverse")){
         breaks <- rngrev$inversefun(breaks)
     }
+    legendpos <- check_legend_position(plot=x)
     gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
-    pg <- plot_list(gg, ncol=1, guides="collect")
+    pg <- plot_list(gg, ncol=1, guides="collect") & legendpos
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
     if (recording){
         print(g)
@@ -209,6 +211,7 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     coord_fun <- check_coord_flip(plot=x)
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
+    legendpos <- check_legend_position(plot=x)
     if (!rngrev$flagrev %in% c("identity", "reverse")){
         breaks <- rngrev$inversefun(breaks)
     }
@@ -223,11 +226,11 @@ grid.draw.ggcut <- function(x, recording=TRUE){
                     coord_flip = plot_list(gglist=c(list(pp2), rev(pp1), list(p1)),
                                            ncol=1,
                                            heights=relrange,#c(rev(relrange[-1]), relrange[1]),
-                                           guides = 'collect'),
+                                           guides = 'collect') & legendpos, 
                     coord_cartesian = plot_list(gglist=c(list(p1), pp1, list(pp2)),
                                                 nrow=1,
                                                 widths=relrange,
-                                                guides = 'collect')
+                                                guides = 'collect') & legendpos
                     )
     } else {
         breaks <- rev(breaks)
@@ -241,11 +244,11 @@ grid.draw.ggcut <- function(x, recording=TRUE){
                     coord_flip = plot_list(gglist=c(list(p1), rev(pp1), list(pp2)),
                                            nrow=1,
                                            widths=relrange,
-                                           guides = 'collect'),
+                                           guides = 'collect') & legendpos,
                     coord_cartesian = plot_list(gglist=c(list(pp2), pp1, list(p1)),
                                                 ncol=1,
                                                 heights=relrange,#c(rev(relrange[-1]), relrange[1]),
-                                                guides = 'collect')
+                                                guides = 'collect') & legendpos
                )
     }
     totallabs$x <- NULL
