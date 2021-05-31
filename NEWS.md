@@ -1,5 +1,7 @@
-# ggbreak 0.0.3.991
+# ggbreak 0.0.3.992
 
++ support setting e.g. `legend.position = "bottom"` via `theme()` (2021-05-31, Mon)
+    - manual legend position (e.g. `legend.positon = c(.1, .2)`) is not supported currently
 + if passing `recording = FALSE` to `grid.draw` method, only graph object return without plotting the figure (2021-05-24, Mon)
  
 # ggbreak 0.0.3

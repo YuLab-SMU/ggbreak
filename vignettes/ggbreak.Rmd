@@ -139,7 +139,7 @@ print(pg)
 ### Feature 8: Compatible with legend
 
 ```{r message=FALSE}
-pg <- pg + aes(fill=group)
+pg <- pg + aes(fill=group) + theme(legend.position = "bottom")
 print(pg)
 ```
 
