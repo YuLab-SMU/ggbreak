@@ -47,13 +47,13 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         scaleind <- NULL
     }
     if(axis == 'x') {
-        p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1
+        p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]), expand=FALSE)) + subplottheme1
 
         pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) 
-                            x + do.call(coord_fun, list(xlim=c(i[1], i[2]))) + 
+                            x + do.call(coord_fun, list(xlim=c(i[1], i[2]), expand=FALSE)) + 
                             subplottheme2)
         
-        pp2 <- x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) +
+        pp2 <- x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]), expand=FALSE)) +
                subplottheme3
 
         if (length(ticklabs) > 1){
@@ -98,13 +98,13 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         breaks <- rev(breaks)
         ticklabs <- rev(ticklabs)
 
-        p1 <- x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + subplottheme1
+        p1 <- x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]), expand=FALSE)) + subplottheme1
 
         pp1 <- lapply(breaks[-c(1, nbreaks)], function(i) 
-                      x + do.call(coord_fun, list(ylim=c(i[1], i[2]))) +
+                      x + do.call(coord_fun, list(ylim=c(i[1], i[2]), expand=FALSE)) +
                             subplottheme2)
 
-        pp2 <- x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]))) +
+        pp2 <- x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]), expand=FALSE)) +
                subplottheme3
         
         if (length(ticklabs) > 1){
@@ -178,7 +178,7 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
         breaks <- rngrev$inversefun(breaks)
     }
     legendpos <- check_legend_position(plot=x)
-    gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
+    gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1]), expand=FALSE))
     pg <- plot_list(gg, ncol=1, guides="collect") & legendpos
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
     if (recording){
@@ -216,11 +216,11 @@ grid.draw.ggcut <- function(x, recording=TRUE){
         breaks <- rngrev$inversefun(breaks)
     }
     if(axis == 'x') {
-        p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1
+        p1 <- x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]), expand=FALSE)) + subplottheme1
         pp1 <- lapply(breaks[-c(1, nbreaks)], function(i)
-                            x + do.call(coord_fun, list(xlim=c(i[1], i[2]))) +
+                            x + do.call(coord_fun, list(xlim=c(i[1], i[2]), expand=FALSE)) +
                             subplottheme2)
-        pp2 <- x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) +
+        pp2 <- x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]), expand=FALSE)) +
                subplottheme3
         g <- switch(coord_fun,
                     coord_flip = plot_list(gglist=c(list(pp2), rev(pp1), list(p1)),
@@ -234,11 +234,11 @@ grid.draw.ggcut <- function(x, recording=TRUE){
                     )
     } else {
         breaks <- rev(breaks)
-        p1 <- x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + subplottheme1
+        p1 <- x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]), expand=FALSE)) + subplottheme1
         pp1 <- lapply(breaks[-c(1, nbreaks)], function(i)
-                      x + do.call(coord_fun, list(ylim=c(i[1], i[2]))) +
+                      x + do.call(coord_fun, list(ylim=c(i[1], i[2]), expand=FALSE)) +
                             subplottheme2)
-        pp2 <- x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]))) +
+        pp2 <- x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]), expand=FALSE)) +
                subplottheme3
         g <- switch(coord_fun,
                     coord_flip = plot_list(gglist=c(list(p1), rev(pp1), list(pp2)),
