@@ -10,6 +10,7 @@
 ##' @importFrom ggplot2 scale_x_continuous
 ##' @importFrom ggplot2 scale_y_continuous
 ##' @importFrom aplot plot_list
+##' @importFrom stats setNames
 ##' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
     class(x) <- class(x)[class(x) != "ggbreak"]
@@ -85,11 +86,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         }
         
         g <- switch(coord_fun,
-                    coord_flip = plot_list(gglist=c(list(pp2), rev(pp1), list(p1)), 
+                    coord_flip = plot_list(gglist=setNames(c(list(pp2), rev(pp1), list(p1)), NULL),
                                            ncol=1,
                                            heights=c(rev(relrange[-1]), relrange[1]),
                                            guides = 'collect') & legendpos,
-                    coord_cartesian = plot_list(gglist=c(list(p1), pp1, list(pp2)), 
+                    coord_cartesian = plot_list(gglist=setNames(c(list(p1), pp1, list(pp2)), NULL), 
                                                 nrow=1, 
                                                 widths=relrange,
                                                 guides = 'collect') & legendpos
@@ -136,11 +137,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         }
         
         g <- switch(coord_fun,
-                    coord_flip = plot_list(gglist=c(list(p1), rev(pp1), list(pp2)), 
+                    coord_flip = plot_list(gglist=setNames(c(list(p1), rev(pp1), list(pp2)), NULL), 
                                            nrow=1, 
                                            widths=relrange,
                                            guides = 'collect') & legendpos,
-                    coord_cartesian = plot_list(gglist=c(list(pp2), pp1, list(p1)), 
+                    coord_cartesian = plot_list(gglist=setNames(c(list(pp2), pp1, list(p1)), NULL), 
                                                 ncol=1, 
                                                 heights=c(rev(relrange[-1]), relrange[1]),
                                                 guides = 'collect') & legendpos
@@ -179,7 +180,7 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
     }
     legendpos <- check_legend_position(plot=x)
     gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1]), expand=FALSE))
-    pg <- plot_list(gg, ncol=1, guides="collect") & legendpos
+    pg <- plot_list(gglist=setNames(gg, NULL), ncol=1, guides="collect") & legendpos
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
     if (recording){
         print(g)
@@ -223,11 +224,11 @@ grid.draw.ggcut <- function(x, recording=TRUE){
         pp2 <- x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]), expand=FALSE)) +
                subplottheme3
         g <- switch(coord_fun,
-                    coord_flip = plot_list(gglist=c(list(pp2), rev(pp1), list(p1)),
+                    coord_flip = plot_list(gglist=setNames(c(list(pp2), rev(pp1), list(p1)), NULL),
                                            ncol=1,
                                            heights=relrange,#c(rev(relrange[-1]), relrange[1]),
                                            guides = 'collect') & legendpos, 
-                    coord_cartesian = plot_list(gglist=c(list(p1), pp1, list(pp2)),
+                    coord_cartesian = plot_list(gglist=setNames(c(list(p1), pp1, list(pp2)), NULL),
                                                 nrow=1,
                                                 widths=relrange,
                                                 guides = 'collect') & legendpos
@@ -241,11 +242,11 @@ grid.draw.ggcut <- function(x, recording=TRUE){
         pp2 <- x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]), expand=FALSE)) +
                subplottheme3
         g <- switch(coord_fun,
-                    coord_flip = plot_list(gglist=c(list(p1), rev(pp1), list(pp2)),
+                    coord_flip = plot_list(gglist=setNames(c(list(p1), rev(pp1), list(pp2)), NULL),
                                            nrow=1,
                                            widths=relrange,
                                            guides = 'collect') & legendpos,
-                    coord_cartesian = plot_list(gglist=c(list(pp2), pp1, list(p1)),
+                    coord_cartesian = plot_list(gglist=setNames(c(list(pp2), pp1, list(p1)), NULL),
                                                 ncol=1,
                                                 heights=relrange,#c(rev(relrange[-1]), relrange[1]),
                                                 guides = 'collect') & legendpos

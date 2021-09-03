@@ -1,3 +1,7 @@
+# ggbreak 0.0.5
+
++ change according to `aplot::plot_list` (2021-09-03, Fri)
+
 # ggbreak 0.0.4
 
 + set `expand=FALSE` (2021-08-14, Sat)
