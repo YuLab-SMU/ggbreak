@@ -42,21 +42,21 @@ ggplot_add.ggcut_params <- function(object, plot, object_name){
 ##' @method ggplot_add ggbreak
 ##' @export
 ggplot_add.ggbreak <- function(object, plot, object_name) {
-    if (inherits(plot, "ggbreak") || inherits(plot, "ggcut") || inherits(plot, "ggwrap"))
-        ggplot_add(as.ggplot(grid.draw(object, recording=FALSE)),
-                   as.ggplot(grid.draw(plot, recording=FALSE)),
-               object_name)
-    else{
+    if (is.ggbreak(plot)) {
+        ggplot_add(ggbreak2ggplot(object),
+                   ggbreak2ggplot(plot),
+                   object_name)
+    } else{
         ggplot_add(as.ggplot(grid.draw(object, recording=FALSE)),
                    as.ggplot(plot),
                object_name)
     }
 }
 
+
 ##' @method ggplot_add ggwrap
 ##' @export
 ggplot_add.ggwrap <- ggplot_add.ggbreak
-
 
 ##' @method ggplot_add ggcut
 ##' @export
@@ -65,9 +65,13 @@ ggplot_add.ggcut <- ggplot_add.ggbreak
 ##' @method ggplot_add gg
 ##' @export
 ggplot_add.gg <- function(object, plot, object_name){
-    if (inherits(plot, "ggbreak") || inherits(plot, "ggcut") || inherits(plot, "ggwrap")){
-        ggplot_add(as.ggplot(object), as.ggplot(grid.draw(plot, recording=FALSE)), object_name)
-    }else{
+    if (is.ggbreak(plot)){
+        ggplot_add(as.ggplot(object), ggbreak2ggplot(plot), object_name)
+    } else{
         NextMethod()
     }
 }
+
+##' @importFrom yulab.utils get_fun_from_pkg
+is.ggbreak <- yulab.utils::get_fun_from_pkg('aplot', 'is.ggbreak')
+ggbreak2ggplot <- yulab.utils::get_fun_from_pkg("aplot", 'ggbreak2ggplot')

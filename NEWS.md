@@ -1,3 +1,7 @@
+# ggbreak 0.0.5.991
+
++ `is.ggbreak()` and `ggbreak2ggplot()` functions (2021-09-08, Wed)
+
 # ggbreak 0.0.5
 
 + change according to `aplot::plot_list` (2021-09-03, Fri)

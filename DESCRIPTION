@@ -1,6 +1,6 @@
 Package: ggbreak
 Title: Set Axis Break for 'ggplot2'
-Version: 0.0.5
+Version: 0.0.5.991
 Authors@R: c(
        person("Guangchuang", "Yu",     email = "guangchuangyu@gmail.com", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
        person("Shuangbin", "Xu",       email = "xshuangbin@163.com",      role = "aut", comment = c(ORCID="0000-0003-3513-5362"))
@@ -12,7 +12,8 @@ Imports:
   ggplotify (>= 0.0.7),
   aplot,
   rlang,
-  stats
+  stats,
+  yulab.utils
 Suggests:
   knitr,
   prettydoc,
