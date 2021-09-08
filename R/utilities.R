@@ -22,8 +22,8 @@ check_legend_position <- function(plot){
 #' @importFrom ggplot2 labs
 set_label <- function(p, totallabs, p2 = NULL) {
     p <- p + 
-         do.call(labs, totallabs) +
-         theme(axis.title = element_text())
+         do.call(labs, totallabs) #+
+         #theme(axis.title = element_text())
 
     if (is.null(p2)) {
         has_theme <- FALSE
@@ -36,8 +36,9 @@ set_label <- function(p, totallabs, p2 = NULL) {
     } else {
         x <- NULL
     }
-    labs_params <- c("axis.title.x","axis.title.y", "plot.title", "plot.title.position", "plot.subtitle",
-                    "plot.caption", "plot.caption.position", "plot.tag", "plot.tag.position")
+    labs_params <- c("text", "title", "axis.title", "axis.title.x","axis.title.y", 
+                     "plot.title", "plot.title.position", "plot.subtitle",
+                     "plot.caption", "plot.caption.position", "plot.tag", "plot.tag.position")
     p <- p + theme_fp(x=x, i=labs_params)
     return(p)
 }
