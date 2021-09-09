@@ -1,6 +1,7 @@
-# ggbreak 0.0.5.991
+# ggbreak 0.0.5.992
 
-+ `is.ggbreak()` and `ggbreak2ggplot()` functions (2021-09-08, Wed)
++ applying text and title setting from pre-break graph to breaked graph (2021-09-09, Thu)
++ `is.ggbreak()` and `ggbreak2ggplot()` functions from `aplot` (2021-09-08, Wed)
 
 # ggbreak 0.0.5
 
