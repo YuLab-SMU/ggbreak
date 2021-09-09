@@ -148,9 +148,9 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
                )
     }
 
-    totallabs$x <- NULL
-    totallabs$y <- NULL
-    g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
+    totallabs$x <- newxlab #NULL
+    totallabs$y <- newylab #NULL
+    g <- ggplotify::as.ggplot(g) #+ xlab(newxlab) + ylab(newylab)
     g <- set_label(g, totallabs = totallabs, p2 = x)
     if (recording){
         print(g)
@@ -252,9 +252,9 @@ grid.draw.ggcut <- function(x, recording=TRUE){
                                                 guides = 'collect') & legendpos
                )
     }
-    totallabs$x <- NULL
-    totallabs$y <- NULL
-    g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
+    totallabs$x <- newxlab #NULL
+    totallabs$y <- newylab #NULL
+    g <- ggplotify::as.ggplot(g) #+ xlab(newxlab) + ylab(newylab)
     g <- set_label(g, totallabs = totallabs, p2 = x)
     if (recording){
         print(g)
