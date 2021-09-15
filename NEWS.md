@@ -1,5 +1,6 @@
-# ggbreak 0.0.5.992
+# ggbreak 0.0.5.993
 
++ fixed x and y labels and introduced `scale_xy_expand` option (2021-09-15, Wed; #26)
 + applying text and title setting from pre-break graph to breaked graph (2021-09-09, Thu)
 + `is.ggbreak()` and `ggbreak2ggplot()` functions from `aplot` (2021-09-08, Wed)
 
