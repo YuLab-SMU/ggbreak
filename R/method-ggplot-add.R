@@ -40,6 +40,7 @@ ggplot_add.ggcut_params <- function(object, plot, object_name){
 }
 
 ##' @method ggplot_add ggbreak
+##' @importFrom ggfun is.ggbreak
 ##' @export
 ggplot_add.ggbreak <- function(object, plot, object_name) {
     if (is.ggbreak(plot)) {
@@ -63,6 +64,7 @@ ggplot_add.ggwrap <- ggplot_add.ggbreak
 ggplot_add.ggcut <- ggplot_add.ggbreak
 
 ##' @method ggplot_add gg
+##' @importFrom ggfun ggbreak2ggplot
 ##' @export
 ggplot_add.gg <- function(object, plot, object_name){
     if (is.ggbreak(plot)){
@@ -72,6 +74,3 @@ ggplot_add.gg <- function(object, plot, object_name){
     }
 }
 
-##' @importFrom yulab.utils get_fun_from_pkg
-is.ggbreak <- yulab.utils::get_fun_from_pkg('aplot', 'is.ggbreak')
-ggbreak2ggplot <- yulab.utils::get_fun_from_pkg("aplot", 'ggbreak2ggplot')
