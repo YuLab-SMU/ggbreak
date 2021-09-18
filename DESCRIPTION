@@ -7,11 +7,11 @@ Authors@R: c(
        )
 Description: An implementation of scale functions for setting axis breaks of a 'gg' plot.
 Imports:
-  ggfun,
+  ggfun (>= 0.0.4),
   grid,
   ggplot2,
   ggplotify (>= 0.0.7),
-  aplot,
+  aplot (>= 0.1.0),
   rlang,
   stats
 Suggests:
