@@ -34,21 +34,21 @@ library(patchwork)
 
 ## Introduction
 
-This package was first designed to set break points to truncate plot as I need to [shrink outlier long branch of a phylogenetic tree](https://yulab-smu.top/treedata-book/faq.html#shrink-outlier-long-branch).
+This package was first designed to set breakpoints for truncating the plot as I need to [shrink outlier long branch of a phylogenetic tree](https://yulab-smu.top/treedata-book/faq.html#shrink-outlier-long-branch).
 
 
-Axis break or a so call gap plot is useful for data are not normal and contain outliers. Sometimes we can transform the data (e.g. using log if the data was log normal distributed) to solve this problem. But this is not always granted. The data may just simply contains outliers and these outliers are meaningful. A simple gap plot can solve this issue well to present the data in details with both normal and extreme data. 
+Axis break or a so call gap plot is useful for large datasets that are not normally distributed and contain outliers. Sometimes we can transform the data (e.g. using log-transformation if the data was log-normal distributed) to solve this problem. But this is not always granted. The data may just simply contain outliers and these outliers are meaningful. A simple gap plot can solve this issue well to present the data in detail with both normal and extreme data. 
 
 
-This package provides several scale functions to break down a 'gg' plot into pieces and align them together with (gap plot) or without (wrap plot or cut plot) ignoring subplots. Our methods are fully compatible with `ggplot2`, so that after breaking axis, users can still use `+` operator to add geometric layers.
+This package provides several scale functions to break down a 'gg' plot into pieces and align them together with (gap plot) or without (wrap plot or cut plot) ignoring subplots. Our methods are fully compatible with `ggplot2`, so that users can still use the `+` operator to add geometric layers after creating a broken axis.
 
 ## Gap plot
 
-For creating gap plot, we only provide `scale_x_break` and `scale_y_break` functions. Currently applying both function to set break points for both axes are not allowed. However, multiple break points on a single axis are supported. 
+For creating gap plot, we only provide `scale_x_break` and `scale_y_break` functions. Currently, it is not allowed to apply both functions to set breakpoints for both x and y axes. However, multiple breakpoints on a single axis is supported.
 
 ### Feature 1: Compatible with ggplot2. 
 
-After breaking the plot, we can still add geometric layers and setting themes.
+After breaking the plot, we can still superpose geometric layers and set themes.
 
 ```{r fig.keep="last"}
 library(ggplot2)
@@ -69,7 +69,7 @@ p2 <- p1 + scale_x_break(c(7, 17)) +
 p1 + p2
 ```
 
-### Feature 2: Multiple break points supported
+### Feature 2: Multiple break points are supported
 
 ```{r}
 p2 + scale_x_break(c(18, 21))
