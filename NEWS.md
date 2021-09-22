@@ -1,4 +1,4 @@
-# ggbreak 0.0.5.994
+# ggbreak 0.0.5.995
 
 + import `is.ggbreak` and `ggbreak2ggplot` from the ggfun package (2021-09-16, Thu)
 + fixed x and y labels and introduced `scale_xy_expand` option (2021-09-15, Wed; #26)
