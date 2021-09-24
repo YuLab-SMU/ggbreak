@@ -1,5 +1,6 @@
-# ggbreak 0.0.5.995
+# ggbreak 0.0.5.996
 
++ remove xy intercept label and compatible with `xlim` and `ylim` (2021-09-24, Fri, #29)
 + import `is.ggbreak` and `ggbreak2ggplot` from the ggfun package (2021-09-16, Thu)
 + fixed x and y labels and introduced `scale_xy_expand` option (2021-09-15, Wed; #26)
 + applying text and title setting from pre-break graph to breaked graph (2021-09-09, Thu)

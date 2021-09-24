@@ -239,5 +239,5 @@ p + scale_y_cut(breaks=c(7, 18), which=c(1, 3), scales=c(3, 0.5))
 
 ## Note
 
-1. The features we introduced for `scale_x_break` and `scale_y_break` also work for `scale_wrap`, `scale_x_cut` and `scale_y_cut`.
-2. `xlim` is not compatible with `ggbreak`. Instead, users can use [expand_limits](https://github.com/YuLab-SMU/ggbreak/issues/22). 
+The features we introduced for `scale_x_break` and `scale_y_break` also work for `scale_wrap`, `scale_x_cut` and `scale_y_cut`.
+
