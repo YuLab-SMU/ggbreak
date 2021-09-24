@@ -44,7 +44,7 @@ This package provides several scale functions to break down a 'gg' plot into pie
 
 ## Gap plot
 
-For creating gap plot, we only provide `scale_x_break` and `scale_y_break` functions. Currently, it is not allowed to apply both functions to set breakpoints for both x and y axes. However, multiple breakpoints on a single axis is supported.
+For creating gap plot, we only provide `scale_x_break` and `scale_y_break` functions. Currently, it is not allowed to apply both functions to set breakpoints for both x and y axes. However, multiple breakpoints on a single axis are supported.
 
 ### Feature 1: Compatible with ggplot2. 
 
@@ -69,7 +69,7 @@ p2 <- p1 + scale_x_break(c(7, 17)) +
 p1 + p2
 ```
 
-### Feature 2: Multiple break points are supported
+### Feature 2: Multiple break-points are supported
 
 ```{r}
 p2 + scale_x_break(c(18, 21))
@@ -136,7 +136,7 @@ print(pg)
 
 
 
-### Feature 8: Compatible with legend
+### Feature 8: Compatible with legends
 
 ```{r message=FALSE}
 pg <- pg + aes(fill=group) + theme(legend.position = "bottom")
@@ -212,7 +212,7 @@ x + p
 
 ## Wrap plot
 
-The `scale_wrap()` function wraps a 'gg' plot over multiple rows to make plots with long x axes easier to read.
+The `scale_wrap()` function wraps a 'gg' plot over multiple rows to make plots with long x-axes easier to read.
 
 ```{r fig.width=6, fig.height=8}
 p <- ggplot(economics, aes(x=date, y = unemploy, colour = uempmed)) +
