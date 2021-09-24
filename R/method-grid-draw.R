@@ -14,6 +14,7 @@
 ##' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
     class(x) <- class(x)[class(x) != "ggbreak"]
+    x <- check_xy_intercept(plot=x)
     axis_break <- attr(x, 'axis_break')
     axis_breaks <- extract_axis_break(object=axis_break)
     axis <- axis_breaks$axis
@@ -156,7 +157,6 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     if (recording){
         print(g)
     }
-    
     invisible(g)
 }
 
@@ -164,6 +164,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
 ##' @export
 grid.draw.ggwrap <- function(x, recording=TRUE){
     class(x) <- class(x)[class(x) != "ggwrap"]
+    x <- check_xy_intercept(plot=x)
     axis_wrap <- attr(x, "axis_wrap")
     totallabs <- extract_totallabs(plot=x)
     if (length(totallabs) > 0){
@@ -196,6 +197,7 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
 #' @export
 grid.draw.ggcut <- function(x, recording=TRUE){
     class(x) <- class(x)[class(x) != "ggcut"]
+    x <- check_xy_intercept(plot=x)
     axis_cut <- attr(x, "axis_cut")
     axis <- axis_cut$axis
     totallabs <- extract_totallabs(plot=x)

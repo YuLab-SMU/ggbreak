@@ -104,6 +104,12 @@ is_numeric <- function(x) {
     !anyNA(suppressWarnings(as.numeric(x)))
 }
 
-extract_wrap_breaks <- function(){
-
+check_xy_intercept <- function(plot){
+    if ("yintercept" %in% plot$labels){
+        plot$labels$yintercept <- NULL
+    }
+    if ("xintercept" %in% plot$labels){
+        plot$labels$xintercept <- NULL
+    }
+    return (plot)
 }

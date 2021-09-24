@@ -3,7 +3,12 @@
 ggrange2 <- function (plot, var) {
     var <- paste0("panel_scales_", var)
     gb <- ggplot_build(plot)
-    axis_range <- gb$layout[[var]][[1]]$range$range
+    limits <- gb$layout[[var]][[1]]$limits
+    if (!is.null(limits)){
+        axis_range <- limits
+    }else{
+        axis_range <- gb$layout[[var]][[1]]$range$range
+    }
     flagrev <- gb$layout[[var]][[1]]$trans$name
     transfun <- gb$layout[[var]][[1]]$trans$transform
     inversefun <- gb$layout[[var]][[1]]$trans$inverse
