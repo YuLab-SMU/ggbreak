@@ -1,4 +1,4 @@
-# ggbreak 0.0.5.996
+# ggbreak 0.0.6
 
 + remove xy intercept label and compatible with `xlim` and `ylim` (2021-09-24, Fri, #29)
 + import `is.ggbreak` and `ggbreak2ggplot` from the ggfun package (2021-09-16, Thu)
