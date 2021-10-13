@@ -1,0 +1,30 @@
+citHeader("To cite treeio in publications use:")
+
+citEntry(
+    entry  = "article",
+    title  = "Use ggbreak to effectively utilize plotting space to deal with large datasets and outliers.",
+    author = personList(
+        as.person("Shuangbin Xu"),
+        as.person("Meijun Chen"),
+        as.person("Tingze Feng"),
+        as.person("Li Zhan"),
+        as.person("Lang Zhou"),
+        as.person("Guangchuang Yu")
+        ),
+    year    = "2021",
+    journal = "Frontiers in Genetics",
+    volume  = "12",
+    issue   = "",
+    number  = "",
+    pages   = "774846",
+    doi     = "10.3389/fgene.2021.774846",
+    PMID    = "",
+    url     = "", 
+    textVersion =  paste("S Xu, M Chen, T Feng, L Zhan, L Zhou, G Yu.",
+                         "Use ggbreak to effectively utilize plotting space to deal with large datasets and outliers.",
+                         "Frontiers in Genetics. 2021, 12:774846. doi: 10.3389/fgene.2021.774846"
+                         )
+    
+)
+
+

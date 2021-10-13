@@ -30,6 +30,13 @@ knitr::opts_chunk$set(warning = FALSE,
 library(ggplot2)
 library(ggbreak)
 library(patchwork)
+
+CRANpkg <- function (pkg) {
+    cran <- "https://CRAN.R-project.org/package"
+    fmt <- "[%s](%s=%s)"
+    sprintf(fmt, pkg, cran, pkg)
+}
+
 ```
 
 ## Introduction
@@ -41,6 +48,13 @@ Axis break or a so call gap plot is useful for large datasets that are not norma
 
 
 This package provides several scale functions to break down a 'gg' plot into pieces and align them together with (gap plot) or without (wrap plot or cut plot) ignoring subplots. Our methods are fully compatible with `ggplot2`, so that users can still use the `+` operator to add geometric layers after creating a broken axis.
+
+
+
+If you use `r CRANpkg('ggbreak')` in published research, please cite the following paper:
+
++ S Xu<sup>#</sup>, M Chen<sup>#</sup>, T Feng, L Zhan, L Zhou, __G Yu__<sup>\*</sup>. Use ggbreak to effectively utilize plotting space to deal with large datasets and outliers. __*Frontiers in Genetics*__. 2021, 12:774846. doi: [10.3389/fgene.2021.774846](https://www.frontiersin.org/articles/10.3389/fgene.2021.774846)
+
 
 ## Gap plot
 
