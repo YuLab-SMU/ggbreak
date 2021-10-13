@@ -32,7 +32,7 @@ School of Basic Medical Sciences, Southern Medical University
 If you use `ggbreak` in published research, please cite the following paper:
 
 + S Xu<sup>#</sup>, M Chen<sup>#</sup>, T Feng, L Zhan, L Zhou, __G Yu__<sup>\*</sup>. Use ggbreak to effectively utilize plotting space to deal with large datasets and outliers. __*Frontiers in Genetics*__. 2021, 12:774846. doi: [10.3389/fgene.2021.774846](https://www.frontiersin.org/articles/10.3389/fgene.2021.774846)
-
+    - Supplemental file: <https://github.com/YuLab-SMU/supplemental-ggbreak>.
 
 ## :arrow_double_down: Installation
 

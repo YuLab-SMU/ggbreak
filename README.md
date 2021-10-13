@@ -31,6 +31,8 @@ paper:
     to deal with large datasets and outliers. ***Frontiers in
     Genetics***. 2021, 12:774846. doi:
     [10.3389/fgene.2021.774846](https://www.frontiersin.org/articles/10.3389/fgene.2021.774846)
+    -   Supplemental file:
+        <https://github.com/YuLab-SMU/supplemental-ggbreak>.
 
 ## :arrow_double_down: Installation
 
