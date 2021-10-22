@@ -133,15 +133,24 @@ extract_axis_break <- function(object){
     if (inherits(object, "ggbreak_params")){
         axis <- object$axis
         breaks <- object$breaks
+        expand <- object$expand
         scales <- object$scales
         ticklabs <- object$ticklabels
     }else{
         axis <- object[[1]]$axis
+        expand <- object[[length(object)]]$expand
         breaks <- lapply(object, function(i)i$breaks)
         scales <- lapply(object, function(i)i$scales) 
         ticklabs <- lapply(object, function(i)i$ticklabels)
     }
-    return(list(axis=axis, breaks=breaks, scales=scales, ticklabs=ticklabs))
+    return(list(
+                axis = axis, 
+                breaks = breaks, 
+                expand = expand, 
+                scales = scales, 
+                ticklabs = ticklabs
+               )
+    )
 }
 
 compute_ggcut_breaks_relrange <- function(ggcut_params, rngrev){
