@@ -5,9 +5,9 @@
 \alias{scale_y_cut}
 \title{scale_x_cut}
 \usage{
-scale_x_cut(breaks, which = NULL, scales = NULL)
+scale_x_cut(breaks, which = NULL, scales = NULL, expand = FALSE)
 
-scale_y_cut(breaks, which = NULL, scales = NULL)
+scale_y_cut(breaks, which = NULL, scales = NULL, expand = FALSE)
 }
 \arguments{
 \item{breaks}{a numeric or numeric vector, the points to be divided}
@@ -15,6 +15,14 @@ scale_y_cut(breaks, which = NULL, scales = NULL)
 \item{which}{integer, the position of subplots to scales, started from left to right or top to bottom.}
 
 \item{scales}{numeric, relative width or height of subplots.}
+
+\item{expand}{default is FALSE, logical a vector of range expansion constants
+used to add some padding around the data to ensure that they
+are placed some distance away from the axes. Use the convenience
+function \code{expansion()} of \code{ggplot2} to generate the values for
+the \code{expand} argument. The defaults are to expand the scale
+by 5\% on each side for continuous variables. If it is logical, the \code{TRUE} means
+the default of \code{ggplot2} (foregoing statement), and \code{FALSE} means no expand for the plot.}
 }
 \value{
 gg object

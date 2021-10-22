@@ -9,11 +9,18 @@
 ##' equal width or height. It also can be any number to set 
 ##' relative width or height compare to first subplot.
 ##' @param ticklabels the axis labels to subplot, default is NULL.
+##' @param expand default is TRUE, logical or a vector of range expansion constants
+##' used to add some padding around the data to ensure that they
+##' are placed some distance away from the axes. Use the convenience 
+##' function \code{expansion()} of \code{ggplot2} to generate the values for
+##' the \code{expand} argument. The defaults are to expand the scale
+##' by 5% on each side for continuous variables. If it is logical, the \code{TRUE} means
+##' the default of \code{ggplot2} (foregoing statement), and \code{FALSE} means no expand for the plot.
 ##' @return gg object
 ##' @export
 ##' @author Guangchuang Yu
-scale_x_break <- function(breaks, scales="fixed", ticklabels=NULL) {
-    scale_break('x', breaks, scales, ticklabels)
+scale_x_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE) {
+    scale_break('x', breaks, scales, ticklabels, expand)
 }
 
 ##' @title scale_y_break
@@ -30,12 +37,12 @@ scale_x_break <- function(breaks, scales="fixed", ticklabels=NULL) {
 ##' p <- ggplot(d, aes(x, y)) + geom_col()
 ##' x <- p+scale_y_break(c(7, 17 ) )
 ##' print(x)
-scale_y_break <- function(breaks, scales="fixed", ticklabels=NULL) {
-    scale_break('y', breaks, scales, ticklabels)
+scale_y_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE) {
+    scale_break('y', breaks, scales, ticklabels, expand)
 }
 
-scale_break <- function(axis, breaks, scales, ticklabels=NULL) {
-    structure(list(axis = axis, breaks = breaks, scales=scales, ticklabels=ticklabels),
+scale_break <- function(axis, breaks, scales, ticklabels=NULL, expand=TRUE) {
+    structure(list(axis = axis, breaks = breaks, scales=scales, ticklabels=ticklabels, expand = expand),
               class = "ggbreak_params")
 }
 
@@ -52,7 +59,7 @@ scale_break <- function(axis, breaks, scales, ticklabels=NULL) {
 #'      geom_line()
 #' p + scale_wrap(n=4)
 scale_wrap <- function(n){
-    structure(list(n = n), 
+    structure(list(n = n, expand = FALSE), 
               class = "wrap_params")
 }
 
@@ -61,15 +68,23 @@ scale_wrap <- function(n){
 #' @param breaks a numeric or numeric vector, the points to be divided
 #' @param which integer, the position of subplots to scales, started from left to right or top to bottom.
 #' @param scales numeric, relative width or height of subplots.
+#' @param expand default is FALSE, logical a vector of range expansion constants
+#' used to add some padding around the data to ensure that they
+#' are placed some distance away from the axes. Use the convenience
+#' function \code{expansion()} of \code{ggplot2} to generate the values for
+#' the \code{expand} argument. The defaults are to expand the scale
+#' by 5% on each side for continuous variables. If it is logical, the \code{TRUE} means
+#' the default of \code{ggplot2} (foregoing statement), and \code{FALSE} means no expand for the plot.
 #' @rdname scale_cut
 #' @return gg object
 #' @export
-scale_x_cut <- function(breaks, which=NULL, scales=NULL){
+scale_x_cut <- function(breaks, which=NULL, scales=NULL, expand = FALSE){
     scale_cut(
         axis = "x",
         breaks = breaks,
         which = which,
-        scales = scales
+        scales = scales,
+        expand = expand
     )
 }
 
@@ -86,20 +101,23 @@ scale_x_cut <- function(breaks, which=NULL, scales=NULL){
 #'  )
 #' p <- ggplot(d, aes(x, y)) + geom_col()
 #' p + scale_y_cut(breaks=c(7, 18), which=c(1, 3), scales=c(3, 0.5))
-scale_y_cut <- function(breaks, which=NULL, scales=NULL){
+scale_y_cut <- function(breaks, which=NULL, scales=NULL, expand = FALSE){
     scale_cut(
         axis = "y",
         breaks = breaks,
         which = which,
-        scales = scales
+        scales = scales,
+        expand = expand
     )
 
 }
 
-scale_cut <- function(axis, breaks, which=NULL, scales=NULL){
+scale_cut <- function(axis, breaks, which=NULL, scales=NULL, expand = FALSE){
     structure(list(axis = axis, 
                    breaks = breaks, 
                    which = which, 
-                   scales = scales),
+                   scales = scales,
+                   expand = expand
+                   ),
     class = "ggcut_params")
 }
