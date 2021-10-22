@@ -115,16 +115,21 @@ check_xy_intercept <- function(plot){
 }
 
 add_expand <- function(plot, expand, axis){
-   if (!is.numeric(expand) && expand){
-       return (plot)
-   }
-   if (!is.numeric(expand) && !expand){
-       expand <- c(0, 0)
-   }
+   expand <- convert_expand(expand=expand)
    var <- paste0("panel_scales_", axis)
    gb <- ggplot_build(plot)
    scales_axis_obj <- gb$layout[[var]][[1]]
    scales_axis_obj$expand <- expand
-   plot <- plot + scales_axis_obj
+   plot <- suppressMessages(plot + scales_axis_obj)
    return(plot)
+}
+
+convert_expand <- function(expand){
+   if (!is.numeric(expand) && !expand){
+       expand <- c(0, 0)
+   }
+   if (!is.numeric(expand) && expand){
+       expand <- ggplot2::waiver()
+   }
+   return(expand)
 }
