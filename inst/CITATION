@@ -1,4 +1,4 @@
-citHeader("To cite treeio in publications use:")
+citHeader("To cite ggbreak in publications use:")
 
 citEntry(
     entry  = "article",
