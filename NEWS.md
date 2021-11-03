@@ -1,4 +1,4 @@
-# ggbreak 0.0.6.901
+# ggbreak 0.0.7
 
 + introduce `expand` argument (2021-10-22, Fri, #30)
 + add citation (2021-10-13, Wed)
