@@ -255,3 +255,9 @@ p + scale_y_cut(breaks=c(7, 18), which=c(1, 3), scales=c(3, 0.5))
 
 The features we introduced for `scale_x_break` and `scale_y_break` also work for `scale_wrap`, `scale_x_cut` and `scale_y_cut`.
 
+## FAQ
+
+1. Incompatible with functions that arrange multiple plots
+
+You can use `aplot::plot_list()` to arrange `ggbreak` objects with other `ggplot` objects. For other functions, such as `cowplot::plot_grid()` and `gridExtra::grid.arrange()`, you need to explictly call `print()` to `ggbreak` object, see also <https://github.com/YuLab-SMU/ggbreak/issues/36>.
+
