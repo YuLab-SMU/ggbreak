@@ -261,3 +261,5 @@ The features we introduced for `scale_x_break` and `scale_y_break` also work for
 
 You can use `aplot::plot_list()` to arrange `ggbreak` objects with other `ggplot` objects. For other functions, such as `cowplot::plot_grid()` and `gridExtra::grid.arrange()`, you need to explictly call `print()` to `ggbreak` object, see also <https://github.com/YuLab-SMU/ggbreak/issues/36>.
 
+Using `print()` is a secret magic to make `ggbreak` compatible with other packages, including [export](https://github.com/YuLab-SMU/ggbreak/issues/37). 
+
