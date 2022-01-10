@@ -136,8 +136,10 @@ extract_axis_break <- function(object){
         expand <- object$expand
         scales <- object$scales
         ticklabs <- object$ticklabels
+        space <- object$space
     }else{
         axis <- object[[1]]$axis
+        space <- object[[1]]$space
         expand <- object[[length(object)]]$expand
         breaks <- lapply(object, function(i)i$breaks)
         scales <- lapply(object, function(i)i$scales) 
@@ -145,6 +147,7 @@ extract_axis_break <- function(object){
     }
     return(list(
                 axis = axis, 
+                space = space,
                 breaks = breaks, 
                 expand = expand, 
                 scales = scales, 

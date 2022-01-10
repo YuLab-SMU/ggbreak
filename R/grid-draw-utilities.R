@@ -1,15 +1,18 @@
-subplot_theme <- function(plot, axis, type){
+subplot_theme <- function(plot, axis, type, margin = .2, rev){
     type <- check_strip_pos(plot=plot, type=type)
     axis <- check_theme_coflip(plot=plot, axis=axis)
     te <- switch(type,
-                 first = strip_theme(plot=plot, axis=axis),
+                 first = strip_theme(plot=plot, axis=axis) +
+                         first_margin_theme(axis = axis, margin = margin, rev=rev),
                  other = axis_theme(plot=plot, axis=axis) + 
-                         strip_theme(plot, axis=axis),
-                 last = axis_theme(plot=plot, axis=axis),
+                         strip_theme(plot, axis=axis) +
+                         other_margin_theme(axis = axis, margin = margin),
+                 last = axis_theme(plot=plot, axis = axis) +
+                        last_margin_theme(axis = axis, margin = margin, rev=rev),
                  #internalfirst = axis_theme(plot=plot, axis=axis) + 
                  #    strip_theme(plot=plot, axis=axis),
                  internallast = list()) 
-    te <- te + theme_no_margin()
+    #te <- te + theme_no_margin()
     return(te)
 }
 
@@ -33,6 +36,43 @@ strip_theme <- function(plot, axis){
                                 strip.text.x=element_blank())
                 )
     return(sp_theme)
+}
+
+#' @importFrom ggplot2 margin
+first_margin_theme <- function(axis, margin, rev){
+    if (rev == "reverse"){
+      fmg_theme <- switch(axis,
+        x = theme(plot.margin = margin(l = margin/2, unit = "cm")),
+        y = theme(plot.margin = margin(b = margin/2, unit = "cm")),
+      )
+    }else{
+      fmg_theme <- switch(axis,
+        x = theme(plot.margin = margin(r = margin/2, unit = "cm")),
+        y = theme(plot.margin = margin(t = margin/2, unit = "cm"))
+      )
+    }
+    return (fmg_theme)
+}
+
+other_margin_theme <- function(axis, margin){
+    mg_theme <- switch(axis,
+      x = theme(plot.margin = margin(r = margin/2, l = margin/2, unit = "cm")),
+      y = theme(plot.margin = margin(t = margin/2, b = margin/2, unit = "cm"))
+    )
+}
+
+last_margin_theme <- function(axis, margin, rev){
+    if (rev == "reverse"){
+      lmg_theme <- switch(axis,
+        x = theme(plot.margin = margin(r=margin/2, unit = "cm")),
+        y = theme(plot.margin = margin(t=margin/2, unit = "cm"))
+      )
+    }else{
+      lmg_theme <- switch(axis,
+        x = theme(plot.margin = margin(l = margin/2, unit = "cm")),
+        y = theme(plot.margin = margin(b = margin/2, unit = "cm"))
+      )
+    }
 }
 
 check_strip_pos <- function(plot, type){
