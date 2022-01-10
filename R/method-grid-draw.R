@@ -18,6 +18,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     axis_break <- attr(x, 'axis_break')
     axis_breaks <- extract_axis_break(object=axis_break)
     axis <- axis_breaks$axis
+    margin <- axis_breaks$space
     breaks <- axis_breaks$breaks
     expand <- axis_breaks$expand
     scales <- axis_breaks$scales
@@ -33,9 +34,9 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         x$labels[names(totallabs)] <- NULL
     }
     nbreaks <- length(breaks)
-    subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first")
-    subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other")
-    subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last")
+    subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first", margin = margin, rev = rng$flagrev)
+    subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other", margin = margin, rev = rng$flagrev)
+    subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last", margin = margin, rev = rng$flagrev)
     coord_fun <- check_coord_flip(plot=x) 
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
@@ -220,6 +221,7 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     x <- check_xy_intercept(plot=x)
     axis_cut <- attr(x, "axis_cut")
     axis <- axis_cut$axis
+    margin <- axis_cut$space
     expand <- axis_cut$expand
     totallabs <- extract_totallabs(plot=x)
     if (length(totallabs) > 0){
@@ -231,9 +233,9 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     relrange <- breaks_relrange$relrange
 
     nbreaks <- length(breaks)
-    subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first")
-    subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other")
-    subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last")
+    subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first", margin = margin, rev = rngrev$flagrev)
+    subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other", margin = margin, rev = rngrev$flagrev)
+    subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last", margin = margin, rev = rngrev$flagrev)
     coord_fun <- check_coord_flip(plot=x)
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)

@@ -16,11 +16,12 @@
 ##' the \code{expand} argument. The defaults are to expand the scale
 ##' by 5% on each side for continuous variables. If it is logical, the \code{TRUE} means
 ##' the default of \code{ggplot2} (foregoing statement), and \code{FALSE} means no expand for the plot.
+##' @param space the blank space among the subplots after break, default is 0.1 (cm).
 ##' @return gg object
 ##' @export
 ##' @author Guangchuang Yu
-scale_x_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE) {
-    scale_break('x', breaks, scales, ticklabels, expand)
+scale_x_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, space = 0.1) {
+    scale_break('x', breaks, scales, ticklabels, expand, space)
 }
 
 ##' @title scale_y_break
@@ -37,12 +38,13 @@ scale_x_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE) 
 ##' p <- ggplot(d, aes(x, y)) + geom_col()
 ##' x <- p+scale_y_break(c(7, 17 ) )
 ##' print(x)
-scale_y_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE) {
-    scale_break('y', breaks, scales, ticklabels, expand)
+scale_y_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, space = .1) {
+    scale_break('y', breaks, scales, ticklabels, expand, space)
 }
 
-scale_break <- function(axis, breaks, scales, ticklabels=NULL, expand=TRUE) {
-    structure(list(axis = axis, breaks = breaks, scales=scales, ticklabels=ticklabels, expand = expand),
+scale_break <- function(axis, breaks, scales, ticklabels=NULL, expand=TRUE, space = .1) {
+    structure(list(axis = axis, breaks = breaks, scales=scales, 
+                   ticklabels=ticklabels, expand = expand, space = space),
               class = "ggbreak_params")
 }
 
@@ -75,16 +77,18 @@ scale_wrap <- function(n){
 #' the \code{expand} argument. The defaults are to expand the scale
 #' by 5% on each side for continuous variables. If it is logical, the \code{TRUE} means
 #' the default of \code{ggplot2} (foregoing statement), and \code{FALSE} means no expand for the plot.
+#' @param space the blank space among the subplots after cut, default is 0.1 (cm). 
 #' @rdname scale_cut
 #' @return gg object
 #' @export
-scale_x_cut <- function(breaks, which=NULL, scales=NULL, expand = FALSE){
+scale_x_cut <- function(breaks, which=NULL, scales=NULL, expand = FALSE, space = .1){
     scale_cut(
         axis = "x",
         breaks = breaks,
         which = which,
         scales = scales,
-        expand = expand
+        expand = expand,
+        space = space
     )
 }
 
@@ -101,23 +105,25 @@ scale_x_cut <- function(breaks, which=NULL, scales=NULL, expand = FALSE){
 #'  )
 #' p <- ggplot(d, aes(x, y)) + geom_col()
 #' p + scale_y_cut(breaks=c(7, 18), which=c(1, 3), scales=c(3, 0.5))
-scale_y_cut <- function(breaks, which=NULL, scales=NULL, expand = FALSE){
+scale_y_cut <- function(breaks, which=NULL, scales=NULL, expand = FALSE, space = .1){
     scale_cut(
         axis = "y",
         breaks = breaks,
         which = which,
         scales = scales,
-        expand = expand
+        expand = expand,
+        space = space
     )
 
 }
 
-scale_cut <- function(axis, breaks, which=NULL, scales=NULL, expand = FALSE){
+scale_cut <- function(axis, breaks, which=NULL, scales=NULL, expand = FALSE, space = .1){
     structure(list(axis = axis, 
                    breaks = breaks, 
                    which = which, 
                    scales = scales,
-                   expand = expand
+                   expand = expand,
+                   space = space
                    ),
     class = "ggcut_params")
 }

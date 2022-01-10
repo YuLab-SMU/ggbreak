@@ -5,9 +5,21 @@
 \alias{scale_y_break}
 \title{scale_x_break}
 \usage{
-scale_x_break(breaks, scales = "fixed", ticklabels = NULL, expand = TRUE)
+scale_x_break(
+  breaks,
+  scales = "fixed",
+  ticklabels = NULL,
+  expand = TRUE,
+  space = 0.1
+)
 
-scale_y_break(breaks, scales = "fixed", ticklabels = NULL, expand = TRUE)
+scale_y_break(
+  breaks,
+  scales = "fixed",
+  ticklabels = NULL,
+  expand = TRUE,
+  space = 0.1
+)
 }
 \arguments{
 \item{breaks}{break point}
@@ -26,6 +38,8 @@ function \code{expansion()} of \code{ggplot2} to generate the values for
 the \code{expand} argument. The defaults are to expand the scale
 by 5\% on each side for continuous variables. If it is logical, the \code{TRUE} means
 the default of \code{ggplot2} (foregoing statement), and \code{FALSE} means no expand for the plot.}
+
+\item{space}{the blank space among the subplots after break, default is 0.1 (cm).}
 }
 \value{
 gg object
