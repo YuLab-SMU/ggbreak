@@ -1,3 +1,7 @@
+# ggbreak 0.0.8
+
++ introduce `space` argument (2022-01-11, Tue)
+
 # ggbreak 0.0.7
 
 + introduce `expand` argument (2021-10-22, Fri, #30)
