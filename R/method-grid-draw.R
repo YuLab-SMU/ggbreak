@@ -38,8 +38,6 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other", margin = margin, rev = rng$flagrev)
     subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last", margin = margin, rev = rng$flagrev)
     coord_fun <- check_coord_flip(plot=x) 
-    newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
-    newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
     relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng)
     legendpos <- check_legend_position(plot=x)
     if (!rng$flagrev %in% c("identity","reverse")){
@@ -50,14 +48,25 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     }else{
         scaleind <- NULL
     }
-    #expand <- getOption(x="scale_xy_expand", default = FALSE)
     expand <- convert_expand(expand=expand)
     if (!is.null(scaleind)){
         x$scales$scales[[scaleind]]$expand <- expand
+        if (!inherits(x$scales$scales[[scaleind]]$name, "waiver")){
+            axis.title <- x$scales$scales[[scaleind]]$name
+            x$scales$scales[[scaleind]]$name <- ggplot2::waiver()
+        }
+        if (!inherits(x$scales$scales[[scaleind]]$secondary.axis$name, "waiver")){
+            axis.sec.title <- x$scales$scales[[scaleind]]$secondary.axis$name
+            x$scales$scales[[scaleind]]$secondary.axis$name <- ggplot2::waiver()
+        }
     }else{
         scale_axis <- switch(axis, x=scale_x_continuous, y=scale_y_continuous)
         x <- suppressMessages(x + do.call(scale_axis, list(expand=expand)))
+        axis.title <- NULL
+        axis.sec.title <- NULL
     }
+    newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
+    newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
     if(axis == 'x') {
         p1 <- suppressMessages(x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1)
 
@@ -173,7 +182,16 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     totallabs$x <- NULL
     totallabs$y <- NULL
     g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
+    
+    g <- check_axis_title(
+            plot = g, 
+            axis = axis, 
+            axis.title = axis.title, 
+            axis.sec.title = axis.sec.title
+         )
+
     g <- set_label(g, totallabs = totallabs, p2 = x)
+    
     if (recording){
         print(g)
     }

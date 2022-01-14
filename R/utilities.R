@@ -40,7 +40,9 @@ set_label <- function(p, totallabs, p2 = NULL) {
     } else {
         x <- NULL
     }
-    labs_params <- c("text", "title", "axis.title", "axis.title.x","axis.title.y", 
+    labs_params <- c("text", "title", "axis.title", 
+                     "axis.title.x", "axis.title.x.top", "axis.title.x.bottom",
+                     "axis.title.y", "axis.title.y.left", "axis.title.y.right",
                      "plot.title", "plot.title.position", "plot.subtitle",
                      "plot.caption", "plot.caption.position", "plot.tag", "plot.tag.position")
     p <- p + 
@@ -214,6 +216,25 @@ list.add <- function(obj, ...){
     }
 }
 
+check_axis_title <- function(plot, axis, axis.title, axis.sec.title){
+    if (!is.null(axis.sec.title)){
+        if (axis == "x"){
+            plot <- plot + ggplot2::guides(x.sec = ggplot2::guide_axis(title=axis.sec.title))
+        }
+        if (axis == "y"){
+            plot <- plot + ggplot2::guides(y.sec = ggplot2::guide_axis(title=axis.sec.title))
+        }
+    }
+    if (!is.null(axis.title)){
+        if (axis == "x"){
+            plot <- plot + ggplot2::guides(x = ggplot2::guide_axis(title=axis.title))
+        }
+        if (axis == "y"){
+            plot <- plot + ggplot2::guides(y = ggplot2::guide_axis(title=axis.title))
+        }
+    }
+    return (plot)
+}
 
 numeric2Date <- function(x) {
     as.Date(x, origin="1970-01-01")
