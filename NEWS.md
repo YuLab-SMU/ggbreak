@@ -1,3 +1,7 @@
+# ggbreak 0.0.8.900
+
++ support double axes (2022-01-16, Sun, #40)
+
 # ggbreak 0.0.8
 
 + introduce `space` argument (2022-01-11, Tue)
