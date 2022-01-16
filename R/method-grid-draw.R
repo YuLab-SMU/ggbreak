@@ -53,11 +53,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         x$scales$scales[[scaleind]]$expand <- expand
         if (!inherits(x$scales$scales[[scaleind]]$name, "waiver")){
             axis.title <- x$scales$scales[[scaleind]]$name
-            x$scales$scales[[scaleind]]$name <- ggplot2::waiver()
+            x <- remove_axis_title(x, axis, coord_fun)
         }
         if (!inherits(x$scales$scales[[scaleind]]$secondary.axis$name, "waiver")){
             axis.sec.title <- x$scales$scales[[scaleind]]$secondary.axis$name
-            x$scales$scales[[scaleind]]$secondary.axis$name <- ggplot2::waiver()
+            x <- remove_axis_title(x, axis, coord_fun, second = TRUE)
         }
     }else{
         scale_axis <- switch(axis, x=scale_x_continuous, y=scale_y_continuous)
@@ -186,6 +186,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     g <- check_axis_title(
             plot = g, 
             axis = axis, 
+            coord_fun = coord_fun,
             axis.title = axis.title, 
             axis.sec.title = axis.sec.title
          )

@@ -216,7 +216,30 @@ list.add <- function(obj, ...){
     }
 }
 
-check_axis_title <- function(plot, axis, axis.title, axis.sec.title){
+remove_axis_title <- function(plot, axis, coord_fun, second = FALSE){
+    axis <- switch(coord_fun,
+                   coord_flip = setdiff(c("x", "y"), axis),
+                   coord_cartesian = intersect(c("x", "y"), axis))    
+    if (axis == "x"){
+        if (second){
+            plot <- plot + ggplot2::guides(x.sec = ggplot2::guide_axis(title = NULL))
+        }else{
+            plot <- plot + ggplot2::guides(x = ggplot2::guide_axis(title = NULL))
+        }
+    }else if (axis == "y"){
+        if (second){
+            plot <- plot + ggplot2::guides(y.sec = ggplot2::guide_axis(title = NULL))
+        }else{
+            plot <- plot + ggplot2::guides(y = ggplot2::guide_axis(title = NULL))
+        }
+    }
+    return(plot)
+}
+
+check_axis_title <- function(plot, axis, coord_fun, axis.title, axis.sec.title){
+    axis <- switch(coord_fun, 
+                   coord_flip = setdiff(c("x", "y"), axis), 
+                   coord_cartesian = intersect(c("x", "y"), axis))
     if (!is.null(axis.sec.title)){
         if (axis == "x"){
             plot <- plot + ggplot2::guides(x.sec = ggplot2::guide_axis(title=axis.sec.title))
