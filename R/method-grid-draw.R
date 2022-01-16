@@ -213,13 +213,17 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
     expand <- axis_wrap$expand
     rngrev <- ggrange2(plot=x, 'x')
     rng <- rngrev$axis_range
-    if (rngrev$flagrev == "reverse"){
+    if (is.null(rngrev$flagrev)){
+        rng <- c(.5, length(rng))
+    }else if (rngrev$flagrev == "reverse"){
         rng <- rev(-1 * (rng))
     }
     breaks <- seq(rng[1], rng[2], length.out=nstep + 1)
-    if (!rngrev$flagrev %in% c("identity", "reverse")){
+    if (is.null(rngrev$flagrev)) {
+        breaks <- round(breaks, 0) + .5
+    } else if (!rngrev$flagrev %in% c("identity", "reverse")){
         breaks <- rngrev$inversefun(breaks)
-    }
+    } 
     x <- add_expand(plot = x, expand = expand, axis = "x")
     legendpos <- check_legend_position(plot=x)
     gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
