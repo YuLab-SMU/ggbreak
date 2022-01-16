@@ -1,5 +1,6 @@
 # ggbreak 0.0.8.900
 
++ `scale_wrap()` supports using categorical variable as x-axis (2022-01-16, Sun, #41)
 + support double axes (2022-01-16, Sun, #40)
 
 # ggbreak 0.0.8
