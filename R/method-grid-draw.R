@@ -54,10 +54,14 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         if (!inherits(x$scales$scales[[scaleind]]$name, "waiver")){
             axis.title <- x$scales$scales[[scaleind]]$name
             x <- remove_axis_title(x, axis, coord_fun)
+        }else{
+            axis.title <- NULL
         }
         if (!inherits(x$scales$scales[[scaleind]]$secondary.axis$name, "waiver")){
             axis.sec.title <- x$scales$scales[[scaleind]]$secondary.axis$name
             x <- remove_axis_title(x, axis, coord_fun, second = TRUE)
+        }else{
+            axis.sec.title <- NULL
         }
     }else{
         scale_axis <- switch(axis, x=scale_x_continuous, y=scale_y_continuous)
@@ -223,7 +227,7 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
         breaks <- round(breaks, 0) + .5
     } else if (!rngrev$flagrev %in% c("identity", "reverse")){
         breaks <- rngrev$inversefun(breaks)
-    } 
+    }
     x <- add_expand(plot = x, expand = expand, axis = "x")
     legendpos <- check_legend_position(plot=x)
     gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
