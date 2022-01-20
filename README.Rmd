@@ -48,7 +48,7 @@ install.packages("ggbreak")
 Or the development version from github:
 
 ```r
-remotes::install_github("GuangchuangYu/ggbreak")
+remotes::install_github("YuLab-SMU/ggbreak")
 ```
 
 ## :u6307: Vignette
