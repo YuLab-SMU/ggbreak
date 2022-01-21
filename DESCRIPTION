@@ -18,7 +18,8 @@ Suggests:
   knitr,
   prettydoc,
   rmarkdown,
-  patchwork
+  patchwork,
+  pillar
 VignetteBuilder: knitr
 License: Artistic-2.0
 Encoding: UTF-8

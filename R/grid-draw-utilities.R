@@ -145,12 +145,10 @@ is_numeric <- function(x) {
 }
 
 check_xy_intercept <- function(plot){
-    if ("yintercept" %in% plot$labels){
-        plot$labels$yintercept <- NULL
-    }
-    if ("xintercept" %in% plot$labels){
-        plot$labels$xintercept <- NULL
-    }
+    confuse_xy_labs <- c("xend", "xmax", "xmin", "xintercept", 
+                         "yend", "ymax", "ymin", "yintercept")
+    index <- which(names(plot$labels) %in% confuse_xy_labs)
+    plot$labels[index] <- NULL
     return (plot)
 }
 
