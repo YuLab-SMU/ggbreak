@@ -2,7 +2,7 @@
 
 # ggbreak: set axis breaks for ‘ggplot2’
 
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/ggbreak?color=green)](https://cran.r-project.org/package=ggbreak)
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/ggbreak?color=green)](https://cran.r-project.org/package=ggbreak)
 ![](http://cranlogs.r-pkg.org/badges/grand-total/ggbreak?color=green)
 ![](http://cranlogs.r-pkg.org/badges/ggbreak?color=green)
 ![](http://cranlogs.r-pkg.org/badges/last-week/ggbreak?color=green)
@@ -10,7 +10,7 @@
 An implementation of scale functions for setting axis breaks of a ‘gg’
 plot.
 
-## :writing_hand: Authors
+## :writing\_hand: Authors
 
 Guangchuang YU & Shuangbin XU
 
@@ -26,7 +26,7 @@ School of Basic Medical Sciences, Southern Medical University
 If you use `ggbreak` in published research, please cite the following
 paper:
 
--   S Xu<sup>#</sup>, M Chen<sup>#</sup>, T Feng, L Zhan, L Zhou, **G
+-   S Xu<sup>\#</sup>, M Chen<sup>\#</sup>, T Feng, L Zhan, L Zhou, **G
     Yu**<sup>\*</sup>. Use ggbreak to effectively utilize plotting space
     to deal with large datasets and outliers. ***Frontiers in
     Genetics***. 2021, 12:774846. doi:
@@ -34,7 +34,7 @@ paper:
     -   Supplemental file:
         <https://github.com/YuLab-SMU/supplemental-ggbreak>.
 
-## :arrow_double_down: Installation
+## :arrow\_double\_down: Installation
 
 Get the released version from CRAN:
 
@@ -45,7 +45,7 @@ install.packages("ggbreak")
 Or the development version from github:
 
 ``` r
-remotes::install_github("GuangchuangYu/ggbreak")
+remotes::install_github("YuLab-SMU/ggbreak")
 ```
 
 ## :u6307: Vignette
