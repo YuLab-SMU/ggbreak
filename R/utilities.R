@@ -259,6 +259,25 @@ check_axis_title <- function(plot, axis, coord_fun, axis.title, axis.sec.title){
     return (plot)
 }
 
+split_discrete_range <- function(x, n){
+    if (n >= 2){
+        l <- max(table(cut(seq_along(x), n, label=FALSE)))
+    }else{
+        l <- length(x)
+    }
+    x <- split(x, ceiling(seq_along(x)/l))
+    return(x)
+}
+
+split_discrete_scale <- function(limits, plot, axis='x'){
+   var <- paste0("panel_scales_", axis)
+   gb <- ggplot_build(plot)
+   scales_axis_obj <- gb$layout[[var]][[1]]
+   scales_axis_obj$limits <- limits
+   plot <- plot + scales_axis_obj
+   return(plot)
+}
+
 numeric2Date <- function(x) {
     as.Date(x, origin="1970-01-01")
 }

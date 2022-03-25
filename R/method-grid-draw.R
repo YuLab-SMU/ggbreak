@@ -217,20 +217,22 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
     expand <- axis_wrap$expand
     rngrev <- ggrange2(plot=x, 'x')
     rng <- rngrev$axis_range
-    if (is.null(rngrev$flagrev)){
-        rng <- c(.5, length(rng))
-    }else if (rngrev$flagrev == "reverse"){
+    if (!is.null(rngrev$flagrev) && rngrev$flagrev == "reverse"){
         rng <- rev(-1 * (rng))
     }
-    breaks <- seq(rng[1], rng[2], length.out=nstep + 1)
-    if (is.null(rngrev$flagrev)) {
-        breaks <- round(breaks, 0) + .5
-    } else if (!rngrev$flagrev %in% c("identity", "reverse")){
-        breaks <- rngrev$inversefun(breaks)
+    
+    if (!is.null(rngrev$flagrev)) {
+        breaks <- seq(rng[1], rng[2], length.out=nstep + 1)
+        if (!rngrev$flagrev %in% c("identity", "reverse")){
+            breaks <- rngrev$inversefun(breaks)
+        }
+        x <- add_expand(plot = x, expand = expand, axis = "x")
+        gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
+    }else{
+        limits <- split_discrete_range(x = rng, n = nstep) 
+        gg <- lapply(limits, split_discrete_scale, plot=x, axis='x')
     }
-    x <- add_expand(plot = x, expand = expand, axis = "x")
     legendpos <- check_legend_position(plot=x)
-    gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
     pg <- plot_list(gglist=setNames(gg, NULL), ncol=1, guides="collect") & legendpos
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
     if (recording){

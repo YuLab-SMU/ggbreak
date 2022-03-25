@@ -158,7 +158,7 @@ add_expand <- function(plot, expand, axis){
    gb <- ggplot_build(plot)
    scales_axis_obj <- gb$layout[[var]][[1]]
    scales_axis_obj$expand <- expand
-   plot <- suppressMessages(plot + scales_axis_obj)
+   plot <- suppressWarnings(plot + scales_axis_obj)
    return(plot)
 }
 
