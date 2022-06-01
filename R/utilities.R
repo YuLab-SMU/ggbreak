@@ -236,10 +236,14 @@ remove_axis_title <- function(plot, axis, coord_fun, second = FALSE){
     return(plot)
 }
 
-check_axis_title <- function(plot, axis, coord_fun, axis.title, axis.sec.title){
+check_axis_title <- function(plot, axis, coord_fun, axis.title, axis.sec.title, another.axis){
+    if (another.axis){
+        axis <- setdiff(c('x','y'), axis)
+    }
+        
     axis <- switch(coord_fun, 
                    coord_flip = setdiff(c("x", "y"), axis), 
-                   coord_cartesian = intersect(c("x", "y"), axis))
+                   coord_cartesian = axis)
     if (!is.null(axis.sec.title)){
         if (axis == "x"){
             plot <- plot + ggplot2::guides(x.sec = ggplot2::guide_axis(title=axis.sec.title))
@@ -258,6 +262,16 @@ check_axis_title <- function(plot, axis, coord_fun, axis.title, axis.sec.title){
     }
     return (plot)
 }
+
+find_scale_index <- function(plot, aesthetic){
+    if (plot$scales$has_scale(aesthetic)){
+        scaleind <- which(plot$scales$find(aesthetic))
+    }else{
+        scaleind <- NULL
+    }
+    return(scaleind)
+}
+
 
 split_discrete_range <- function(x, n){
     if (n >= 2){
