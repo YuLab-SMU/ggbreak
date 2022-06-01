@@ -43,12 +43,9 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     if (!rng$flagrev %in% c("identity","reverse")){
         breaks <- lapply(breaks, function(i)rng$inversefun(i))
     }
-    if (x$scales$has_scale(axis)){
-        scaleind <- which(x$scales$find(axis))
-    }else{
-        scaleind <- NULL
-    }
+    scaleind <- find_scale_index(x, axis)
     expand <- convert_expand(expand=expand)
+    another.axis = FALSE
     if (!is.null(scaleind)){
         x$scales$scales[[scaleind]]$expand <- expand
         if (!inherits(x$scales$scales[[scaleind]]$name, "waiver")){
@@ -66,8 +63,22 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     }else{
         scale_axis <- switch(axis, x=scale_x_continuous, y=scale_y_continuous)
         x <- suppressMessages(x + do.call(scale_axis, list(expand=expand)))
-        axis.title <- NULL
-        axis.sec.title <- NULL
+        another_axis <- setdiff(c('x', 'y'), axis)
+        another_scaleind <- find_scale_index(x, another_axis)
+        if (!is.null(another_scaleind) && !inherits(x$scales$scales[[another_scaleind]]$name, "waiver")){
+            axis.title <- x$scales$scales[[another_scaleind]]$name
+            x <- remove_axis_title(x, another_axis, coord_fun)
+            another.axis = TRUE
+        }else{
+            axis.title <- NULL
+        }
+        if (!is.null(another_scaleind) && !inherits(x$scales$scales[[another_scaleind]]$secondary.axis$name, "waiver")){
+            axis.sec.title <- x$scales$scales[[another_scaleind]]$secondary.axis$name
+            x <- remove_axis_title(x, another_axis, coord_fun, second = TRUE)
+            another.axis = TRUE
+        }else{
+            axis.sec.title <- NULL
+        }
     }
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
@@ -192,7 +203,8 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
             axis = axis, 
             coord_fun = coord_fun,
             axis.title = axis.title, 
-            axis.sec.title = axis.sec.title
+            axis.sec.title = axis.sec.title,
+            another.axis = another.axis
          )
 
     g <- set_label(g, totallabs = totallabs, p2 = x)
@@ -217,20 +229,22 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
     expand <- axis_wrap$expand
     rngrev <- ggrange2(plot=x, 'x')
     rng <- rngrev$axis_range
-    if (is.null(rngrev$flagrev)){
-        rng <- c(.5, length(rng))
-    }else if (rngrev$flagrev == "reverse"){
+    if (!is.null(rngrev$flagrev) && rngrev$flagrev == "reverse"){
         rng <- rev(-1 * (rng))
     }
-    breaks <- seq(rng[1], rng[2], length.out=nstep + 1)
-    if (is.null(rngrev$flagrev)) {
-        breaks <- round(breaks, 0) + .5
-    } else if (!rngrev$flagrev %in% c("identity", "reverse")){
-        breaks <- rngrev$inversefun(breaks)
+    
+    if (!is.null(rngrev$flagrev)) {
+        breaks <- seq(rng[1], rng[2], length.out=nstep + 1)
+        if (!rngrev$flagrev %in% c("identity", "reverse")){
+            breaks <- rngrev$inversefun(breaks)
+        }
+        x <- add_expand(plot = x, expand = expand, axis = "x")
+        gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
+    }else{
+        limits <- split_discrete_range(x = rng, n = nstep) 
+        gg <- lapply(limits, split_discrete_scale, plot=x, axis='x')
     }
-    x <- add_expand(plot = x, expand = expand, axis = "x")
     legendpos <- check_legend_position(plot=x)
-    gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
     pg <- plot_list(gglist=setNames(gg, NULL), ncol=1, guides="collect") & legendpos
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
     if (recording){
