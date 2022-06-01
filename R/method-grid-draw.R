@@ -127,11 +127,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
                     coord_flip = plot_list(gglist=setNames(c(list(pp2), rev(pp1), list(p1)), NULL),
                                            ncol=1,
                                            heights=c(rev(relrange[-1]), relrange[1]),
-                                           guides = 'collect') & legendpos,
+                                           guides = 'collect', output = "patchwork") & legendpos,
                     coord_cartesian = plot_list(gglist=setNames(c(list(p1), pp1, list(pp2)), NULL), 
                                                 nrow=1, 
                                                 widths=relrange,
-                                                guides = 'collect') & legendpos
+                                                guides = 'collect', output = "patchwork") & legendpos
                     )
     } else {
         breaks <- rev(breaks)
@@ -186,11 +186,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
                     coord_flip = plot_list(gglist=setNames(c(list(p1), rev(pp1), list(pp2)), NULL), 
                                            nrow=1, 
                                            widths=relrange,
-                                           guides = 'collect') & legendpos,
+                                           guides = 'collect', output = "patchwork") & legendpos,
                     coord_cartesian = plot_list(gglist=setNames(c(list(pp2), pp1, list(p1)), NULL), 
                                                 ncol=1, 
                                                 heights=c(rev(relrange[-1]), relrange[1]),
-                                                guides = 'collect') & legendpos
+                                                guides = 'collect', output = "patchwork") & legendpos
                )
     }
 
@@ -245,7 +245,7 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
         gg <- lapply(limits, split_discrete_scale, plot=x, axis='x')
     }
     legendpos <- check_legend_position(plot=x)
-    pg <- plot_list(gglist=setNames(gg, NULL), ncol=1, guides="collect") & legendpos
+    pg <- plot_list(gglist=setNames(gg, NULL), ncol=1, guides="collect", output = "patchwork") & legendpos
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
     if (recording){
         print(g)
@@ -297,11 +297,11 @@ grid.draw.ggcut <- function(x, recording=TRUE){
                     coord_flip = plot_list(gglist=setNames(c(list(pp2), rev(pp1), list(p1)), NULL),
                                            ncol=1,
                                            heights=relrange,#c(rev(relrange[-1]), relrange[1]),
-                                           guides = 'collect') & legendpos, 
+                                           guides = 'collect', output = "patchwork") & legendpos, 
                     coord_cartesian = plot_list(gglist=setNames(c(list(p1), pp1, list(pp2)), NULL),
                                                 nrow=1,
                                                 widths=relrange,
-                                                guides = 'collect') & legendpos
+                                                guides = 'collect', output = "patchwork") & legendpos
                     )
     } else {
         breaks <- rev(breaks)
@@ -315,11 +315,11 @@ grid.draw.ggcut <- function(x, recording=TRUE){
                     coord_flip = plot_list(gglist=setNames(c(list(p1), rev(pp1), list(pp2)), NULL),
                                            nrow=1,
                                            widths=relrange,
-                                           guides = 'collect') & legendpos,
+                                           guides = 'collect', output = "patchwork") & legendpos,
                     coord_cartesian = plot_list(gglist=setNames(c(list(pp2), pp1, list(p1)), NULL),
                                                 ncol=1,
                                                 heights=relrange,#c(rev(relrange[-1]), relrange[1]),
-                                                guides = 'collect') & legendpos
+                                                guides = 'collect', output = "patchwork") & legendpos
                )
     }
     totallabs$x <- NULL

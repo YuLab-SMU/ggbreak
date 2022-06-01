@@ -1,3 +1,8 @@
+
+# ggbreak 0.1.0
+
++ fixed a bug in drawing dual axis (2022-06-01, Wed, #48, #49)
+
 # ggbreak 0.0.9
 
 + `scale_wrap()` supports using categorical variable as x-axis (2022-01-16, Sun, #41)
