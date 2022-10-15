@@ -1,6 +1,6 @@
 Package: ggbreak
 Title: Set Axis Break for 'ggplot2'
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
        person("Guangchuang", "Yu",     email = "guangchuangyu@gmail.com", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-6485-8781")),
        person("Shuangbin", "Xu",       email = "xshuangbin@163.com",      role = "aut", comment = c(ORCID="0000-0003-3513-5362"))
@@ -15,15 +15,17 @@ Imports:
   rlang,
   stats
 Suggests:
+  cowplot,
+  ggimage,
   knitr,
-  prettydoc,
-  rmarkdown,
   patchwork,
-  pillar
+  pillar,
+  prettydoc,
+  rmarkdown
 VignetteBuilder: knitr
 License: Artistic-2.0
 Encoding: UTF-8
 URL: https://github.com/YuLab-SMU/ggbreak (devel), https://www.frontiersin.org/articles/10.3389/fgene.2021.774846/full (article)
 BugReports: https://github.com/YuLab-SMU/ggbreak/issues
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1

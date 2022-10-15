@@ -1,4 +1,8 @@
 
+# ggbreak 0.1.1
+
++ update vignette with example to place legend at any position (2022-10-15, Sat)
+
 # ggbreak 0.1.0
 
 + fixed a bug in drawing dual axis (2022-06-01, Wed, #48, #49)
