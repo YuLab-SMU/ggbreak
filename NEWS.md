@@ -1,4 +1,8 @@
 
+# ggbreak 0.1.2
+
++ mv `theme_fp()` to the 'ggfun' package (2023-06-24, Sat)
+
 # ggbreak 0.1.1
 
 + update vignette with example to place legend at any position (2022-10-15, Sat)
