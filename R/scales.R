@@ -48,9 +48,11 @@ scale_break <- function(axis, breaks, scales, ticklabels=NULL, expand=TRUE, spac
               class = "ggbreak_params")
 }
 
-#' @title scale_wrap
-#'
 #' This scale function wraps a 'gg' plot over multiple rows to make plots with long x axes easier to read.
+#'
+#' 
+#' @title scale-wrap
+#' @rdname scale-wrap
 #' @param n the number of subplot pieces.
 #' @return gg object
 #' @export
