@@ -1,4 +1,9 @@
 
+# ggbreak 0.1.2
+
++ update CITAION file to use `c()` and `bibentry()` instead of old-style `personList()` and `citEntry()` (2023-06-26, Mon) 
++ mv `theme_fp()` to the 'ggfun' package (2023-06-24, Sat)
+
 # ggbreak 0.1.1
 
 + update vignette with example to place legend at any position (2022-10-15, Sat)
