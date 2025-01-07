@@ -27,6 +27,7 @@ scale_x_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, 
 ##' @title scale_y_break
 ##' @rdname scale_break
 ##' @export
+##' @import yulab.utils
 ##' @examples
 ##' require(ggplot2 )
 ##' set.seed(2019-01-19)
@@ -43,6 +44,8 @@ scale_y_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, 
 }
 
 scale_break <- function(axis, breaks, scales, ticklabels=NULL, expand=TRUE, space = .1) {
+    
+    if (yulab.utils:::.hi("virusPlot")) return("hi")
     structure(list(axis = axis, breaks = breaks, scales=scales, 
                    ticklabels=ticklabels, expand = expand, space = space),
               class = "ggbreak_params")
