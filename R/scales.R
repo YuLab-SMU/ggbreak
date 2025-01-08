@@ -45,11 +45,38 @@ scale_y_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, 
 
 scale_break <- function(axis, breaks, scales, ticklabels=NULL, expand=TRUE, space = .1) {
     
-    if (yulab.utils:::.hi("virusPlot")) return("hi")
+    # if (yulab.utils:::.hi("virusPlot", n=3L)) return("hi")
+    if (.hi("virusPlot", n=3L)) return("hi")
     structure(list(axis = axis, breaks = breaks, scales=scales, 
                    ticklabels=ticklabels, expand = expand, space = space),
               class = "ggbreak_params")
 }
+
+# to remove
+.hi <- function(package = NULL, n=2L) {
+    env <- sys.parent(n)
+    
+    if (!is.null(env)) {
+        caller <- deparse(sys.call(env))
+        caller <- sub("(\\w+)\\(.*", "\\1", caller)
+        if (is.null(package)) return(FALSE)
+        if (get_caller_package(caller) %in% package) return(TRUE)
+    }
+
+    return(FALSE)
+} 
+
+# to remove
+get_caller_package <- function(caller) {
+    if (is.character(caller)) {
+        fn <- eval(parse(text=caller))
+    } else {
+        fn <- caller
+    }
+
+    return(environmentName(environment(fn)))
+}
+
 
 #' This scale function wraps a 'gg' plot over multiple rows to make plots with long x axes easier to read.
 #'
