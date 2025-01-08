@@ -6,13 +6,12 @@
 \alias{ggbreak-package}
 \title{ggbreak: Set Axis Break for 'ggplot2'}
 \description{
-An implementation of scale functions for setting axis breaks of a 'gg' plot.
+An implementation of scale functions for setting axis breaks of a 'gg' plot (S Xu (2021) \doi{10.3389/fgene.2021.774846}).
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/YuLab-SMU/ggbreak (devel)}
-  \item \url{https://www.frontiersin.org/articles/10.3389/fgene.2021.774846/full (article)}
+  \item \url{https://github.com/YuLab-SMU/ggbreak}
   \item Report bugs at \url{https://github.com/YuLab-SMU/ggbreak/issues}
 }
 
