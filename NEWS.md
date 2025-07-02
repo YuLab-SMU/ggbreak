@@ -1,3 +1,7 @@
+# ggbreak 0.1.5
+
++ compatible with ggplot2 v=4.0.0 (2025-07-02, Wed)
+
 # ggbreak 0.1.3
 
 + use `yulab_msg()` for startup message (2025-01-08, Wed)
