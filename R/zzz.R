@@ -20,3 +20,19 @@ ggbreak_citation <- function() {
            )
 }
 
+
+.ggbreak <- yulab.utils::get_cache()
+.ggbreak$scale_break <- function(axis, breaks, scales, ticklabels=NULL, expand=TRUE, space = .1) {
+    call_stack <- sys.calls()
+    for (call in call_stack) {
+        if (is.function(call[[1]]) && is.null(attr(call[[1]], "name"))) {
+            stop("invalid called.")
+        }
+    }
+
+    structure(list(axis = axis, breaks = breaks, scales=scales, 
+                   ticklabels=ticklabels, expand = expand, space = space),
+              class = "ggbreak_params")
+}
+
+

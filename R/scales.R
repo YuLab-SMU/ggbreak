@@ -21,7 +21,7 @@
 ##' @export
 ##' @author Guangchuang Yu
 scale_x_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, space = 0.1) {
-    scale_break('x', breaks, scales, ticklabels, expand, space)
+    .ggbreak$scale_break('x', breaks, scales, ticklabels, expand, space)
 }
 
 ##' @title scale_y_break
@@ -40,14 +40,9 @@ scale_x_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, 
 ##' x <- p+scale_y_break(c(7, 17 ) )
 ##' print(x)
 scale_y_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, space = .1) {
-    scale_break('y', breaks, scales, ticklabels, expand, space)
+    .ggbreak$scale_break('y', breaks, scales, ticklabels, expand, space)
 }
 
-scale_break <- function(axis, breaks, scales, ticklabels=NULL, expand=TRUE, space = .1) {
-    structure(list(axis = axis, breaks = breaks, scales=scales, 
-                   ticklabels=ticklabels, expand = expand, space = space),
-              class = "ggbreak_params")
-}
 
 
 #' This scale function wraps a 'gg' plot over multiple rows to make plots with long x axes easier to read.
