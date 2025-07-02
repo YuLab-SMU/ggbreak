@@ -2,7 +2,7 @@
 ##' @importFrom rlang abort
 ##' @method ggplot_add ggbreak_params
 ##' @export
-ggplot_add.ggbreak_params <- function(object, plot, object_name) {
+ggplot_add.ggbreak_params <- function(object, plot, ...) {
     if (inherits(plot, "ggbreak")){
         origin_axis_break <- attr(plot, 'axis_break')
         origin_axis <- ifelse(inherits(origin_axis_break, "ggbreak_params"), 
@@ -25,7 +25,7 @@ ggplot_add.ggbreak_params <- function(object, plot, object_name) {
 
 ##' @method ggplot_add wrap_params
 ##' @export
-ggplot_add.wrap_params <- function(object, plot, object_name){
+ggplot_add.wrap_params <- function(object, plot, ...){
     attr(plot, "axis_wrap") <- object
     class(plot) <- c("ggwrap", class(plot))
     return(plot)
@@ -34,7 +34,7 @@ ggplot_add.wrap_params <- function(object, plot, object_name){
 
 ##' @method ggplot_add ggcut_params
 ##' @export
-ggplot_add.ggcut_params <- function(object, plot, object_name){
+ggplot_add.ggcut_params <- function(object, plot, ...){
     attr(plot, "axis_cut") <- object
     class(plot) <- c("ggcut", class(plot))
     return (plot)
@@ -43,15 +43,15 @@ ggplot_add.ggcut_params <- function(object, plot, object_name){
 ##' @method ggplot_add ggbreak
 ##' @importFrom ggfun is.ggbreak
 ##' @export
-ggplot_add.ggbreak <- function(object, plot, object_name) {
+ggplot_add.ggbreak <- function(object, plot, ...) {
     if (is.ggbreak(plot)) {
         ggplot_add(ggbreak2ggplot(object),
                    ggbreak2ggplot(plot),
-                   object_name)
+                   ...)
     } else{
         ggplot_add(as.ggplot(grid.draw(object, recording=FALSE)),
                    as.ggplot(plot),
-               object_name)
+                   ...)
     }
 }
 
@@ -67,9 +67,9 @@ ggplot_add.ggcut <- ggplot_add.ggbreak
 ##' @method ggplot_add gg
 ##' @importFrom ggfun ggbreak2ggplot
 ##' @export
-ggplot_add.gg <- function(object, plot, object_name){
+ggplot_add.gg <- function(object, plot, ...){
     if (is.ggbreak(plot)){
-        ggplot_add(as.ggplot(object), ggbreak2ggplot(plot), object_name)
+        ggplot_add(as.ggplot(object), ggbreak2ggplot(plot), ...)
     } else{
         NextMethod()
     }
