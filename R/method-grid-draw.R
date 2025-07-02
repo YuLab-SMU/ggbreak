@@ -31,7 +31,8 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
 
     totallabs <- extract_totallabs(plot=x)
     if (length(totallabs) > 0){
-        x$labels[names(totallabs)] <- NULL
+        #x$labels[names(totallabs)] <- NULL
+        x <- .remove_axis_lab(x, totallabs)
     }
     nbreaks <- length(breaks)
     subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first", margin = margin, rev = rng$flagrev)
@@ -223,7 +224,8 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
     axis_wrap <- attr(x, "axis_wrap")
     totallabs <- extract_totallabs(plot=x)
     if (length(totallabs) > 0){
-        x$labels[names(totallabs)] <- NULL
+        #x$labels[names(totallabs)] <- NULL
+        x <- .remove_axis_lab(x, totallabs)
     }
     nstep <- axis_wrap$n
     expand <- axis_wrap$expand
@@ -266,7 +268,8 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     expand <- axis_cut$expand
     totallabs <- extract_totallabs(plot=x)
     if (length(totallabs) > 0){
-        x$labels[names(totallabs)] <- NULL
+        #x$labels[names(totallabs)] <- NULL
+        x <- .remove_axis_lab(x, totallabs)
     }
     rngrev <- ggrange2(plot=x, var = axis)
     breaks_relrange <- compute_ggcut_breaks_relrange(ggcut_params=axis_cut, rngrev=rngrev)
