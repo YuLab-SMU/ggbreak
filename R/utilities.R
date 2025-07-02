@@ -191,22 +191,9 @@ compute_ggcut_breaks_relrange <- function(ggcut_params, rngrev){
 }
 
 
-theme_no_margin <- getFromNamespace("theme_no_margin", "aplot")
+theme_no_margin <- getFromNamespace("theme_no_margin", "ggfun")
+theme_fp <- getFromNamespace('theme_fp', 'ggfun')
 
-#' @importFrom ggplot2 theme_get
-get_theme_params = function(x, i) {
-    if (!inherits(x, "theme")) x <- x$theme
-    if (length(x) == 0) {
-        x <- ggplot2::theme_get()
-    }
-    x[i]
-}
-
-theme_fp <- function(x, i) {
-    params <- get_theme_params(x, i)
-    params <- c(params, list(complete = TRUE))
-    do.call(theme, params)
-}
 
 list.add <- function(obj, ...){
     if (inherits(obj, "ggbreak_params")){

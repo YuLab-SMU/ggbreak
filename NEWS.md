@@ -1,3 +1,11 @@
+# ggbreak 0.1.3
+
++ use `yulab_msg()` for startup message (2025-01-08, Wed)
+
+# ggbreak 0.1.2
+
++ update CITAION file to use `c()` and `bibentry()` instead of old-style `personList()` and `citEntry()` (2023-06-26, Mon) 
++ mv `theme_fp()` to the 'ggfun' package (2023-06-24, Sat)
 
 # ggbreak 0.1.1
 

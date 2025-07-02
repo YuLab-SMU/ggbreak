@@ -2,9 +2,7 @@
 % Please edit documentation in R/scales.R
 \name{scale_wrap}
 \alias{scale_wrap}
-\title{scale_wrap
-
-This scale function wraps a 'gg' plot over multiple rows to make plots with long x axes easier to read.}
+\title{scale-wrap}
 \usage{
 scale_wrap(n)
 }
@@ -15,8 +13,6 @@ scale_wrap(n)
 gg object
 }
 \description{
-scale_wrap
-
 This scale function wraps a 'gg' plot over multiple rows to make plots with long x axes easier to read.
 }
 \examples{

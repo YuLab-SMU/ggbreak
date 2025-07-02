@@ -1,7 +1,7 @@
-##' @importFrom utils packageDescription
+#' @importFrom utils packageDescription
+#' @importFrom yulab.utils yulab_msg
 .onAttach <- function(libname, pkgname) {
-    pkgVersion <- packageDescription(pkgname, fields="Version")
-    msg <- paste0(pkgname, " v", pkgVersion,"\n\n")
+    packageStartupMessage(yulab_msg(pkgname))
 
     citation <- paste0(paste0("If you use ", 
                               pkgname, 
@@ -9,7 +9,7 @@
                               ),
                        ggbreak_citation(), collapse = "\n")
 
-    packageStartupMessage(paste0(strwrap(pillar::style_subtle(paste0(msg, citation))), collapse="\n"))
+    packageStartupMessage(paste0(strwrap(pillar::style_subtle(citation)), collapse="\n"))
 }
 
 
