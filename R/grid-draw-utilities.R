@@ -240,8 +240,13 @@ is_numeric <- function(x) {
 check_xy_intercept <- function(plot){
     confuse_xy_labs <- c("xend", "xmax", "xmin", "xintercept", 
                          "yend", "ymax", "ymin", "yintercept")
-    index <- which(names(plot$labels) %in% confuse_xy_labs)
-    plot$labels[index] <- NULL
+    index <- confuse_xy_labs[confuse_xy_labs %in% names(ggplot_build(plot)$plot$labels)]
+    if (length(index) == 0){
+       return(plot)
+    }
+    params <- lapply(seq(length(index)), function(i)NULL)
+    names(params) <- index
+    plot <- plot + do.call('labs', params)
     return (plot)
 }
 
