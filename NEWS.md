@@ -1,6 +1,6 @@
-# ggbreak 0.1.5
+# ggbreak 0.1.6
 
-+ compatible with ggplot2 v=4.0.0 (2025-07-02, Wed)
++ compatible with ggplot2 v=4.0.0 (2025-08-24, Sun, #80)
 
 # ggbreak 0.1.3
 
