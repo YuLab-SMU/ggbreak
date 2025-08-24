@@ -69,9 +69,20 @@ ggplot_add.ggcut <- ggplot_add.ggbreak
 ##' @export
 ggplot_add.gg <- function(object, plot, ...){
     if (is.ggbreak(plot)){
-        ggplot_add(as.ggplot(object), ggbreak2ggplot(plot), ...)
+        if (inherits(object, all_class_gg)){
+            tmp <- class(plot)
+            plot <- .drop_class(plot, "ggbreak")
+            plot <- ggplot_add(object, plot, ...)
+            class(plot) <- tmp
+            return(plot)
+        }else{
+            ggplot_add(as.ggplot(object), ggbreak2ggplot(plot), ...)
+	}
     } else{
         NextMethod()
     }
 }
 
+
+all_class_gg <- c("Scale", "Guides", "Coord", "Facet", "Layer", 
+                  "Layout", "theme", "ggplot2::labels", "ggplot2::mapping")

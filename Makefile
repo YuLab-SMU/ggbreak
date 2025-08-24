@@ -20,6 +20,7 @@ build2:
 	Rscript -e 'devtools::build(vignettes = FALSE)'
 	# cd ..;\
 	# R CMD build --no-build-vignettes $(PKGSRC)
+debuginstall: rd build2 install
 
 install:
 	cd ..;\

@@ -54,7 +54,7 @@ set_label <- function(p, totallabs, p2 = NULL) {
 }
 
 extract_totallabs <- function(plot){
-    alllabs <- plot$labels
+    alllabs <- ggplot_build(plot)$plot$labels
     totallabs <- alllabs[names(alllabs) %in% c("x", "y", "title", "subtitle", "caption", "tag")]
     totallabs
 }
@@ -284,4 +284,14 @@ numeric2Date <- function(x) {
 }
 
 
+.remove_axis_lab <- function(x, labels){
+   params <- lapply(seq(length(labels)), function(i)NULL)
+   names(params) <- names(labels)
+   x + do.call('labs', params)
+}
 
+.drop_class <- function(x, class){
+    old <- class(x)
+    class(x) <- old[!old %in% class]
+    return(x)
+}
