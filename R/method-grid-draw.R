@@ -13,7 +13,6 @@
 ##' @importFrom stats setNames
 
 ## Dual-axis break rendering: creates an Nx * Ny 2D grid of subplots
-##' @export
 render_dual_break <- function(x, axis_break_x, axis_break_y) {
     # Process x-axis breaks
     xb <- extract_axis_break(object = axis_break_x)

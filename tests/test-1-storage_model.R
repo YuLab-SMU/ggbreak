@@ -1,5 +1,6 @@
 library(ggplot2)
-devtools::load_all(".")
+library(ggbreak)
+library(grid)
 
 # Test-1: check that the new storage model for axis breaks is working as intended
 # - This is a regression test to ensure that the new storage model (using plot attributes)
