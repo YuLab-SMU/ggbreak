@@ -3,21 +3,21 @@
 ##' @method ggplot_add ggbreak_params
 ##' @export
 ggplot_add.ggbreak_params <- function(object, plot, ...) {
-    if (inherits(plot, "ggbreak")){
-        origin_axis_break <- attr(plot, 'axis_break')
-        origin_axis <- ifelse(inherits(origin_axis_break, "ggbreak_params"), 
-                              origin_axis_break$axis, 
-                              origin_axis_break[[1]]$axis)
-        if (origin_axis != object$axis){
-            rlang::abort("The truncation of different axis is not be supported simultaneously.
-                         The ", origin_axis_break$axis," axis of original plot has been
-                         truncated.")
-        }else{
-            object <- list.add(origin_axis_break, object)
+    axis <- object$axis
+    attr_name <- paste0('axis_break_', axis)
+
+    if (inherits(plot, "ggbreak")) {
+        existing <- attr(plot, attr_name)
+        if (!is.null(existing)) {
+            # Same axis: merge multiple breaks
+            object <- list.add(existing, object)
         }
     }
-    attr(plot, 'axis_break') <- object
-    class(plot) <- c("ggbreak", class(plot))
+
+    attr(plot, attr_name) <- object
+    if (!"ggbreak" %in% class(plot)) {
+        class(plot) <- c("ggbreak", class(plot))
+    }
 
     return(plot)
 }

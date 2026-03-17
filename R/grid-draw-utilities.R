@@ -269,3 +269,120 @@ convert_expand <- function(expand){
    }
    return(expand)
 }
+
+## Theme for 2D grid cells (dual-axis breaks)
+## col_type: "first" (left), "other" (middle), "last" (right) — controls y-axis visibility
+## row_type: "first" (bottom), "other" (middle), "last" (top) — controls x-axis visibility
+subplot_theme_2d <- function(plot, col_type, row_type, margin_x, margin_y, rev_x, rev_y) {
+    te <- theme()
+
+    # Y-axis visibility: hide for non-first columns
+    if (col_type %in% c("other", "last")) {
+        te <- te + axis_theme(plot, axis = "x")
+    }
+
+    # X-axis visibility: hide for non-bottom rows
+    if (row_type %in% c("other", "last")) {
+        te <- te + axis_theme(plot, axis = "y")
+    }
+
+    # Y-strips: show only in last column (rightmost)
+    if (col_type != "last") {
+        te <- te + strip_theme(plot, axis = "x")
+    }
+
+    # X-strips: show only in last row (topmost = "last" type)
+    if (row_type != "last") {
+        te <- te + strip_theme(plot, axis = "y")
+    }
+
+    # Combined margins from both axes
+    l <- if (col_type == "first") 0 else margin_x / 2
+    r <- if (col_type == "last")  0 else margin_x / 2
+    t <- if (row_type == "last")  0 else margin_y / 2
+    b <- if (row_type == "first") 0 else margin_y / 2
+
+    if (rev_x == "reverse") { tmp <- l; l <- r; r <- tmp }
+    if (rev_y == "reverse") { tmp <- t; t <- b; b <- tmp }
+
+    te <- te + theme(plot.margin = margin(t = t, r = r, b = b, l = l, unit = "cm"))
+
+    # Handle panel border for boxed themes (theme_bw, theme_linedraw, etc.)
+    # Remove the full rectangle and draw lines only on outer-facing edges
+    border_te <- .border_theme_2d(plot, col_type, row_type)
+    if (!is.null(border_te)) {
+        te <- te + border_te
+    }
+
+    return(te)
+}
+
+## Custom theme element: rectangle that draws only specified sides.
+## Used for panel.border in 2D break grids to avoid doubled borders.
+## Useful for for theme where there is a panel border (e.g. theme_bw, linedraw) and we want to avoid drawing borders on internal edges of the 2D grid.
+element_partial_rect <- function(colour = "grey20", linewidth = 0.5,
+                                 linetype = 1, sides = c("top", "bottom", "left", "right")) {
+    structure(
+        list(colour = colour, linewidth = linewidth, linetype = linetype,
+             sides = sides, fill = NA, inherit.blank = FALSE),
+        class = c("element_partial_rect", "element_rect", "element")
+    )
+}
+
+##' @method element_grob element_partial_rect
+##' @export
+element_grob.element_partial_rect <- function(element, ...) {
+    gp <- grid::gpar(
+        col = element$colour,
+        lwd = element$linewidth * 72.27 / 25.4,   # mm -> points
+        lty = element$linetype
+    )
+
+    grobs <- list()
+    sides <- element$sides
+    if ("left" %in% sides)
+        grobs <- c(grobs, list(grid::segmentsGrob(
+            x0 = 0, y0 = 0, x1 = 0, y1 = 1, default.units = "npc", gp = gp)))
+    if ("right" %in% sides)
+        grobs <- c(grobs, list(grid::segmentsGrob(
+            x0 = 1, y0 = 0, x1 = 1, y1 = 1, default.units = "npc", gp = gp)))
+    if ("bottom" %in% sides)
+        grobs <- c(grobs, list(grid::segmentsGrob(
+            x0 = 0, y0 = 0, x1 = 1, y1 = 0, default.units = "npc", gp = gp)))
+    if ("top" %in% sides)
+        grobs <- c(grobs, list(grid::segmentsGrob(
+            x0 = 0, y0 = 1, x1 = 1, y1 = 1, default.units = "npc", gp = gp)))
+
+    if (length(grobs) == 0) return(grid::nullGrob())
+    do.call(grid::grobTree, grobs)
+}
+
+## Replace panel.border rectangle with a partial-rect that draws only
+## the outer-facing edges of each cell in the 2D grid.
+.border_theme_2d <- function(plot, col_type, row_type) {
+    # Resolve panel.border from plot theme + global default
+    full_theme <- ggplot2::theme_get() + plot$theme
+    border <- full_theme$panel.border
+    if (is.null(border) || inherits(border, "element_blank")) {
+        return(NULL)
+    }
+
+    # Extract border appearance
+    border_colour <- if (!is.null(border$colour)) border$colour else "grey20"
+    border_lw <- if (!is.null(border$linewidth)) border$linewidth
+                 else if (!is.null(border$size)) border$size
+                 else 0.5
+
+    # Draw only outer-facing edges of the grid perimeter
+    sides <- character(0)
+    if (col_type == "first") sides <- c(sides, "left")
+    if (col_type == "last")  sides <- c(sides, "right")
+    if (row_type == "first") sides <- c(sides, "bottom")
+    if (row_type == "last")  sides <- c(sides, "top")
+
+    theme(
+        panel.border = element_partial_rect(
+            colour = border_colour, linewidth = border_lw, sides = sides
+        )
+    )
+}

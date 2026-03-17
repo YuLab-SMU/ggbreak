@@ -4,3 +4,6 @@
 inst/doc
 vignettes/*.html
 CRAN-SUBMISSION
+tests/test-outputs
+*.Rproj
+Rplots.pdf
