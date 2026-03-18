@@ -87,7 +87,8 @@ render_dual_break <- function(x, axis_break_x, axis_break_y) {
                 plot = x,
                 col_type = col_type, row_type = row_type,
                 margin_x = margin_x, margin_y = margin_y,
-                rev_x = rng_x$flagrev, rev_y = rng_y$flagrev
+                rev_x = rng_x$flagrev, rev_y = rng_y$flagrev,
+                symbol_x = xb$symbol, symbol_y = yb$symbol
             )
 
             plots[[idx]] <- suppressMessages(
@@ -115,6 +116,10 @@ render_dual_break <- function(x, axis_break_x, axis_break_y) {
 
     g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
     g <- set_label(g, totallabs = totallabs, p2 = x)
+
+    # if (!is.null(axis_break_x$symbol) || !is.null(axis_break_y$symbol)) {
+    #     g <- add_symbol_annotation(g, axis_break_x, axis_break_y, margin_x, margin_y, rng_x, rng_y, nx, ny, "dual")
+    # }
 
     return(g)
 }
@@ -162,9 +167,9 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         x <- .remove_axis_lab(x, totallabs)
     }
     nbreaks <- length(breaks)
-    subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first", margin = margin, rev = rng$flagrev)
-    subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other", margin = margin, rev = rng$flagrev)
-    subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last", margin = margin, rev = rng$flagrev)
+    subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first", margin = margin, rev = rng$flagrev, symbol = axis_breaks$symbol)
+    subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other", margin = margin, rev = rng$flagrev, symbol = axis_breaks$symbol)
+    subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last", margin = margin, rev = rng$flagrev, symbol = axis_breaks$symbol)
     coord_fun <- check_coord_flip(plot=x) 
     relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng)
     legendpos <- check_legend_position(plot=x)
@@ -336,7 +341,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
          )
 
     g <- set_label(g, totallabs = totallabs, p2 = x)
-    
+
+    # if (!is.null(axis_breaks$symbol)) {
+    #     g <- add_symbol_annotation(g, axis_breaks, NULL, margin, NULL, rng, NULL, nbreaks + 1, 1, axis)
+    # }
+
     if (recording){
         print(g)
     }

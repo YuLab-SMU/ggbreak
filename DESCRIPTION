@@ -22,7 +22,8 @@ Suggests:
   patchwork,
   pillar,
   prettydoc,
-  rmarkdown
+  rmarkdown,
+  testthat
 VignetteBuilder: knitr
 License: Artistic-2.0
 Encoding: UTF-8

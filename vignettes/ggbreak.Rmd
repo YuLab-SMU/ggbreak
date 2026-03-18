@@ -38,7 +38,7 @@ library(yulab.utils)
 This package was first designed to set breakpoints for truncating the plot as I need to [shrink outlier long branch of a phylogenetic tree](https://yulab-smu.top/treedata-book/faq.html#shrink-outlier-long-branch).
 
 
-Axis break or a so call gap plot is useful for large datasets that are not normally distributed and contain outliers. Sometimes we can transform the data (e.g. using log-transformation if the data was log-normal distributed) to solve this problem. But this is not always granted. The data may just simply contain outliers and these outliers are meaningful. A simple gap plot can solve this issue well to present the data in detail with both normal and extreme data. 
+Axis break or a so-called gap plot is useful for large datasets that are not normally distributed and contain outliers. Sometimes we can transform the data (e.g. using log-transformation if the data was log-normal distributed) to solve this problem. But this is not always granted. The data may just simply contain outliers and these outliers are meaningful. A simple gap plot can solve this issue well to present the data in detail with both normal and extreme data. 
 
 
 This package provides several scale functions to break down a 'gg' plot into pieces and align them together with (gap plot) or without (wrap plot or cut plot) ignoring subplots. Our methods are fully compatible with `ggplot2`, so that users can still use the `+` operator to add geometric layers after creating a broken axis.
@@ -54,9 +54,9 @@ If you use `r CRANpkg('ggbreak')` in published research, please cite the followi
 
 For creating gap plot, we provide `scale_x_break` and `scale_y_break` functions. Multiple breakpoints on a single axis are supported, and you can also apply both functions to set breakpoints for both x and y axes simultaneously.
 
-### Feature 1: Compatible with ggplot2. 
+### Feature 1: Compatible with ggplot2
 
-After breaking the plot, we can still superpose geometric layers and set themes.
+After breaking the plot, we can still superpose geometric layers and set themes. This ensures that users familiar with `ggplot2` can seamlessly adopt `ggbreak` without changing their workflow. The following example demonstrates adding a text layer and modifying the theme after applying an axis break.
 
 ```{r fig.keep="last"}
 library(ggplot2)
@@ -79,13 +79,15 @@ p1 + p2
 
 ### Feature 2: Multiple break-points are supported
 
+`ggbreak` allows users to specify multiple breakpoints on a single axis. This is particularly useful when the data contains multiple clusters of outliers or interesting regions separated by large empty intervals. You can simply add multiple `scale_x_break()` layers to the plot.
+
 ```{r}
 p2 + scale_x_break(c(18, 21))
 ```
 
 ### Feature 3: Simultaneous breaks on both x and y axes
 
-You can combine `scale_x_break()` and `scale_y_break()` to create dual-axis break plots. This is particularly useful when you have data points that form distinct clusters with large gaps in between on both dimensions.
+You can combine `scale_x_break()` and `scale_y_break()` to create dual-axis break plots. This is particularly useful when you have data points that form distinct clusters with large gaps in between on both dimensions. The package handles the layout and alignment automatically.
 
 ```{r fig.width=8, fig.height=6}
 set.seed(2023-01-01)
@@ -103,7 +105,7 @@ ggplot(df, aes(x, y, color = group)) +
     theme(legend.position = "top")
 ```
 
-Multiple breaks on both axes are also supported.
+Multiple breaks on both axes are also supported. This feature enables complex visualizations where data is distributed across multiple disjoint regions in a 2D space.
 
 ```{r fig.width=8, fig.height=6}
 ggplot(df, aes(x, y, color = group)) + 
@@ -116,13 +118,27 @@ ggplot(df, aes(x, y, color = group)) +
     theme(legend.position = "top")
 ```
 
-### Feature 4: Zoom in or zoom out of subplots
+### Feature 4: Axis break symbols
+
+You can add standard axis break symbols (like a double-slash `//`) to the axes where they are broken by using the `symbol` parameter. This visual cue helps readers quickly identify that the axis is discontinuous. Currently, `symbol = "slash"` is supported, and it works for both single and dual axis breaks.
+
+```{r fig.width=8, fig.height=4}
+ggplot(mpg, aes(displ, hwy)) +
+    geom_point() +
+    scale_x_break(c(3, 4), symbol = "slash")
+```
+
+### Feature 5: Zoom in or zoom out of subplots
+
+The `scales` parameter allows you to control the relative size of the subplots. This is useful when you want to zoom in on a specific range of data to show more detail, or zoom out to show the overall trend. A value larger than 1 zooms in (allocates more space), while a value smaller than 1 zooms out.
 
 ```{r}
 p1 + scale_x_break(c(7, 17), scales = 1.5) + scale_x_break(c(18, 21), scales=2)
 ```
 
-### Feature 5: Support reverse scale
+### Feature 6: Support reverse scale
+
+`ggbreak` works seamlessly with `scale_y_reverse()` (and `scale_x_reverse()`). This is common in fields like oceanography or atmospheric science where depth or pressure is plotted on a reversed axis. The break function respects the reversed direction of the axis.
 
 ```{r fig.keep='last'}
 g <- ggplot(d, aes(x, y)) + geom_col()
@@ -131,9 +147,9 @@ g2 <- g + scale_y_break(c(7, 17), scales = 1.5) +
 g + g2
 ```
 
-### Feature 6: Compatible with scale transform functions
+### Feature 7: Compatible with scale transform functions
 
-Users can apply scale transform functions, such as `scale_x_log10` and `scale_x_sqrt`, to axis break plot.
+Users can apply scale transform functions, such as `scale_x_log10` and `scale_x_sqrt`, to an axis break plot. This allows for handling data that spans several orders of magnitude while still excluding uninteresting ranges.
 
 ```{r fig.keep='last', fig.width=10, fig.height=5}
 p2 <- p1 + scale_x_break(c(7, 17)) 
@@ -141,14 +157,18 @@ p3 <- p1 + scale_x_break(c(7, 17)) + scale_x_log10()
 p2 + p3
 ```
 
-### Feature 7: Compatible with `coord_flip`
+### Feature 8: Compatible with `coord_flip`
+
+Flipping the coordinate system with `coord_flip()` is fully supported. This is often used to create horizontal bar charts or to swap axes for better readability. `ggbreak` detects the flip and adjusts the axis breaks accordingly.
 
 ```{r message=FALSE}
 g + coord_flip() + scale_y_break(c(7, 18))
 ```
 
 
-### Feature 8: Compatible with `facet_grid` and `facet_wrap`
+### Feature 9: Compatible with `facet_grid` and `facet_wrap`
+
+`ggbreak` can be used in conjunction with faceting functions like `facet_grid()` and `facet_wrap()`. This allows you to create small multiples where each panel has a broken axis, which is extremely powerful for comparing distributions across different groups.
 
 ```{r message=FALSE}
 set.seed(2019-01-19)
@@ -176,14 +196,18 @@ print(pg)
 
 
 
-### Feature 9: Compatible with legends
+### Feature 10: Compatible with legends
+
+Legends are automatically handled and preserved. You can position the legend anywhere using `theme(legend.position = ...)`. In this example, we move the legend to the bottom of the plot.
 
 ```{r message=FALSE}
 pg <- pg + aes(fill=group) + theme(legend.position = "bottom")
 print(pg)
 ```
 
-### Feature 10: Supports all plot labels
+### Feature 11: Supports all plot labels
+
+All standard plot labels, including title, subtitle, caption, and tag, are supported and correctly placed around the broken plot. Standard theme elements for these labels (like font size, face, and position) are also respected.
 
 ```{r message=FALSE}
 pg + labs(title="test title", subtitle="test subtitle", tag="A tag", caption="A caption") +
@@ -202,7 +226,9 @@ pg + labs(title="test title", subtitle="test subtitle", tag="A tag", caption="A 
      )
 ```
 
-### Feature 11: Allows setting tick labels for subplots
+### Feature 12: Allows setting tick labels for subplots
+
+Sometimes you might want specific control over the tick labels in each subplot segment. The `ticklabels` argument allows you to manually specify which labels should appear in each broken segment, overriding the default breaks.
 
 ```{r message=FALSE, fig.width=10, fig.height=6}
 require(ggplot2)
@@ -233,7 +259,9 @@ p +
      scale_y_break(c(19,21), scales=1, ticklabels=c(21, 22, 23))
 ```
 
-### Feature 12: Compatible with dual axis
+### Feature 13: Compatible with dual axis
+
+`ggbreak` works correctly with `scale_y_continuous(sec.axis = ...)` to create dual y-axes (e.g., metric vs imperial units). The secondary axis is broken in sync with the primary axis.
 
 ```{r fig.width=10, fig.height=5}
 p <- ggplot(mpg, aes(displ, hwy)) +
@@ -251,7 +279,9 @@ p2 <- p + scale_x_break(breaks = c(3, 4))
 p1 + p2
 ```
 
-### Feature 13: Compatible with patchwork
+### Feature 14: Compatible with patchwork
+
+`ggbreak` objects are fully compatible with `patchwork`. This means you can combine multiple broken plots, or combine broken plots with standard ggplot objects, into a single composite figure using simple arithmetic operators like `+` or `/`.
 
 ```{r message=FALSE, fig.width=8, fig.height=5, fig.keep="last"}
 library(patchwork)

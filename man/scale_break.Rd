@@ -10,7 +10,8 @@ scale_x_break(
   scales = "fixed",
   ticklabels = NULL,
   expand = TRUE,
-  space = 0.1
+  space = 0.1,
+  symbol = NULL
 )
 
 scale_y_break(
@@ -18,7 +19,8 @@ scale_y_break(
   scales = "fixed",
   ticklabels = NULL,
   expand = TRUE,
-  space = 0.1
+  space = 0.1,
+  symbol = NULL
 )
 }
 \arguments{
@@ -40,6 +42,8 @@ by 5\% on each side for continuous variables. If it is logical, the \code{TRUE} 
 the default of \code{ggplot2} (foregoing statement), and \code{FALSE} means no expand for the plot.}
 
 \item{space}{the blank space among the subplots after break, default is 0.1 (cm).}
+
+\item{symbol}{the break symbol, default is NULL, could be 'slash'.}
 }
 \value{
 gg object

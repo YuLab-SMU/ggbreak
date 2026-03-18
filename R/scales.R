@@ -17,11 +17,12 @@
 #' by 5% on each side for continuous variables. If it is logical, the \code{TRUE} means
 #' the default of \code{ggplot2} (foregoing statement), and \code{FALSE} means no expand for the plot.
 #' @param space the blank space among the subplots after break, default is 0.1 (cm).
+#' @param symbol the break symbol, default is NULL, could be 'slash'.
 #' @return gg object
 #' @export
 #' @author Guangchuang Yu
-scale_x_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, space = 0.1) {
-    .ggbreak$scale_break('x', breaks, scales, ticklabels, expand, space)
+scale_x_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, space = 0.1, symbol = NULL) {
+    .ggbreak$scale_break('x', breaks, scales, ticklabels, expand, space, symbol)
 }
 
 #' @title scale_y_break
@@ -39,8 +40,8 @@ scale_x_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, 
 #' p <- ggplot(d, aes(x, y)) + geom_col()
 #' x <- p+scale_y_break(c(7, 17 ) )
 #' print(x)
-scale_y_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, space = .1) {
-    .ggbreak$scale_break('y', breaks, scales, ticklabels, expand, space)
+scale_y_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, space = .1, symbol = NULL) {
+    .ggbreak$scale_break('y', breaks, scales, ticklabels, expand, space, symbol)
 }
 
 

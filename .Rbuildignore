@@ -2,3 +2,4 @@ Makefile
 README.md
 README.Rmd
 ^CRAN-SUBMISSION$
+.dev

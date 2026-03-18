@@ -1,6 +1,8 @@
 # ggbreak 0.1.7
 
-+ support multiple axis break (2026-03-18, Wed, #81, thanks @abertran3)
++ add test unit (2026-03-18, Wed)
++ support axis break symbols (2026-03-18, Wed)
++ support multiple axis break (#81, thanks @abertran3)
 
 # ggbreak 0.1.6
 
@@ -12,8 +14,8 @@
 
 # ggbreak 0.1.2
 
-+ update CITAION file to use `c()` and `bibentry()` instead of old-style `personList()` and `citEntry()` (2023-06-26, Mon) 
-+ mv `theme_fp()` to the 'ggfun' package (2023-06-24, Sat)
++ update CITATION file to use `c()` and `bibentry()` instead of old-style `personList()` and `citEntry()` (2023-06-26, Mon) 
++ move `theme_fp()` to the 'ggfun' package (2023-06-24, Sat)
 
 # ggbreak 0.1.1
 
@@ -42,7 +44,7 @@
 + remove xy intercept label and compatible with `xlim` and `ylim` (2021-09-24, Fri, #29)
 + import `is.ggbreak` and `ggbreak2ggplot` from the ggfun package (2021-09-16, Thu)
 + fixed x and y labels and introduced `scale_xy_expand` option (2021-09-15, Wed; #26)
-+ applying text and title setting from pre-break graph to breaked graph (2021-09-09, Thu)
++ apply text and title setting from pre-break graph to breaked graph (2021-09-09, Thu)
 
 # ggbreak 0.0.5
 
@@ -52,7 +54,7 @@
 
 + set `expand=FALSE` (2021-08-14, Sat) 
 + support setting e.g. `legend.position = "bottom"` via `theme()` (2021-05-31, Mon)
-    - manual legend position (e.g. `legend.positon = c(.1, .2)`) is not supported currently
+    - manual legend position (e.g. `legend.position = c(.1, .2)`) is not supported currently
 + if passing `recording = FALSE` to `grid.draw` method, only graph object return without plotting the figure (2021-05-24, Mon)
  
 # ggbreak 0.0.3
