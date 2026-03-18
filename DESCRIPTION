@@ -16,7 +16,6 @@ Imports:
   stats,
   yulab.utils (>= 0.1.9)
 Suggests:
-  cowplot,
   ggimage,
   knitr,
   patchwork,

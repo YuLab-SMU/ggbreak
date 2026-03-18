@@ -355,7 +355,7 @@ p2 <- p1 + scale_x_break(c(3, 4)) +
     theme(legend.position="none") 
 
 ## extract legend from original plot
-leg = cowplot::get_legend(p1)
+leg = ggfun::get_legend(p1)
 
 ## redraw the figure
 p3 <- ggplotify::as.ggplot(print(p2))
