@@ -1,16 +1,16 @@
-##' @importFrom grid grid.draw
-##' @method grid.draw ggbreak
-##' @importFrom ggplotify as.ggplot
-##' @importFrom ggplot2 coord_cartesian
-##' @importFrom ggplot2 xlab
-##' @importFrom ggplot2 ylab
-##' @importFrom ggplot2 theme
-##' @importFrom ggplot2 element_blank
-##' @importFrom ggplot2 element_text
-##' @importFrom ggplot2 scale_x_continuous
-##' @importFrom ggplot2 scale_y_continuous
-##' @importFrom aplot plot_list
-##' @importFrom stats setNames
+#' @importFrom grid grid.draw
+#' @method grid.draw ggbreak
+#' @importFrom ggplotify as.ggplot
+#' @importFrom ggplot2 coord_cartesian
+#' @importFrom ggplot2 xlab
+#' @importFrom ggplot2 ylab
+#' @importFrom ggplot2 theme
+#' @importFrom ggplot2 element_blank
+#' @importFrom ggplot2 element_text
+#' @importFrom ggplot2 scale_x_continuous
+#' @importFrom ggplot2 scale_y_continuous
+#' @importFrom aplot plot_list
+#' @importFrom stats setNames
 
 ## Dual-axis break rendering: creates an Nx * Ny 2D grid of subplots
 render_dual_break <- function(x, axis_break_x, axis_break_y) {
@@ -119,7 +119,7 @@ render_dual_break <- function(x, axis_break_x, axis_break_y) {
     return(g)
 }
 
-##' @export
+#' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
     class(x) <- class(x)[class(x) != "ggbreak"]
     x <- check_xy_intercept(plot=x)
@@ -343,8 +343,8 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     invisible(g)
 }
 
-##' @method grid.draw ggwrap
-##' @export
+#' @method grid.draw ggwrap
+#' @export
 grid.draw.ggwrap <- function(x, recording=TRUE){
     class(x) <- class(x)[class(x) != "ggwrap"]
     x <- check_xy_intercept(plot=x)

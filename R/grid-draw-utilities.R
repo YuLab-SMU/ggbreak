@@ -329,8 +329,9 @@ element_partial_rect <- function(colour = "grey20", linewidth = 0.5,
     )
 }
 
-##' @method element_grob element_partial_rect
-##' @export
+#' @importFrom ggplot2 element_grob
+#' @method element_grob element_partial_rect
+#' @export
 element_grob.element_partial_rect <- function(element, ...) {
     gp <- grid::gpar(
         col = element$colour,

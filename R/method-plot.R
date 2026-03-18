@@ -1,15 +1,15 @@
-##' @method plot ggbreak
-##' @export
+#' @method plot ggbreak
+#' @export
 plot.ggbreak <- function(x, y, ...) {
     NextMethod()
 }
 
-##' @method plot ggwrap
+#' @method plot ggwrap
 plot.ggwrap <- function(x, y, ...){
     NextMethod()
 }
 
-##' @method plot ggcut
+#' @method plot ggcut
 plot.ggcut <- function(x, y, ...){
     NextMethod()
 }

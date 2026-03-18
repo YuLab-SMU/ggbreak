@@ -1,3 +1,7 @@
+# ggbreak 0.1.7
+
++ support multiple axis break (2026-03-18, Wed, #81, thanks @abertran3)
+
 # ggbreak 0.1.6
 
 + compatible with ggplot2 v=4.0.0 (2025-08-24, Sun, #80)

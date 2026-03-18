@@ -1,5 +1,5 @@
 ## function taken from ggtree
-##' @importFrom ggplot2 ggplot_build
+#' @importFrom ggplot2 ggplot_build
 ggrange2 <- function (plot, var) {
     var <- paste0("panel_scales_", var)
     gb <- ggplot_build(plot)

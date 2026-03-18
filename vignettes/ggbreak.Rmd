@@ -52,7 +52,7 @@ If you use `r CRANpkg('ggbreak')` in published research, please cite the followi
 
 ## Gap plot
 
-For creating gap plot, we only provide `scale_x_break` and `scale_y_break` functions. Currently, it is not allowed to apply both functions to set breakpoints for both x and y axes. However, multiple breakpoints on a single axis are supported.
+For creating gap plot, we provide `scale_x_break` and `scale_y_break` functions. Multiple breakpoints on a single axis are supported, and you can also apply both functions to set breakpoints for both x and y axes simultaneously.
 
 ### Feature 1: Compatible with ggplot2. 
 
@@ -83,14 +83,46 @@ p1 + p2
 p2 + scale_x_break(c(18, 21))
 ```
 
+### Feature 3: Simultaneous breaks on both x and y axes
 
-### Feature 3: Zoom in or zoom out of subplots
+You can combine `scale_x_break()` and `scale_y_break()` to create dual-axis break plots. This is particularly useful when you have data points that form distinct clusters with large gaps in between on both dimensions.
+
+```{r fig.width=8, fig.height=6}
+set.seed(2023-01-01)
+df <- data.frame(
+    x = c(rnorm(50, 5, 1), rnorm(10, 50, 2)),
+    y = c(rnorm(50, 10, 2), rnorm(10, 100, 5)),
+    group = c(rep("Cluster 1", 50), rep("Cluster 2", 10))
+)
+
+ggplot(df, aes(x, y, color = group)) + 
+    geom_point(size = 3) +
+    scale_x_break(c(10, 45)) + 
+    scale_y_break(c(20, 90)) +
+    theme_bw() +
+    theme(legend.position = "top")
+```
+
+Multiple breaks on both axes are also supported.
+
+```{r fig.width=8, fig.height=6}
+ggplot(df, aes(x, y, color = group)) + 
+    geom_point(size = 3) +
+    scale_x_break(c(10, 20)) + 
+    scale_x_break(c(30, 45)) + 
+    scale_y_break(c(20, 40)) + 
+    scale_y_break(c(60, 90)) +
+    theme_bw() +
+    theme(legend.position = "top")
+```
+
+### Feature 4: Zoom in or zoom out of subplots
 
 ```{r}
 p1 + scale_x_break(c(7, 17), scales = 1.5) + scale_x_break(c(18, 21), scales=2)
 ```
 
-### Feature 4: Support reverse scale
+### Feature 5: Support reverse scale
 
 ```{r fig.keep='last'}
 g <- ggplot(d, aes(x, y)) + geom_col()
@@ -99,7 +131,7 @@ g2 <- g + scale_y_break(c(7, 17), scales = 1.5) +
 g + g2
 ```
 
-### Feature 5: Compatible with scale transform functions
+### Feature 6: Compatible with scale transform functions
 
 Users can apply scale transform functions, such as `scale_x_log10` and `scale_x_sqrt`, to axis break plot.
 
@@ -109,14 +141,14 @@ p3 <- p1 + scale_x_break(c(7, 17)) + scale_x_log10()
 p2 + p3
 ```
 
-### Feature 6: Compatible with `coord_flip`
+### Feature 7: Compatible with `coord_flip`
 
 ```{r message=FALSE}
 g + coord_flip() + scale_y_break(c(7, 18))
 ```
 
 
-### Feature 7: Compatible with `facet_grid` and `facet_wrap`
+### Feature 8: Compatible with `facet_grid` and `facet_wrap`
 
 ```{r message=FALSE}
 set.seed(2019-01-19)
@@ -144,14 +176,14 @@ print(pg)
 
 
 
-### Feature 8: Compatible with legends
+### Feature 9: Compatible with legends
 
 ```{r message=FALSE}
 pg <- pg + aes(fill=group) + theme(legend.position = "bottom")
 print(pg)
 ```
 
-### Feature 9: Supports all plot labels
+### Feature 10: Supports all plot labels
 
 ```{r message=FALSE}
 pg + labs(title="test title", subtitle="test subtitle", tag="A tag", caption="A caption") +
@@ -170,7 +202,7 @@ pg + labs(title="test title", subtitle="test subtitle", tag="A tag", caption="A 
      )
 ```
 
-### Feature 10: Allows setting tick labels for subplots
+### Feature 11: Allows setting tick labels for subplots
 
 ```{r message=FALSE, fig.width=10, fig.height=6}
 require(ggplot2)
@@ -201,7 +233,7 @@ p +
      scale_y_break(c(19,21), scales=1, ticklabels=c(21, 22, 23))
 ```
 
-### Feature 11: Compatible with dual axis
+### Feature 12: Compatible with dual axis
 
 ```{r fig.width=10, fig.height=5}
 p <- ggplot(mpg, aes(displ, hwy)) +
@@ -219,7 +251,7 @@ p2 <- p + scale_x_break(breaks = c(3, 4))
 p1 + p2
 ```
 
-### Feature 12: Compatible with patchwork
+### Feature 13: Compatible with patchwork
 
 ```{r message=FALSE, fig.width=8, fig.height=5, fig.keep="last"}
 library(patchwork)

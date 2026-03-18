@@ -1,7 +1,7 @@
-##' @importFrom ggplot2 ggplot_add
-##' @importFrom rlang abort
-##' @method ggplot_add ggbreak_params
-##' @export
+#' @importFrom ggplot2 ggplot_add
+#' @importFrom rlang abort
+#' @method ggplot_add ggbreak_params
+#' @export
 ggplot_add.ggbreak_params <- function(object, plot, ...) {
     axis <- object$axis
     attr_name <- paste0('axis_break_', axis)
@@ -23,8 +23,8 @@ ggplot_add.ggbreak_params <- function(object, plot, ...) {
 }
 
 
-##' @method ggplot_add wrap_params
-##' @export
+#' @method ggplot_add wrap_params
+#' @export
 ggplot_add.wrap_params <- function(object, plot, ...){
     attr(plot, "axis_wrap") <- object
     class(plot) <- c("ggwrap", class(plot))
@@ -32,17 +32,17 @@ ggplot_add.wrap_params <- function(object, plot, ...){
 }
 
 
-##' @method ggplot_add ggcut_params
-##' @export
+#' @method ggplot_add ggcut_params
+#' @export
 ggplot_add.ggcut_params <- function(object, plot, ...){
     attr(plot, "axis_cut") <- object
     class(plot) <- c("ggcut", class(plot))
     return (plot)
 }
 
-##' @method ggplot_add ggbreak
-##' @importFrom ggfun is.ggbreak
-##' @export
+#' @method ggplot_add ggbreak
+#' @importFrom ggfun is.ggbreak
+#' @export
 ggplot_add.ggbreak <- function(object, plot, ...) {
     if (is.ggbreak(plot)) {
         ggplot_add(ggbreak2ggplot(object),
@@ -56,17 +56,17 @@ ggplot_add.ggbreak <- function(object, plot, ...) {
 }
 
 
-##' @method ggplot_add ggwrap
-##' @export
+#' @method ggplot_add ggwrap
+#' @export
 ggplot_add.ggwrap <- ggplot_add.ggbreak
 
-##' @method ggplot_add ggcut
-##' @export
+#' @method ggplot_add ggcut
+#' @export
 ggplot_add.ggcut <- ggplot_add.ggbreak
 
-##' @method ggplot_add gg
-##' @importFrom ggfun ggbreak2ggplot
-##' @export
+#' @method ggplot_add gg
+#' @importFrom ggfun ggbreak2ggplot
+#' @export
 ggplot_add.gg <- function(object, plot, ...){
     if (is.ggbreak(plot)){
         if (inherits(object, all_class_gg)){
