@@ -30,6 +30,10 @@ subplot_theme <- function(plot, axis, type, margin = .2, rev, symbol = NULL){
     }else{
         te <- switch(type,
                      first = strip_theme(plot=plot, axis=axis) +
+                             (if (axis == 'y') theme(axis.text.x.top = element_blank(),
+                                                      axis.ticks.x.top = element_blank(),
+                                                      axis.line.x.top = element_blank(),
+                                                      axis.title.x.top = element_blank()) else theme()) +
                              first_margin_theme(axis = axis, margin = margin, rev=rev),
                      other = axis_theme(plot=plot, axis=axis) + 
                              strip_theme(plot, axis=axis) +
