@@ -1,3 +1,7 @@
+# ggbreak 0.1.7.004
+
++ `scale_x_break()`, `scale_y_break()`, `scale_x_cut()` and `scale_y_cut()` accept break points of a datetime axis given as `Date`, character or numeric, in addition to `POSIXct` (2026-09-16, Wed, #84)
+
 # ggbreak 0.1.7.003
 
 + report an error instead of silently flipping the axis of a subplot when a break interval is not in the plot range (2026-09-16, Wed, #43)

@@ -12,7 +12,9 @@ ggrange2 <- function (plot, var) {
     flagrev <- gb$layout[[var]][[1]]$trans$name
     transfun <- gb$layout[[var]][[1]]$trans$transform
     inversefun <- gb$layout[[var]][[1]]$trans$inverse
-    list(axis_range=axis_range, flagrev=flagrev, transfun=transfun, inversefun=inversefun)
+    ## only datetime scales have a timezone, it is `NULL` otherwise
+    tz <- gb$layout[[var]][[1]]$timezone
+    list(axis_range=axis_range, flagrev=flagrev, transfun=transfun, inversefun=inversefun, tz=tz)
 }
 
 check_legend_position <- function(plot){
@@ -60,16 +62,48 @@ extract_totallabs <- function(plot){
 }
 
 
+## Coerce the break points of a date or datetime axis to the class that the
+## scale transform expects.  `transform_time()` accepts `POSIXct` objects only,
+## while the range of a datetime scale is stored as numeric seconds since the
+## epoch, so numeric, `Date` and character break points all failed with
+## "`transform_time()` works with objects of class <POSIXct> only" (#84).
+convert_axis_breaks <- function(breaks, rangeres){
+    if (identical(rangeres$flagrev, "date")){
+        return(as.Date(breaks))
+    }
+    if (identical(rangeres$flagrev, "time")){
+        return(as_datetime_break(breaks, tz = rangeres$tz))
+    }
+    breaks
+}
+
+
+as_datetime_break <- function(x, tz = NULL){
+    if (inherits(x, "POSIXct")){
+        return(x)
+    }
+    if (is.null(tz)){
+        tz <- "UTC"
+    }
+    ## `Date` and character break points refer to a wall clock time, so they
+    ## have to be interpreted in the timezone of the scale
+    if (inherits(x, "Date") || is.character(x)){
+        return(as.POSIXct(as.character(x), tz = tz))
+    }
+    ## numeric break points are seconds since the epoch, mirroring how
+    ## `as.Date()` reads numeric break points as days since the epoch
+    as.POSIXct(as.numeric(x), origin = "1970-01-01", tz = tz)
+}
+
+
 combine_range <- function(breaks, rangeres, scales, ticklabs){
     if (rangeres$flagrev=="reverse"){
         rangeres$axis_range <- rev(-1 * (rangeres$axis_range))
     }
-    if (rangeres$flagrev=="date"){
-        if (is.list(breaks)){
-            breaks <- lapply(breaks, function(i) as.Date(i))
-        }else{
-            breaks <- as.Date(breaks)
-        }
+    if (is.list(breaks)){
+        breaks <- lapply(breaks, convert_axis_breaks, rangeres = rangeres)
+    }else{
+        breaks <- convert_axis_breaks(breaks, rangeres)
     }
     if (!rangeres$flagrev %in% c("identity", "reverse")){
         if (is.list(breaks)){
@@ -183,10 +217,7 @@ compute_ggcut_breaks_relrange <- function(ggcut_params, rngrev){
     if (rngrev$flagrev == "reverse"){
         rngrev$axis_range <- rev(-1 * (rngrev$axis_range))
     }
-    breaks <- ggcut_params$breaks
-    if (rngrev$flagrev == "date"){
-        breaks <- as.Date(breaks)
-    }
+    breaks <- convert_axis_breaks(ggcut_params$breaks, rngrev)
     if (!rngrev$flagrev %in% c("identity", "reverse")){
         breaks <- rngrev$transfun(breaks)
     }
