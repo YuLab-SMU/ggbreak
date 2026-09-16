@@ -187,7 +187,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         }else{
             axis.title <- NULL
         }
-        if (!inherits(x$scales$scales[[scaleind]]$secondary.axis$name, "waiver")){
+        if (has_secondary_axis(x$scales$scales[[scaleind]])){
             axis.sec.title <- x$scales$scales[[scaleind]]$secondary.axis$name
             x <- remove_axis_title(x, axis, coord_fun, second = TRUE)
         }else{
@@ -205,7 +205,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         }else{
             axis.title <- NULL
         }
-        if (!is.null(another_scaleind) && !inherits(x$scales$scales[[another_scaleind]]$secondary.axis$name, "waiver")){
+        if (!is.null(another_scaleind) && has_secondary_axis(x$scales$scales[[another_scaleind]])){
             axis.sec.title <- x$scales$scales[[another_scaleind]]$secondary.axis$name
             x <- remove_axis_title(x, another_axis, coord_fun, second = TRUE)
             another.axis = TRUE

@@ -193,6 +193,16 @@ compute_ggcut_breaks_relrange <- function(ggcut_params, rngrev){
 }
 
 
+## check whether a scale defines a real secondary axis.
+## Note that `scale$secondary.axis` is a `waiver` for continuous scales without
+## a secondary axis, but is `NULL` for `ScaleDiscretePosition`.  Testing
+## `scale$secondary.axis$name` (as was done before) never matches a `waiver`,
+## which made ggbreak add a spurious secondary axis, see #64 and #83.
+has_secondary_axis <- function(scale) {
+    inherits(scale$secondary.axis, "AxisSecondary")
+}
+
+
 theme_no_margin <- getFromNamespace("theme_no_margin", "ggfun")
 theme_fp <- getFromNamespace('theme_fp', 'ggfun')
 

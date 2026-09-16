@@ -1,3 +1,7 @@
+# ggbreak 0.1.7.002
+
++ fixed extra lines drawn outside the plot and a duplicated axis when the plot uses a scale without `sec.axis` (2026-09-16, Wed, #64)
+
 # ggbreak 0.1.7.001
 
 + fixed duplicated datetime x-axis labels when using `scale_y_break()` (2026-08-07, Fri, #83)

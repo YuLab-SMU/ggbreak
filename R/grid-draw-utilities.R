@@ -234,7 +234,7 @@ check_another_position <- function(plot, axis){
             (another.axis == 'y' && plot$scales$scales[[another.scaleind]]$position !='left')
         ){
             return('another.position')
-        }else if (!inherits(plot$scales$scales[[another.scaleind]]$secondary.axis, "waiver")){
+        }else if (has_secondary_axis(plot$scales$scales[[another.scaleind]])){
             return("another.secondary.axis")
         }else{
             return('normal.position')
