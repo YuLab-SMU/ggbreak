@@ -84,12 +84,31 @@ combine_range <- function(breaks, rangeres, scales, ticklabs){
     newticklabs <- res$ticklabs
     newbreaks <- c(rangeres$axis_range[1], unlist(newbreaks), rangeres$axis_range[2])
     newbreaks <- lapply(data.frame(matrix(newbreaks, nrow=2)), function(i)i)
+    check_break_range(newbreaks)
     if (rangeres$flagrev=="reverse"){
         newbreaks <- lapply(newbreaks, function(i)rev(i))
         return(list(breaks=rev(newbreaks), scales=rev(newscales), 
                     ticklabs=c(rev(newticklabs[-length(newticklabs)]), newticklabs[length(newticklabs)])))
     }
     return(list(breaks=newbreaks, scales=newscales, ticklabs=newticklabs))
+}
+
+
+## The subplot ranges are built by splicing the break points into the axis
+## range.  This assumes that every break point lies inside the axis range;
+## a break interval that is (partly) outside of it yields ranges that are
+## not ordered the same way as the axis, e.g. `scale_y_break(c(10, 20))` for
+## a plot whose `y` spans 4 to 6 gives the ranges (4, 10) and (20, 6), and the
+## second one silently flips the axis of that subplot, see #43.  `scale_x_cut()`
+## already validates its breaks, so use the same message here.
+check_break_range <- function(breaks){
+    bad <- vapply(breaks, function(i){
+        length(i) == 2 && i[1] > i[2]
+    }, logical(1))
+    if (any(bad)){
+        abort("Some breaks are not in the plot range. Please check all breaks!")
+    }
+    invisible(NULL)
 }
 
 merge_intervals <- function(breaks, scales, ticklabs){

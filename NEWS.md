@@ -1,3 +1,7 @@
+# ggbreak 0.1.7.003
+
++ report an error instead of silently flipping the axis of a subplot when a break interval is not in the plot range (2026-09-16, Wed, #43)
+
 # ggbreak 0.1.7.002
 
 + fixed extra lines drawn outside the plot and a duplicated axis when the plot uses a scale without `sec.axis` (2026-09-16, Wed, #64)
