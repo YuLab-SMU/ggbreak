@@ -7,3 +7,4 @@ CRAN-SUBMISSION
 tests/test-outputs
 *.Rproj
 Rplots.pdf
+.workbuddy-ai/
