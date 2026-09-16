@@ -124,6 +124,84 @@ render_dual_break <- function(x, axis_break_x, axis_break_y) {
     return(g)
 }
 
+## Break a discrete axis.
+##
+## The continuous path sets the limits of every panel with `coord_cartesian()`,
+## which cannot express the character limits of a discrete scale: `zero_range()`
+## is called on them and fails with "missing value where TRUE/FALSE needed".
+## A discrete axis is therefore split by subsetting the levels of its scale, the
+## same way `scale_wrap()` does it.
+##
+## The break points are level names and are read exactly like continuous ones:
+## the first panel runs from the first level to the first break point, the next
+## one from the second break point to the third and so on.  Levels lying
+## strictly between the two ends of a break interval are dropped, so
+## `scale_x_break(c("a", "b"))` with `a` and `b` adjacent only inserts a gap,
+## which is what #68 asks for, while `scale_x_break(c("b", "d"))` also drops
+## every level between `b` and `d`.
+render_discrete_break <- function(x, axis_break){
+    axis_breaks <- extract_axis_break(object = axis_break)
+    axis   <- axis_breaks$axis
+    breaks <- axis_breaks$breaks
+
+    levels <- ggrange2(plot = x, var = axis)$axis_range
+    idx <- discrete_break_index(breaks, levels)
+
+    render_discrete_panels(
+        x       = x,
+        axis    = axis,
+        idx     = idx,
+        margin  = axis_breaks$space,
+        symbol  = axis_breaks$symbol,
+        relrange = discrete_relative_range(idx, axis_breaks$scales)
+    )
+}
+
+## Lay out the panels of a discrete axis.  `idx` holds, for every panel, the
+## positions of the levels it shows, in the order in which they are drawn.
+render_discrete_panels <- function(x, axis, idx, margin, symbol, relrange){
+    nbreaks <- length(idx)
+    levels <- ggrange2(plot = x, var = axis)$axis_range
+    coord_fun <- check_coord_flip(plot = x)
+    totallabs <- extract_totallabs(plot = x)
+    if (length(totallabs) > 0){
+        x <- .remove_axis_lab(x, totallabs)
+    }
+
+    ## a discrete axis has no `reverse` transform; `flagrev` is NULL for it and
+    ## `subplot_theme()` only compares it against "reverse"
+    gg <- lapply(seq_len(nbreaks), function(i){
+        type <- if (i == 1) "first" else if (i == nbreaks) "last" else "other"
+        suppressMessages(
+            split_discrete_scale(levels[idx[[i]]], plot = x, axis = axis) +
+            subplot_theme(plot = x, axis = axis, type = type, margin = margin,
+                          rev = "", symbol = symbol)
+        )
+    })
+
+    ## the panel holding the first levels is the leftmost one, or the bottom one
+    ## for a vertical axis, which is what `coord_flip()` turns the x axis into
+    vertical <- (axis == "y" && coord_fun == "coord_cartesian") ||
+                (axis == "x" && coord_fun == "coord_flip")
+    if (vertical){
+        gg <- rev(gg)
+        relrange <- rev(relrange)
+    }
+
+    legendpos <- check_legend_position(plot = x)
+    if (vertical){
+        pg <- plot_list(gglist = setNames(gg, NULL), ncol = 1, heights = relrange,
+                        guides = 'collect', output = "patchwork") & legendpos
+    }else{
+        pg <- plot_list(gglist = setNames(gg, NULL), nrow = 1, widths = relrange,
+                        guides = 'collect', output = "patchwork") & legendpos
+    }
+
+    g <- set_label(as.ggplot(pg), totallabs = totallabs, p2 = x)
+    return(g)
+}
+
+#' @method grid.draw ggbreak
 #' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
     class(x) <- class(x)[class(x) != "ggbreak"]
@@ -150,12 +228,23 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
 
     axis_breaks <- extract_axis_break(object=axis_break)
     axis <- axis_breaks$axis
+    rng <- ggrange2(plot=x, var=axis)
+
+    ## a discrete scale has no transform, so `flagrev` is NULL and the numeric
+    ## limits of `coord_cartesian()` cannot express a panel of it, see #68
+    if (is.null(rng$flagrev)){
+        g <- render_discrete_break(x, axis_break)
+        if (recording){
+            print(g)
+        }
+        return(invisible(g))
+    }
+
     margin <- axis_breaks$space
     breaks <- axis_breaks$breaks
     expand <- axis_breaks$expand
     scales <- axis_breaks$scales
     ticklabs <- axis_breaks$ticklabs
-    rng <- ggrange2(plot=x, var=axis)
     res <- combine_range(breaks, rng, scales, ticklabs)
     breaks <- res$breaks
     scales <- res$scales
@@ -408,6 +497,21 @@ grid.draw.ggcut <- function(x, recording=TRUE){
         x <- .remove_axis_lab(x, totallabs)
     }
     rngrev <- ggrange2(plot=x, var = axis)
+
+    ## a discrete scale has no transform, so `flagrev` is NULL and its panels
+    ## cannot be expressed with `coord_cartesian()`, see #68
+    if (is.null(rngrev$flagrev)){
+        idx <- discrete_cut_index(axis_cut$breaks, rngrev$axis_range)
+        relrange <- discrete_cut_relative_range(idx, axis_cut$which, axis_cut$scales)
+        g <- render_discrete_panels(x = x, axis = axis, idx = idx,
+                                    margin = axis_cut$space,
+                                    symbol = NULL, relrange = relrange)
+        if (recording){
+            print(g)
+        }
+        return(invisible(g))
+    }
+
     breaks_relrange <- compute_ggcut_breaks_relrange(ggcut_params=axis_cut, rngrev=rngrev)
     breaks <- breaks_relrange$breaks
     relrange <- breaks_relrange$relrange

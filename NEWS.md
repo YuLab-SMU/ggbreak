@@ -1,3 +1,7 @@
+# ggbreak 0.1.7.005
+
++ support `scale_x_break()`, `scale_y_break()`, `scale_x_cut()` and `scale_y_cut()` on a discrete axis; the break points are level names and a break between two adjacent levels only inserts a gap (2026-09-16, Wed, #68)
+
 # ggbreak 0.1.7.004
 
 + `scale_x_break()`, `scale_y_break()`, `scale_x_cut()` and `scale_y_cut()` accept break points of a datetime axis given as `Date`, character or numeric, in addition to `POSIXct` (2026-09-16, Wed, #84)

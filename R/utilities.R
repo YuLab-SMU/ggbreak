@@ -341,6 +341,104 @@ split_discrete_scale <- function(limits, plot, axis='x'){
    return(plot)
 }
 
+## Split the levels of a discrete axis into the panels of a break.
+##
+## The continuous code splices the break points into the axis range and reads the
+## result as a two-row matrix, so that the panels are (start, first break),
+## (second break, next break) ...  The same is done here on the *positions* of
+## the levels, which also keeps the order of the levels instead of sorting them
+## alphabetically the way `merge_intervals()` would.
+##
+## `breaks` are level names, so `c("a", "b")` with `a` and `b` adjacent only
+## inserts a gap, while `c("b", "d")` additionally drops the levels between them.
+discrete_break_index <- function(breaks, levels){
+    if (!inherits(breaks, "list")){
+        breaks <- list(breaks)
+    }
+    pos <- lapply(breaks, function(i){
+        p <- match(as.character(i), as.character(levels))
+        if (anyNA(p)){
+            abort(paste0("Some breaks are not levels of the ", length(levels),
+                         "-level axis: ",
+                         paste(i[is.na(p)], collapse = ", "),
+                         ". Please check all breaks!"))
+        }
+        p
+    })
+
+    if (any(vapply(pos, function(i) i[1] > i[2], logical(1)))){
+        abort("Some breaks are not in ascending order. Please check all breaks!")
+    }
+
+    ## merge overlapping intervals the way `merge_intervals()` does, but on the
+    ## positions of the levels
+    pos <- pos[order(vapply(pos, function(i) i[1], numeric(1)))]
+    merged <- list()
+    for (i in pos){
+        if (length(merged) > 0 && i[1] <= merged[[length(merged)]][2]){
+            merged[[length(merged)]][2] <- max(merged[[length(merged)]][2], i[2])
+        }else{
+            merged[[length(merged) + 1]] <- i
+        }
+    }
+
+    ## the panel limits come in pairs: (first level, first break), (second
+    ## break, third break) ... (last break, last level)
+    bounds <- unlist(merged)
+    start  <- c(1, bounds[seq(2, length(bounds), by = 2)])
+    end    <- c(bounds[seq(1, length(bounds), by = 2)], length(levels))
+
+    ## a break at the very first or the very last level would give an empty panel
+    if (any(start > end)){
+        abort("Some breaks are not in the plot range. Please check all breaks!")
+    }
+    lapply(seq_along(start), function(i) seq(start[i], end[i]))
+}
+
+
+## Split the levels of a discrete axis at the cut points of `scale_*_cut()`.
+## Unlike a break, a cut keeps everything, so neighbouring panels share the
+## level they are cut at, exactly the way the continuous code does.
+discrete_cut_index <- function(breaks, levels){
+    pos <- match(as.character(breaks), as.character(levels))
+    if (anyNA(pos)){
+        abort(paste0("Some breaks are not levels of the ", length(levels),
+                     "-level axis: ", paste(breaks[is.na(pos)], collapse = ", "),
+                     ". Please check all breaks!"))
+    }
+    if (is.unsorted(pos)){
+        abort("Some breaks are not in ascending order. Please check all breaks!")
+    }
+    bounds <- c(1, pos, length(levels))
+    lapply(seq_len(length(bounds) - 1), function(i) seq(bounds[i], bounds[i + 1]))
+}
+
+
+## Relative width or height of the panels of a discrete cut.  `which` and
+## `scales` mean the same as they do for a continuous one.
+discrete_cut_relative_range <- function(idx, which, scales){
+    rel <- vapply(idx, length, numeric(1))
+    if (!is.null(which) && !is.null(scales)){
+        rel[which] <- rel[which] * unlist(scales)[seq_along(which)]
+    }
+    rel
+}
+
+
+## Relative width or height of the panels of a discrete break.  A panel of a
+## discrete axis is as wide as it has levels (plus the usual padding), so the
+## number of levels plays the role of the range of a continuous panel.
+discrete_relative_range <- function(idx, scales){
+    rel <- vapply(idx, length, numeric(1))
+    if ("free" %in% unlist(scales)){
+        return(rep(1, length(rel)))
+    }
+    if (is.numeric(scales) && length(scales) == 1 && scales != 1){
+        return(c(rel[1], rep(rel[1] * scales, length(rel) - 1)))
+    }
+    rel
+}
+
 numeric2Date <- function(x) {
     as.Date(x, origin="1970-01-01")
 }

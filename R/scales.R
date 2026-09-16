@@ -1,9 +1,13 @@
 #' Set an axis break point for a 'gg' plot
 #'
-#' This scale function set an axis break point for a 'gg' plot. Either 'x' and 'y' axes are supported. The result is still a 'gg' object and user can progressively add layers to it. 
+#' This scale function set an axis break point for a 'gg' plot. Either 'x' and 'y' axes are supported. The result is still a 'gg' object and user can progressively add layers to it.
 #' @title scale_x_break
 #' @rdname scale_break
-#' @param breaks break point
+#' @param breaks break point. For a discrete axis these are the names of two
+#' levels, and the levels lying strictly between them are dropped, so two
+#' adjacent levels only insert a gap. For a date or datetime axis they may be
+#' given as \code{Date}, as character or as numeric (days or seconds since the
+#' epoch) besides \code{POSIXct}.
 #' @param scales relative width or height of subplots,
 #' default is "fixed". If scale is 'free', all subplots have 
 #' equal width or height. It also can be any number to set 

@@ -24,7 +24,11 @@ scale_y_break(
 )
 }
 \arguments{
-\item{breaks}{break point}
+\item{breaks}{break point. For a discrete axis these are the names of two
+levels, and the levels lying strictly between them are dropped, so two
+adjacent levels only insert a gap. For a date or datetime axis they may be
+given as \code{Date}, as character or as numeric (days or seconds since the
+epoch) besides \code{POSIXct}.}
 
 \item{scales}{relative width or height of subplots,
 default is "fixed". If scale is 'free', all subplots have
