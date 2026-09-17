@@ -1,25 +1,10 @@
 # ggbreak 0.1.7.006
 
 + fixed the labels of `ggrepel::geom_text_repel()` and `geom_label_repel()` being repeated in every subplot; a label is now only drawn in the subplot that holds its point (2026-09-17, Thu, #35)
-
-# ggbreak 0.1.7.005
-
 + support `scale_x_break()`, `scale_y_break()`, `scale_x_cut()` and `scale_y_cut()` on a discrete axis; the break points are level names and a break between two adjacent levels only inserts a gap (2026-09-16, Wed, #68)
-
-# ggbreak 0.1.7.004
-
 + `scale_x_break()`, `scale_y_break()`, `scale_x_cut()` and `scale_y_cut()` accept break points of a datetime axis given as `Date`, character or numeric, in addition to `POSIXct` (2026-09-16, Wed, #84)
-
-# ggbreak 0.1.7.003
-
 + report an error instead of silently flipping the axis of a subplot when a break interval is not in the plot range (2026-09-16, Wed, #43)
-
-# ggbreak 0.1.7.002
-
 + fixed extra lines drawn outside the plot and a duplicated axis when the plot uses a scale without `sec.axis` (2026-09-16, Wed, #64)
-
-# ggbreak 0.1.7.001
-
 + fixed duplicated datetime x-axis labels when using `scale_y_break()` (2026-08-07, Fri, #83)
 
 # ggbreak 0.1.7
