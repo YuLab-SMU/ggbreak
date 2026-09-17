@@ -1,3 +1,7 @@
+# ggbreak 0.1.7.006
+
++ fixed the labels of `ggrepel::geom_text_repel()` and `geom_label_repel()` being repeated in every subplot; a label is now only drawn in the subplot that holds its point (2026-09-17, Thu, #35)
+
 # ggbreak 0.1.7.005
 
 + support `scale_x_break()`, `scale_y_break()`, `scale_x_cut()` and `scale_y_cut()` on a discrete axis; the break points are level names and a break between two adjacent levels only inserts a gap (2026-09-16, Wed, #68)

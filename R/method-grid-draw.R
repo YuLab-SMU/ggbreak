@@ -49,6 +49,10 @@ render_dual_break <- function(x, axis_break_x, axis_break_y) {
         x <- .remove_axis_lab(x, totallabs)
     }
 
+    # A label belongs to the cell that holds its point, see #35
+    x <- release_repel_labels(x, "x")
+    x <- release_repel_labels(x, "y")
+
     # Handle expand for both axes
     expand_x <- convert_expand(xb$expand)
     expand_y <- convert_expand(yb$expand)
@@ -239,6 +243,8 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         }
         return(invisible(g))
     }
+
+    x <- release_repel_labels(x, axis)
 
     margin <- axis_breaks$space
     breaks <- axis_breaks$breaks
@@ -465,6 +471,7 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
         if (!rngrev$flagrev %in% c("identity", "reverse")){
             breaks <- rngrev$inversefun(breaks)
         }
+        x <- release_repel_labels(x, "x")
         x <- add_expand(plot = x, expand = expand, axis = "x")
         gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
     }else{
@@ -511,6 +518,8 @@ grid.draw.ggcut <- function(x, recording=TRUE){
         }
         return(invisible(g))
     }
+
+    x <- release_repel_labels(x, axis)
 
     breaks_relrange <- compute_ggcut_breaks_relrange(ggcut_params=axis_cut, rngrev=rngrev)
     breaks <- breaks_relrange$breaks

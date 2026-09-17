@@ -304,6 +304,51 @@ check_xy_intercept <- function(plot){
     return (plot)
 }
 
+## `geom_text_repel()` and friends lay their labels out in the coordinates of the
+## panel and keep them inside it, so a label whose point lies outside the window
+## of a subplot is moved to the edge of that subplot instead of being clipped
+## away.  ggbreak draws the same plot once per window, so every label ends up in
+## every window and the ones of the other windows are piled up along the edge,
+## see #35.  Clipping cannot remove them because ggrepel has already moved them
+## inside the panel, but ggrepel leaves a label where it belongs if it is told
+## that there is no limit; the panel clipping then drops the labels that do not
+## belong to the window, exactly as it drops the points outside of it.
+release_repel_labels <- function(plot, axis){
+    limits <- paste0(axis, "lim")
+    for (i in seq_along(plot$layers)){
+        layer <- plot$layers[[i]]
+        if (!any(grepl("Repel$", class(layer$geom)))){
+            next
+        }
+        ## only touch a parameter that ggrepel really has and that the user has
+        ## not set, so that an explicit `xlim`/`ylim` keeps its meaning
+        if (!limits %in% names(layer$geom_params) ||
+            !all(is.na(layer$geom_params[[limits]]))){
+            next
+        }
+        layer <- copy_ggproto(layer)
+        layer$geom_params[[limits]] <- c(-Inf, Inf)
+        plot$layers[[i]] <- layer
+    }
+    return(plot)
+}
+
+## A ggproto object is an environment, so assigning a field of one also changes
+## every plot that shares it.  Copying it with `ggplot2::ggproto(NULL, x)` does
+## not work (the result cannot be drawn any more), so copy the environment and
+## its attributes by hand.
+copy_ggproto <- function(x){
+    if (!is.environment(x)){
+        return(x)
+    }
+    new <- new.env(parent = parent.env(x))
+    for (name in ls(x, all.names = TRUE)){
+        assign(name, get(name, envir = x, inherits = FALSE), envir = new)
+    }
+    attributes(new) <- attributes(x)
+    return(new)
+}
+
 add_expand <- function(plot, expand, axis){
    expand <- convert_expand(expand=expand)
    var <- paste0("panel_scales_", axis)
