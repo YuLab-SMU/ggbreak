@@ -1,5 +1,6 @@
-# ggbreak 0.1.7.008
+# ggbreak 0.1.7.009
 
++ honoured `theme(plot.margin = ...)` when the plot is wrapped for the final draw; previously the `theme_void()` from `ggplotify::as.ggplot()` swallowed the user margin so `plot.margin` had no effect on a broken plot (2026-09-17, Thu, #71)
 + fixed an extra blank page when a broken plot is saved with `pdf()` or `ggsave()`; `ggbreak` now starts the page before it builds the subplots instead of leaving the page that building opens behind (2026-09-17, Thu, #73)
 + document the breaks and cuts on a discrete axis, on a `Date` or datetime axis and the use of `ggrepel` in the vignette (2026-09-17, Thu)
 + fixed the axis losing its tick labels when `scale_wrap()`, `scale_x_cut()` or `scale_y_cut()` is used together with `coord_flip()` (2026-09-17, Thu)

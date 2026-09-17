@@ -28,8 +28,8 @@ check_legend_position <- function(plot){
 
 #' @importFrom ggplot2 labs
 set_label <- function(p, totallabs, p2 = NULL) {
-    p <- p + 
-         do.call(labs, totallabs) 
+    p <- p +
+         do.call(labs, totallabs)
 
     if (is.null(p2)) {
         has_theme <- FALSE
@@ -38,20 +38,31 @@ set_label <- function(p, totallabs, p2 = NULL) {
     }
 
     if (has_theme) {
-        x <- p2 
+        x <- p2
     } else {
         x <- NULL
     }
-    labs_params <- c("text", "title", "axis.title", 
+    labs_params <- c("text", "title", "axis.title",
                      "axis.title.x", "axis.title.x.top", "axis.title.x.bottom",
                      "axis.title.y", "axis.title.y.left", "axis.title.y.right",
                      "plot.title", "plot.title.position", "plot.subtitle",
                      "plot.caption", "plot.caption.position", "plot.tag", "plot.tag.position")
-    p <- p + 
+    p <- p +
          theme_fp(x=x, i=labs_params) +
          theme(axis.text = element_blank(),
                axis.ticks = element_blank()
                )
+
+    ## Bring the user's `theme(plot.margin = ...)` onto the outer ggplot that
+    ## holds the annotation_custom, see #71. Without this the inner subplots
+    ## carry the margin but it is invisible in the final draw.
+    ## Skip when the margin matches `theme_gray()`'s default (5.5pt) so we do
+    ## not shift the figure by ~7px on each side for users who never set it.
+    if (has_theme &&
+        !identical(x$theme$plot.margin, ggplot2::theme_gray()$plot.margin)) {
+        p <- p + theme(plot.margin = x$theme$plot.margin)
+    }
+
     return(p)
 }
 
