@@ -1,3 +1,14 @@
+## Every subplot gets a fresh `coord_cartesian()`/`coord_flip()` so that the axis
+## being broken can be given its own window. That fresh coord would drop the
+## limits the user set on the *other* axis, e.g. `coord_cartesian(xlim = c(5, 6))`
+## together with `scale_y_break()`, #59. Return those limits so the subplots can
+## pass them along again (`NULL` when the user set none).
+other_axis_limits <- function(plot, axis) {
+    lim <- tryCatch(plot$coordinates$limits, error = function(e) NULL)
+    if (is.null(lim)) return(NULL)
+    lim[[setdiff(c("x", "y"), axis)]]
+}
+
 subplot_theme <- function(plot, axis, type, margin = .2, rev, symbol = NULL){
     type <- check_strip_pos(plot=plot, type=type)
     axis.pos <- check_another_position(plot = plot, axis = axis)

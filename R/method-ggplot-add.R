@@ -71,7 +71,12 @@ ggplot_add.gg <- function(object, plot, ...){
     if (is.ggbreak(plot)){
         if (inherits(object, all_class_gg)){
             tmp <- class(plot)
-            plot <- .drop_class(plot, "ggbreak")
+            ## `is.ggbreak()` is TRUE for "ggbreak", "ggwrap" and "ggcut", so
+            ## all three have to go.  Dropping only "ggbreak" leaves a "ggwrap"
+            ## or "ggcut" object behind and `ggplot_add()` re-dispatches to this
+            ## method for ever: adding any coord, theme, scale, facet or layer
+            ## to a wrapped or cut plot used to die with a C stack overflow.
+            plot <- .drop_class(plot, c("ggbreak", "ggwrap", "ggcut"))
             plot <- ggplot_add(object, plot, ...)
             class(plot) <- tmp
             return(plot)

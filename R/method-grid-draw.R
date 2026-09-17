@@ -277,7 +277,9 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first", margin = margin, rev = rng$flagrev, symbol = axis_breaks$symbol)
     subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other", margin = margin, rev = rng$flagrev, symbol = axis_breaks$symbol)
     subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last", margin = margin, rev = rng$flagrev, symbol = axis_breaks$symbol)
-    coord_fun <- check_coord_flip(plot=x) 
+    coord_fun <- check_coord_flip(plot=x)
+    ## the limits of the axis that is *not* being broken, #59
+    otherlim <- other_axis_limits(x, axis)
     relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng)
     legendpos <- check_legend_position(plot=x)
     if (!rng$flagrev %in% c("identity","reverse")){
@@ -326,13 +328,13 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
     if(axis == 'x') {
-        p1 <- suppressMessages(x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1)
+        p1 <- suppressMessages(x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]), ylim = otherlim)) + subplottheme1)
 
-        pp1 <- suppressMessages(lapply(breaks[-c(1, nbreaks)], function(i) 
-                            x + do.call(coord_fun, list(xlim=c(i[1], i[2]))) + 
+        pp1 <- suppressMessages(lapply(breaks[-c(1, nbreaks)], function(i)
+                            x + do.call(coord_fun, list(xlim=c(i[1], i[2]), ylim = otherlim)) +
                             subplottheme2))
-        
-        pp2 <- suppressMessages(x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) +
+
+        pp2 <- suppressMessages(x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]), ylim = otherlim)) +
                subplottheme3)
 
         if (length(ticklabs) > 1){
@@ -380,13 +382,13 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         breaks <- rev(breaks)
         ticklabs <- rev(ticklabs)
 
-        p1 <- suppressMessages(x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + subplottheme1)
+        p1 <- suppressMessages(x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]), xlim = otherlim)) + subplottheme1)
 
-        pp1 <- suppressMessages(lapply(breaks[-c(1, nbreaks)], function(i) 
-                      x + do.call(coord_fun, list(ylim=c(i[1], i[2]))) +
+        pp1 <- suppressMessages(lapply(breaks[-c(1, nbreaks)], function(i)
+                      x + do.call(coord_fun, list(ylim=c(i[1], i[2]), xlim = otherlim)) +
                             subplottheme2))
 
-        pp2 <- suppressMessages(x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]))) +
+        pp2 <- suppressMessages(x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]), xlim = otherlim)) +
                subplottheme3)
         
         if (length(ticklabs) > 1){
@@ -489,7 +491,9 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
         }
         x <- release_repel_labels(x, "x")
         x <- add_expand(plot = x, expand = expand, axis = "x")
-        gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1])))
+        ## keep the y limits the user set, #59
+        wrap_ylim <- other_axis_limits(x, "x")
+        gg <- lapply(seq_len(length(breaks)-1), function(i) x + coord_cartesian(xlim=c(breaks[i], breaks[i+1]), ylim = wrap_ylim))
     }else{
         limits <- split_discrete_range(x = rng, n = nstep) 
         gg <- lapply(limits, split_discrete_scale, plot=x, axis='x')
@@ -547,6 +551,8 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other", margin = margin, rev = rngrev$flagrev)
     subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last", margin = margin, rev = rngrev$flagrev)
     coord_fun <- check_coord_flip(plot=x)
+    ## the limits of the axis that is *not* being cut, #59
+    otherlim <- other_axis_limits(x, axis)
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
     legendpos <- check_legend_position(plot=x)
@@ -560,11 +566,11 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     #expand <- getOption(x="scale_xy_expand", default = FALSE)
     x <- add_expand(plot = x, expand = expand, axis = axis)
     if(axis == 'x') {
-        p1 <- suppressMessages(x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]))) + subplottheme1)
+        p1 <- suppressMessages(x + do.call(coord_fun, list(xlim = c(breaks[[1]][1], breaks[[1]][2]), ylim = otherlim)) + subplottheme1)
         pp1 <- suppressMessages(lapply(breaks[-c(1, nbreaks)], function(i)
-                            x + do.call(coord_fun, list(xlim=c(i[1], i[2]))) +
+                            x + do.call(coord_fun, list(xlim=c(i[1], i[2]), ylim = otherlim)) +
                             subplottheme2))
-        pp2 <- suppressMessages(x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) +
+        pp2 <- suppressMessages(x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]), ylim = otherlim)) +
                subplottheme3)
         g <- switch(coord_fun,
                     coord_flip = plot_list(gglist=setNames(c(list(pp2), rev(pp1), list(p1)), NULL),
@@ -578,11 +584,11 @@ grid.draw.ggcut <- function(x, recording=TRUE){
                     )
     } else {
         breaks <- rev(breaks)
-        p1 <- suppressMessages(x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]))) + subplottheme1)
+        p1 <- suppressMessages(x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]), xlim = otherlim)) + subplottheme1)
         pp1 <- suppressMessages(lapply(breaks[-c(1, nbreaks)], function(i)
-                      x + do.call(coord_fun, list(ylim=c(i[1], i[2]))) +
+                      x + do.call(coord_fun, list(ylim=c(i[1], i[2]), xlim = otherlim)) +
                             subplottheme2))
-        pp2 <- suppressMessages(x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]))) +
+        pp2 <- suppressMessages(x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]), xlim = otherlim)) +
                subplottheme3)
         g <- switch(coord_fun,
                     coord_flip = plot_list(gglist=setNames(c(list(p1), rev(pp1), list(pp2)), NULL),
