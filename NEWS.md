@@ -1,5 +1,6 @@
-# ggbreak 0.1.7.007
+# ggbreak 0.1.7.008
 
++ fixed an extra blank page when a broken plot is saved with `pdf()` or `ggsave()`; `ggbreak` now starts the page before it builds the subplots instead of leaving the page that building opens behind (2026-09-17, Thu, #73)
 + document the breaks and cuts on a discrete axis, on a `Date` or datetime axis and the use of `ggrepel` in the vignette (2026-09-17, Thu)
 + fixed the axis losing its tick labels when `scale_wrap()`, `scale_x_cut()` or `scale_y_cut()` is used together with `coord_flip()` (2026-09-17, Thu)
 + a `Date` or datetime axis is no longer drawn as numbers when the plot relies on the scale that `ggplot2` creates from the data instead of calling `scale_x_date()`, `scale_x_datetime()` or their `y` counterparts itself (2026-09-17, Thu, #84)

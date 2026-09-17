@@ -205,9 +205,21 @@ render_discrete_panels <- function(x, axis, idx, margin, symbol, relrange){
     return(g)
 }
 
+## Start a new page *before* the subplots are built.
+##
+## Building a ggplot on a device that has no current page makes R start one:
+## `ggplot_gtable()` converts `line`/`strwidth` units and that conversion needs
+## a page.  Nothing is ever drawn on the page it starts, so saving a broken
+## plot with `pdf()` or `ggsave()` used to give two pages, one of them blank
+## (#73).  Starting the page here means the build reuses it.
+newpage_if_recording <- function(recording) {
+    if (recording) grid::grid.newpage()
+}
+
 #' @method grid.draw ggbreak
 #' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
+    newpage_if_recording(recording)
     class(x) <- class(x)[class(x) != "ggbreak"]
     x <- check_xy_intercept(plot=x)
 
@@ -219,7 +231,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     if (has_x && has_y) {
         g <- render_dual_break(x, axis_break_x, axis_break_y)
         if (recording) {
-            print(g)
+            grid::grid.draw(ggplot2::ggplotGrob(g))
         }
         return(invisible(g))
     }
@@ -239,7 +251,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     if (is.null(rng$flagrev)){
         g <- render_discrete_break(x, axis_break)
         if (recording){
-            print(g)
+            grid::grid.draw(ggplot2::ggplotGrob(g))
         }
         return(invisible(g))
     }
@@ -445,7 +457,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     # }
 
     if (recording){
-        print(g)
+        grid::grid.draw(ggplot2::ggplotGrob(g))
     }
     invisible(g)
 }
@@ -453,6 +465,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
 #' @method grid.draw ggwrap
 #' @export
 grid.draw.ggwrap <- function(x, recording=TRUE){
+    newpage_if_recording(recording)
     class(x) <- class(x)[class(x) != "ggwrap"]
     x <- check_xy_intercept(plot=x)
     axis_wrap <- attr(x, "axis_wrap")
@@ -485,7 +498,7 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
     pg <- plot_list(gglist=setNames(gg, NULL), ncol=1, guides="collect", output = "patchwork") & legendpos
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
     if (recording){
-        print(g)
+        grid::grid.draw(ggplot2::ggplotGrob(g))
     }
 
     invisible(g)
@@ -495,6 +508,7 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
 #' @method grid.draw ggcut
 #' @export
 grid.draw.ggcut <- function(x, recording=TRUE){
+    newpage_if_recording(recording)
     class(x) <- class(x)[class(x) != "ggcut"]
     x <- check_xy_intercept(plot=x)
     axis_cut <- attr(x, "axis_cut")
@@ -517,7 +531,7 @@ grid.draw.ggcut <- function(x, recording=TRUE){
                                     margin = axis_cut$space,
                                     symbol = NULL, relrange = relrange)
         if (recording){
-            print(g)
+            grid::grid.draw(ggplot2::ggplotGrob(g))
         }
         return(invisible(g))
     }
@@ -586,7 +600,7 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
     g <- set_label(g, totallabs = totallabs, p2 = x)
     if (recording){
-        print(g)
+        grid::grid.draw(ggplot2::ggplotGrob(g))
     }
     
     invisible(g)
