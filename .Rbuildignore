@@ -4,3 +4,4 @@ README.Rmd
 ^CRAN-SUBMISSION$
 .dev
 .workbuddy-ai/
+^Rplots\.pdf$

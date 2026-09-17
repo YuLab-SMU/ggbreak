@@ -61,12 +61,12 @@ render_dual_break <- function(x, axis_break_x, axis_break_y) {
     if (!is.null(scaleind_x)) {
         x$scales$scales[[scaleind_x]]$expand <- expand_x
     } else {
-        x <- suppressMessages(x + scale_x_continuous(expand = expand_x))
+        x <- suppressMessages(x + auto_axis_scale(x, "x", expand_x))
     }
     if (!is.null(scaleind_y)) {
         x$scales$scales[[scaleind_y]]$expand <- expand_y
     } else {
-        x <- suppressMessages(x + scale_y_continuous(expand = expand_y))
+        x <- suppressMessages(x + auto_axis_scale(x, "y", expand_y))
     }
 
     legendpos <- check_legend_position(plot = x)
@@ -289,8 +289,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
             axis.sec.title <- NULL
         }
     }else{
-        scale_axis <- switch(axis, x=scale_x_continuous, y=scale_y_continuous)
-        x <- suppressMessages(x + do.call(scale_axis, list(expand=expand)))
+        ## the plot has no scale of its own for this axis, so take the automatic
+        ## one instead of a plain continuous scale, otherwise a date or datetime
+        ## axis would be drawn as numbers from here on
+        x <- suppressMessages(x + auto_axis_scale(x, axis, expand = expand))
+        scaleind <- find_scale_index(x, axis)
         another_axis <- setdiff(c('x', 'y'), axis)
         another_scaleind <- find_scale_index(x, another_axis)
         if (!is.null(another_scaleind) && !inherits(x$scales$scales[[another_scaleind]]$name, "waiver")){
@@ -533,8 +536,12 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
     legendpos <- check_legend_position(plot=x)
+    ## `breaks` is a list of intervals at this point, so the inverse of the
+    ## transform has to be applied to each end of each interval.  Calling it on
+    ## the list itself failed with "non-numeric argument to binary operator" as
+    ## soon as the axis was transformed, e.g. `scale_y_log10()` + `scale_y_cut()`.
     if (!rngrev$flagrev %in% c("identity", "reverse")){
-        breaks <- rngrev$inversefun(breaks)
+        breaks <- lapply(breaks, function(i) rngrev$inversefun(i))
     }
     #expand <- getOption(x="scale_xy_expand", default = FALSE)
     x <- add_expand(plot = x, expand = expand, axis = axis)

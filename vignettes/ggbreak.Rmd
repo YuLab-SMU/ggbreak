@@ -298,9 +298,100 @@ x <- p+scale_y_break(c(7, 17 ))
 x + p
 ```
 
+### Feature 15: Axis breaks on a discrete axis
+
+`scale_x_break()` and `scale_y_break()` are not limited to continuous axes. They also work on a categorical axis, such as the class of a car in `mpg` or a set of experimental conditions, which is convenient when the categories are not all equally interesting and the space spent on the ones you do not care about can be given to the ones you do. The break points are level names instead of numbers.
+
+```{r fig.width=8, fig.height=4}
+ggplot(mpg, aes(class, hwy)) +
+    geom_boxplot() +
+    scale_x_break(c("compact", "midsize"), space = 0.5)
+```
+
+`compact` and `midsize` are adjacent levels of `mpg$class`, so this break only inserts a gap between them: all seven categories are still drawn, but `2seater` and `compact` are moved into a subplot of their own. The `space` argument is the width of the gap in centimetres, and its default is 0.1 cm. Enlarging it is often worth it here, because the two halves of the axis carry no visual cue other than the gap that they are not contiguous.
+
+A break interval that spans several levels behaves like a break on a continuous axis: the levels lying strictly between the two ends of the interval are dropped. Below, `midsize` and `minivan` disappear from the plot, so the remaining categories are packed closer together and each of them is given more room.
+
+```{r fig.width=8, fig.height=4}
+ggplot(mpg, aes(class, hwy)) +
+    geom_boxplot() +
+    scale_x_break(c("compact", "pickup"), space = 0.5)
+```
+
+This is the categorical counterpart of a break that hides a range of a continuous axis: it removes part of the axis you are not interested in and hands the freed space over to the rest of the plot. Note that the two ends of the interval are the levels that are *kept* on either side, so `scale_x_break(c("compact", "pickup"))` draws `compact` and `pickup` and drops what lies between them.
+
+Everything above also applies to a vertical axis, and `scale_x_cut()` and `scale_y_cut()` accept level names as well.
+
+```{r fig.width=8, fig.height=4}
+ggplot(mpg, aes(hwy, class)) +
+    geom_boxplot() +
+    scale_y_break(c("compact", "midsize"), space = 0.5)
+
+ggplot(mpg, aes(class, hwy)) +
+    geom_boxplot() +
+    scale_x_cut("midsize", which = 2, scales = 2, space = 0.5)
+```
+
+A cut is the right choice when the categories next to the boundary still have to be read against each other: unlike a break, it keeps the level at the boundary in *both* slices, so `midsize` appears twice and each slice can be compared with it. Here the second slice is also zoomed in with `scales = 2`, which is the same argument that zooms in on a continuous cut.
+
+### Feature 16: Date and datetime axes
+
+An axis break can be placed on a `Date` or a `POSIXct` axis, which is what you need for a time series whose early and late parts are far apart in time while the middle is not worth the space. The break points may be given as `Date`, as `POSIXct`, as a character string such as `"2026-01-04"`, or as a number, which is read as days since the epoch on a `Date` axis and as seconds since the epoch on a datetime one.
+
+```{r fig.width=8, fig.height=4}
+ggplot(economics, aes(date, unemploy)) +
+    geom_line() +
+    scale_x_break(as.Date(c("1980-01-01", "1990-01-01")), space = 0.5)
+```
+
+Here the unemployment series of `economics` is broken into the period before 1980 and the period after 1990. Note that the axis still carries dates, not numbers: `ggbreak` keeps the scale that `ggplot2` derives from the data, so you do not have to add a `scale_x_date()` call of your own before breaking the axis.
+
+A character break point is read as a wall clock time on the axis, which is convenient when the break should fall at a natural boundary such as midnight.
+
+```{r fig.width=8, fig.height=4}
+set.seed(2019-01-19)
+t0 <- as.POSIXct("2026-01-01 00:00:00", tz = "UTC")
+d3 <- data.frame(
+    time = t0 + (0:239) * 3600,
+    value = c(rnorm(80) + 5, rnorm(80) + 50, rnorm(80) + 6)
+)
+
+ggplot(d3, aes(time, value)) +
+    geom_point() +
+    scale_x_break(c("2026-01-04", "2026-01-07"), space = 0.5)
+```
+
+The two features combine, so a datetime axis can be paired with a break on the other axis, and neither axis loses its labels.
+
+```{r fig.width=8, fig.height=4}
+ggplot(d3, aes(time, value)) +
+    geom_point() +
+    scale_y_break(c(10, 45), space = 0.5)
+```
+
+### Feature 17: Compatible with `ggrepel`
+
+Labels created by `ggrepel::geom_text_repel()` or `ggrepel::geom_label_repel()` are drawn in the subplot that holds their point, and only there. `ggrepel` lays its labels out in the coordinate system of the panel and keeps them inside it, so without this a label would be pushed to the edge of every subplot instead of being clipped away with the rest of the data, and the labels of the other subplots would pile up along that edge.
+
+```{r eval=requireNamespace("ggrepel", quietly=TRUE), fig.width=8, fig.height=4}
+set.seed(2019-01-19)
+d4 <- data.frame(
+    x = 1:24,
+    y = c(rnorm(12) + 4, rnorm(12) + 20),
+    label = letters[1:24]
+)
+
+ggplot(d4, aes(x, y)) +
+    geom_point() +
+    ggrepel::geom_text_repel(aes(label = label), seed = 1) +
+    scale_y_break(c(7, 17), space = 0.5)
+```
+
+The points above the break are labelled `m` to `x` and the points below it are labelled `a` to `l`, and no label of one group shows up in the subplot of the other. `ggrepel` keeps pushing the labels of a subplot apart as usual, so a crowded panel is still readable. The `seed` argument of `ggrepel` is honoured, which makes such a plot reproducible.
+
 ## Wrap plot
 
-The `scale_wrap()` function wraps a 'gg' plot over multiple rows to make plots with long x-axes easier to read.
+The `scale_wrap()` function wraps a 'gg' plot over multiple rows to make plots with long x-axes easier to read. It is the complement of `scale_x_break()`: a break hides a range of the axis and draws what is left next to each other, while a wrap keeps the whole axis and splits it into `n` consecutive windows of the same width, one per row. Each window is drawn at the full width of the figure, so a long series becomes readable without dropping anything from it.
 
 ```{r fig.width=6, fig.height=8}
 p <- ggplot(economics, aes(x=date, y = unemploy, colour = uempmed)) +
@@ -309,8 +400,7 @@ p <- ggplot(economics, aes(x=date, y = unemploy, colour = uempmed)) +
 p + scale_wrap(n=4)
 ```
 
-
-Both categorical and numerical variables are supported.
+Both categorical and numerical variables are supported. On a categorical axis the levels are divided over the windows instead of the range being cut into equal pieces, so the categories keep their own order.
 
 ```{r fig.width=7, fig.height=6}
 ggplot(mpg, aes(class, hwy)) + 
@@ -320,7 +410,7 @@ ggplot(mpg, aes(class, hwy)) +
 
 ## Cut plot
 
-The `scale_x_cut` or `scale_y_cut` cuts a 'gg' plot to several slices with the ability to specify which subplots to zoom in or zoom out.
+The `scale_x_cut` or `scale_y_cut` cuts a 'gg' plot to several slices with the ability to specify which subplots to zoom in or zoom out. A cut differs from a break in that the break points become boundaries of the slices: the data right next to a boundary is kept in both of the slices it separates, so a trend that crosses the boundary can still be followed across the two of them. The `which` argument selects the slices to zoom, and `scales` says by how much, exactly as it does for `scale_x_break()`.
 
 ```{r}
 library(ggplot2)
@@ -334,10 +424,11 @@ p <- ggplot(d, aes(x, y)) + geom_col()
 p + scale_y_cut(breaks=c(7, 18), which=c(1, 3), scales=c(3, 0.5))
 ```
 
+Here the axis is cut at 7 and 18, which gives three slices, and the first and the third of them are enlarged three times and shrunk by half respectively, while the middle one keeps its size.
+
 ## Adjust the amount of space between subplots
 
-The `space` parameter in `scale_x_break()`, `scale_y_break()`, `scale_x_cut()` and `scale_y_cut()` allows user to control the space between subplots.
-
+The `space` parameter in `scale_x_break()`, `scale_y_break()`, `scale_x_cut()` and `scale_y_cut()` allows user to control the space between subplots. It is a length in centimetres, 0.1 cm by default, and it is added to the margin of the subplots. The gap between two subplots is what tells the reader that the axis is not continuous, so a wider `space` is often worth setting when a plot is meant to be read by someone who does not already know where the breaks are.
 
 ```{r}
 p + scale_y_cut(breaks=c(7, 18), which=c(1, 3), scales=c(3, 0.5), space=.5)
@@ -345,6 +436,7 @@ p + scale_y_cut(breaks=c(7, 18), which=c(1, 3), scales=c(3, 0.5), space=.5)
 
 ## Place legend at any position
 
+A legend is drawn once for the whole broken plot, and its position is controlled by the usual `theme(legend.position = ...)`. A manual position such as `theme(legend.position = c(.1, .2))` is the one case that cannot be honoured directly, because the figure is assembled from several subplots. The workaround is to take the legend out of the plot and put it back at the end, which also gives you full control over where it lands.
 
 ```{r legend-subview, fig.keep="last"}
 ## original plot
@@ -364,11 +456,13 @@ p3 <- ggplotify::as.ggplot(print(p2))
 p3 + ggimage::geom_subview(x=.9, y=.8, subview=leg)
 ```
 
+The legend is extracted from the original plot, the broken plot is turned into a single 'gg' object with `ggplotify::as.ggplot()`, and the legend is then placed on top of it with `ggimage::geom_subview()`, whose `x` and `y` are the coordinates of the legend in the panel, from 0 to 1.
+
 
 
 ## Note
 
-The features we introduced for `scale_x_break` and `scale_y_break` also work for `scale_wrap`, `scale_x_cut` and `scale_y_cut`.
+The features we introduced for `scale_x_break` and `scale_y_break` also work for `scale_wrap`, `scale_x_cut` and `scale_y_cut`. That includes the transformed and reverse scales, `coord_flip()`, faceting, dual axes, `patchwork`, and the discrete and date or datetime axes, so the choice between the five scale functions is only about how the axis should be rearranged and never about what is supported. The `symbol` argument is the exception: it marks the break on the axis and belongs to `scale_x_break()` and `scale_y_break()` only.
 
 ## FAQ
 
@@ -377,4 +471,19 @@ The features we introduced for `scale_x_break` and `scale_y_break` also work for
 You can use `aplot::plot_list()` to arrange `ggbreak` objects with other `ggplot` objects. For other functions, such as `cowplot::plot_grid()` and `gridExtra::grid.arrange()`, you need to explictly call `print()` to `ggbreak` object, see also <https://github.com/YuLab-SMU/ggbreak/issues/36>.
 
 Using `print()` is a secret magic to make `ggbreak` compatible with other packages, including [export](https://github.com/YuLab-SMU/ggbreak/issues/37). 
+
+2. `Some breaks are not in the plot range. Please check all breaks!`
+
+The subplots are built by splicing the break points into the range of the axis, so every break point has to lie inside that range. A break such as `scale_y_break(c(10, 20))` on a plot whose `y` spans 4 to 6 cannot be drawn, and `ggbreak` reports it rather than silently flipping the axis of a subplot. The same message is produced by a break point that is not a level of the axis, or that is given out of order, when the axis is discrete.
+
+3. The axis of a subplot is drawn as numbers
+
+This used to happen when a `Date` or datetime axis was broken without an explicit `scale_x_date()` or `scale_x_datetime()` call, which turned the axis into days or seconds since the epoch. Recent versions of `ggbreak` keep the scale that `ggplot2` derives from the data, so the labels stay as dates. On an older version, adding the scale explicitly before the break is the workaround:
+
+```{r eval=FALSE}
+ggplot(economics, aes(date, unemploy)) +
+    geom_line() +
+    scale_x_date() +
+    scale_x_break(as.Date(c("1980-01-01", "1990-01-01")))
+```
 

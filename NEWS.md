@@ -1,5 +1,9 @@
-# ggbreak 0.1.7.006
+# ggbreak 0.1.7.007
 
++ document the breaks and cuts on a discrete axis, on a `Date` or datetime axis and the use of `ggrepel` in the vignette (2026-09-17, Thu)
++ fixed the axis losing its tick labels when `scale_wrap()`, `scale_x_cut()` or `scale_y_cut()` is used together with `coord_flip()` (2026-09-17, Thu)
++ a `Date` or datetime axis is no longer drawn as numbers when the plot relies on the scale that `ggplot2` creates from the data instead of calling `scale_x_date()`, `scale_x_datetime()` or their `y` counterparts itself (2026-09-17, Thu, #84)
++ fixed `scale_x_cut()` and `scale_y_cut()` failing with "non-numeric argument to binary operator" when the axis uses a transformed scale such as `scale_y_log10()` (2026-09-17, Thu)
 + fixed the labels of `ggrepel::geom_text_repel()` and `geom_label_repel()` being repeated in every subplot; a label is now only drawn in the subplot that holds its point (2026-09-17, Thu, #35)
 + support `scale_x_break()`, `scale_y_break()`, `scale_x_cut()` and `scale_y_cut()` on a discrete axis; the break points are level names and a break between two adjacent levels only inserts a gap (2026-09-16, Wed, #68)
 + `scale_x_break()`, `scale_y_break()`, `scale_x_cut()` and `scale_y_cut()` accept break points of a datetime axis given as `Date`, character or numeric, in addition to `POSIXct` (2026-09-16, Wed, #84)

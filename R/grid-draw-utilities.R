@@ -349,13 +349,32 @@ copy_ggproto <- function(x){
     return(new)
 }
 
+## `find_scale_index()` only reports the scales that the plot carries, so a plot
+## which relies on the scale that `ggplot2` creates from the data has none, and
+## adding a plain continuous scale then replaces that automatic one.  This
+## changes the axis of anything that is not a plain number: a date or datetime
+## axis is drawn as numbers (days or seconds since the epoch) afterwards.  Take
+## the automatic scale from `ggplot_build()` instead and only override the parts
+## that are asked for.  `ggplot_build()` clones the scales of the plot, so the
+## object returned here can be modified without touching the input plot.
+auto_axis_scale <- function(plot, axis, expand = NULL){
+   var <- paste0("panel_scales_", axis)
+   scale_obj <- ggplot_build(plot)$layout[[var]][[1]]
+   ## building a plot whose coordinate is flipped moves the scale to the other
+   ## side of the panel, and a scale that sits perpendicular to its own axis
+   ## loses its guide when it is put back into a plot, so restore the position
+   ## that the scale would have if it were created by `scale_x_continuous()` or
+   ## `scale_y_continuous()`
+   scale_obj$position <- if (axis == "x") "bottom" else "left"
+   if (!is.null(expand)){
+       scale_obj$expand <- expand
+   }
+   return(scale_obj)
+}
+
 add_expand <- function(plot, expand, axis){
    expand <- convert_expand(expand=expand)
-   var <- paste0("panel_scales_", axis)
-   gb <- ggplot_build(plot)
-   scales_axis_obj <- gb$layout[[var]][[1]]
-   scales_axis_obj$expand <- expand
-   plot <- suppressWarnings(plot + scales_axis_obj)
+   plot <- suppressWarnings(plot + auto_axis_scale(plot, axis, expand))
    return(plot)
 }
 

@@ -82,3 +82,91 @@ test_that('a datetime break outside the plot range is still reported (#84)', {
                          recording = FALSE),
                'not in the plot range')
 })
+
+## A plot that never calls `scale_*_datetime()` has no scale of its own, and the
+## subplots used to be given a plain continuous scale instead, so the axis was
+## drawn as seconds since the epoch from then on.  The subplots have to get a
+## scale of the same kind as the automatic one.
+axis_tick_labels <- function(plot, side = 'b') {
+  g <- grid.force(ggplotGrob(suppressMessages(grid.draw(plot, recording = FALSE))))
+  out <- character()
+  walk <- function(grob, path = '') {
+    if (inherits(grob, 'text') && grepl(paste0('/axis-', side, '-'), path) &&
+        !is.null(grob$label)) {
+      out <<- c(out, as.character(grob$label))
+    }
+    if (inherits(grob, 'gTree') && length(grob$children) > 0) {
+      for (i in seq_along(grob$children)) {
+        walk(grob$children[[i]], paste0(path, '/', names(grob$children)[i]))
+      }
+    }
+  }
+  walk(g)
+  out[nzchar(out)]
+}
+
+test_that('a datetime axis without an explicit scale is not drawn as numbers (#84)', {
+  breaks <- as.Date(c('2026-09-13', '2026-09-15'))
+
+  ## the labels have to be the ones of the very same plot with an explicit
+  ## `scale_*_datetime()`, which has always worked
+  base <- ggplot(dat, aes(t, y)) + geom_point()
+  for (b in list(breaks, as.character(breaks), as.numeric(b_posix))) {
+    expect_identical(axis_tick_labels(base + scale_x_break(b)),
+                     axis_tick_labels(base + scale_x_datetime() + scale_x_break(b)))
+  }
+  expect_identical(axis_tick_labels(base + scale_x_cut(breaks)),
+                   axis_tick_labels(base + scale_x_datetime() + scale_x_cut(breaks)))
+  expect_identical(axis_tick_labels(base + scale_wrap(2)),
+                   axis_tick_labels(base + scale_x_datetime() + scale_wrap(2)))
+  expect_identical(axis_tick_labels(base + scale_x_break(breaks) + scale_y_break(c(30, 40))),
+                   axis_tick_labels(base + scale_x_datetime() + scale_x_break(breaks) +
+                                        scale_y_break(c(30, 40))))
+
+  ybase <- ggplot(dat, aes(y, t)) + geom_point()
+  expect_identical(axis_tick_labels(ybase + scale_y_break(breaks), side = 'l'),
+                   axis_tick_labels(ybase + scale_y_datetime() + scale_y_break(breaks),
+                                    side = 'l'))
+  expect_identical(axis_tick_labels(ybase + scale_y_cut(breaks), side = 'l'),
+                   axis_tick_labels(ybase + scale_y_datetime() + scale_y_cut(breaks),
+                                    side = 'l'))
+
+  ## and it is not only about the class of the scale: seconds are long numbers
+  labels <- axis_tick_labels(base + scale_x_break(breaks))
+  expect_true(length(labels) > 0)
+  expect_false(any(grepl('^[0-9]+$', labels)))
+})
+
+test_that('a `Date` axis without an explicit scale keeps its dates (#84)', {
+  ddat <- data.frame(d = as.Date('2026-09-10') + 0:9,
+                     y = c(1, 2, 3, 4, 5, 60, 70, 80, 90, 100))
+  base <- ggplot(ddat, aes(d, y)) + geom_point()
+  breaks <- as.Date(c('2026-09-13', '2026-09-15'))
+
+  expect_identical(axis_tick_labels(base + scale_x_break(breaks)),
+                   axis_tick_labels(base + scale_x_date() + scale_x_break(breaks)))
+  expect_identical(axis_tick_labels(base + scale_x_cut(breaks)),
+                   axis_tick_labels(base + scale_x_date() + scale_x_cut(breaks)))
+
+  ## a `Date` axis is drawn as days since the epoch when it degrades to numbers
+  labels <- axis_tick_labels(base + scale_x_break(breaks))
+  expect_true(length(labels) > 0)
+  expect_false(any(grepl('^[0-9]+([.][0-9]+)?$', labels)))
+})
+
+test_that('the automatic scale keeps its position under `coord_flip()` (#84)', {
+  set.seed(1)
+  df <- data.frame(x = rnorm(100, 10, 3), y = rnorm(100, 10, 3))
+  base <- ggplot(df, aes(x, y)) + geom_point()
+
+  ## building a flipped plot moves the scale to the other side of the panel, and
+  ## putting such a scale back drops the guide, so the axis lost all its labels
+  ## and only a single one per panel was left
+  for (p in list(base + coord_flip() + scale_wrap(2),
+                 base + coord_flip() + scale_x_cut(12))) {
+    expect_true(length(axis_tick_labels(p, side = 'l')) > 3)
+  }
+  expect_identical(axis_tick_labels(base + coord_flip() + scale_wrap(2), side = 'l'),
+                   axis_tick_labels(base + coord_flip() + scale_x_continuous() +
+                                        scale_wrap(2), side = 'l'))
+})
