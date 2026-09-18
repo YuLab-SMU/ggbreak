@@ -118,6 +118,10 @@ render_dual_break <- function(x, axis_break_x, axis_break_y) {
     totallabs$x <- NULL
     totallabs$y <- NULL
 
+    hl <- hoist_bottom_axis_title(g, x, newxlab)
+    g <- hl$plot
+    newxlab <- hl$label
+
     g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
     g <- set_label(g, totallabs = totallabs, p2 = x)
 
@@ -441,6 +445,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
 
     totallabs$x <- NULL
     totallabs$y <- NULL
+
+    hl <- hoist_bottom_axis_title(g, x, newxlab)
+    g <- hl$plot
+    newxlab <- hl$label
+
     g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
     
     g <- check_axis_title(
@@ -500,6 +509,11 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
     }
     legendpos <- check_legend_position(plot=x)
     pg <- plot_list(gglist=setNames(gg, NULL), ncol=1, guides="collect", output = "patchwork") & legendpos
+
+    hl <- hoist_bottom_axis_title(pg, x, totallabs$x)
+    pg <- hl$plot
+    totallabs$x <- hl$label
+
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
     if (recording){
         grid::grid.draw(ggplot2::ggplotGrob(g))
@@ -603,6 +617,11 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     }
     totallabs$x <- NULL
     totallabs$y <- NULL
+
+    hl <- hoist_bottom_axis_title(g, x, newxlab)
+    g <- hl$plot
+    newxlab <- hl$label
+
     g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
     g <- set_label(g, totallabs = totallabs, p2 = x)
     if (recording){

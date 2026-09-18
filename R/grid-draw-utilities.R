@@ -9,6 +9,53 @@ other_axis_limits <- function(plot, axis) {
     lim[[setdiff(c("x", "y"), axis)]]
 }
 
+## `aplot::plot_list(guides = "collect")` hands the collected legend to
+## `patchwork`, which draws it at the bottom of the assembled figure.  That
+## figure becomes the *panel* of the outer ggplot returned by
+## `ggplotify::as.ggplot()`, while the axis title is added to that outer ggplot
+## with `xlab()`.  The title therefore ends up below the legend, whereas
+## `ggplot2` draws it between the panel and the legend, see #53.
+bottom_legend <- function(plot) {
+    pos <- tryCatch(plot$theme$legend.position, error = function(e) NULL)
+    is.character(pos) && length(pos) == 1L && pos == "bottom"
+}
+
+## The title grob the outer ggplot would have drawn in its `xlab-b` row.  It is
+## always rendered with `axis.title.x`, whichever aesthetic the label comes
+## from: `coord_flip()` only swaps the labels themselves.
+bottom_axis_title <- function(label, plot) {
+    ggplot2::element_render(ggplot2::theme_get() + plot$theme,
+                            "axis.title.x", label)
+}
+
+## Give the bottom axis title a row of its own in the assembled figure, just
+## above the legend that `patchwork` collects there, and drop it from the outer
+## labs, see #53.  Appending it with `patchwork::wrap_elements()` instead would
+## not do: a wrapped patch always puts its grob in a `1null` row, which stretches
+## the title over the space that belongs to the panels.
+##
+## Returns the figure together with the label that is left for the outer ggplot,
+## so a caller that does not have to move anything can pass both on unchanged.
+hoist_bottom_axis_title <- function(pg, plot, label) {
+    if (is.null(label) || !bottom_legend(plot)) {
+        return(list(plot = pg, label = label))
+    }
+    pgt <- patchwork::patchworkGrob(pg)
+    i <- which(pgt$layout$name == "guide-box")
+    if (!length(i)) {
+        return(list(plot = pg, label = label))
+    }
+    title <- bottom_axis_title(label, plot)
+    row <- pgt$layout$t[i[1]]
+    height <- grid::convertHeight(grid::grobHeight(title), "mm",
+                                  valueOnly = TRUE)
+    pgt <- gtable::gtable_add_rows(pgt, heights = grid::unit(height, "mm"),
+                                   pos = row - 1)
+    pgt <- gtable::gtable_add_grob(pgt, title, t = row, l = pgt$layout$l[i[1]],
+                                   clip = "off", name = "ggbreak-axis-title")
+    list(plot = pgt, label = NULL)
+}
+
 subplot_theme <- function(plot, axis, type, margin = .2, rev, symbol = NULL){
     type <- check_strip_pos(plot=plot, type=type)
     axis.pos <- check_another_position(plot = plot, axis = axis)

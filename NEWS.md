@@ -1,5 +1,7 @@
-# ggbreak 0.1.7.011
+# ggbreak 0.1.7.012
 
++ drawn the axis title of a broken plot above the legend when `theme(legend.position = "bottom")` is used; `patchwork` collects the legend at the bottom of the assembled figure, which is the panel of the outer ggplot that carries the axis title, so the legend used to be drawn on top of the title instead of underneath it (2026-09-18, Fri, #53)
++ `patchwork` and `gtable` are now declared in `Imports`; both were already needed at run time to assemble the subplots (2026-09-18, Fri)
 + document how to make the ticks line up across the subplots: the `breaks` argument of `scale_x_break()`/`scale_y_break()` is the place where the axis is cut, and the ticks are set with `breaks` in the continuous scale, which every subplot then filters to its own range (2026-09-18, Fri, #66)
 + fixed adding a coord, theme, scale, facet or layer to a plot that uses `scale_wrap()` or `scale_x_cut()`/`scale_y_cut()`; `ggplot_add()` re-dispatched to itself for ever and R died with a C stack overflow (2026-09-17, Thu)
 + kept the limits that `coord_cartesian()` or `coord_flip()` set on the axis that is *not* broken, so `scale_y_break()` no longer discards `coord_cartesian(xlim = ...)`, and `scale_x_break()`, `scale_wrap()` and `scale_x_cut()`/`scale_y_cut()` no longer discard the limits of the other axis (2026-09-17, Thu, #59)
