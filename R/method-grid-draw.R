@@ -296,6 +296,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     expand <- axis_breaks$expand
     scales <- axis_breaks$scales
     ticklabs <- axis_breaks$ticklabs
+    bridge <- axis_breaks$bridge
     res <- combine_range(breaks, rng, scales, ticklabs)
     breaks <- res$breaks
     scales <- res$scales
@@ -408,6 +409,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         } else {
             assemble_windows(c(list(p1), pp1, list(pp2)), relrange, "col", legendpos)
         }
+        along <- if (coord_fun == "coord_flip") "row" else "col"
         g <- aw$plot
         facet_guide <- aw$guide
     } else {
@@ -465,6 +467,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
             assemble_windows(c(list(pp2), pp1, list(p1)),
                              c(rev(relrange[-1]), relrange[1]), "row", legendpos)
         }
+        along <- if (coord_fun == "coord_flip") "col" else "row"
         g <- aw$plot
         facet_guide <- aw$guide
     }
@@ -473,6 +476,14 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     totallabs$y <- NULL
 
     g <- blank_patch_background(g)
+    ## the piece of a line that the break hides, drawn in the space between the
+    ## windows, see #33.  `blank_patch_background()` runs first because it needs
+    ## the assembled figure as `patchwork` hands it over, and the nested facet
+    ## path is left alone: there the windows are bound into a facet grid instead
+    ## of being stacked, so the two ends of a line are not across from each other
+    if (bridge && is.null(facet_guide)) {
+        g <- add_line_bridges(g, along)
+    }
     if (!is.null(facet_guide)) {
         g <- add_facet_guide_box(g, facet_guide)
     }

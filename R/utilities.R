@@ -234,6 +234,7 @@ extract_axis_break <- function(object){
         ticklabs <- object$ticklabels
         space <- object$space
         symbol <- object$symbol
+        bridge <- object$bridge
     }else{
         axis <- object[[1]]$axis
         space <- object[[1]]$space
@@ -242,6 +243,7 @@ extract_axis_break <- function(object){
         scales <- lapply(object, function(i)i$scales)
         ticklabs <- lapply(object, function(i)i$ticklabels)
         symbol <- object[[1]]$symbol
+        bridge <- object[[1]]$bridge
     }
     return(list(
                 axis = axis,
@@ -250,7 +252,8 @@ extract_axis_break <- function(object){
                 expand = expand,
                 scales = scales,
                 ticklabs = ticklabs,
-                symbol = symbol
+                symbol = symbol,
+                bridge = isTRUE(bridge)
             ))
 }
 

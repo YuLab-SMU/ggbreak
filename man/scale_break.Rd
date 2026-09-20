@@ -11,7 +11,8 @@ scale_x_break(
   ticklabels = NULL,
   expand = TRUE,
   space = 0.1,
-  symbol = NULL
+  symbol = NULL,
+  bridge = FALSE
 )
 
 scale_y_break(
@@ -20,7 +21,8 @@ scale_y_break(
   ticklabels = NULL,
   expand = TRUE,
   space = 0.1,
-  symbol = NULL
+  symbol = NULL,
+  bridge = FALSE
 )
 }
 \arguments{
@@ -48,6 +50,11 @@ the default of \code{ggplot2} (foregoing statement), and \code{FALSE} means no e
 \item{space}{the blank space among the subplots after break, default is 0.1 (cm).}
 
 \item{symbol}{the break symbol, default is NULL, could be 'slash'.}
+
+\item{bridge}{whether to draw the piece of a line that the break hides, so
+that a line crossing the break reads as one line instead of two, default is
+FALSE. Only the lines of \code{geom_line()}, \code{geom_path()} and
+\code{geom_step()} are bridged, and only for a single break.}
 }
 \value{
 gg object

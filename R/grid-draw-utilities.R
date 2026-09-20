@@ -1078,3 +1078,146 @@ element_grob.element_partial_rect <- function(element, ...) {
         )
     )
 }
+
+## ---------------------------------------------------------------------------
+## A line that crosses a break is drawn in both windows, but the part of it that
+## lies in the break interval is not drawn at all: the windows are stacked, the
+## break interval is what separates them, and there is no panel to draw in.
+## The line therefore stops at the edge of one window and starts again at the
+## edge of the next, and the two ends are far apart along the broken axis, so it
+## reads as two lines rather than one (#33).
+##
+## The piece is drawn here, in the blank space `space` opens between the
+## windows.  A line grob keeps the geometry of the whole line and is only
+## clipped at draw time, so where it leaves one window and enters the next can
+## be read off the grob, and the space between the windows is a cell of the
+## assembled gtable that spans exactly the two edges.
+
+## the line grobs of a panel, in the order the layers were added; the grid of
+## the panel is a polyline too and is left out
+bridge_lines <- function(grob) {
+    res <- list()
+    walk <- function(g) {
+        if (inherits(g, "polyline") &&
+            (is.null(g$name) || !grepl("panel.grid", g$name))) {
+            res[[length(res) + 1]] <<- g
+        }
+        if (inherits(g, "gtable")) {
+            for (ch in g$grobs) walk(ch)
+        } else if (inherits(g, "gTree")) {
+            for (ch in g$children) walk(ch)
+        }
+        res
+    }
+    walk(grob)
+    res
+}
+
+## the point indices of a polyline grob, one vector per line it carries: a
+## single grob holds every group of the layer, and the last point of one group
+## must not be joined to the first point of the next
+polyline_groups <- function(grob) {
+    n <- length(as.numeric(grob$x))
+    len <- if (!is.null(grob$id.lengths)) {
+        as.integer(grob$id.lengths)
+    } else if (!is.null(grob$id)) {
+        as.integer(rle(as.integer(grob$id))$lengths)
+    } else {
+        n
+    }
+    ## a grob whose groups do not account for every point is read as one line
+    ## rather than dropped
+    if (sum(len) != n) len <- n
+    split(seq_len(n), rep(seq_along(len), len))
+}
+
+## where one line crosses `level`, given as a value of the *other* coordinate;
+## a line that doubles back crosses it more than once
+cross_within <- function(u, v, level) {
+    out <- numeric(0)
+    for (i in seq_len(length(u) - 1)) {
+        u0 <- u[i]
+        u1 <- u[i + 1]
+        if (is.na(u0) || is.na(u1) || u0 == u1) next
+        if ((u0 - level) * (u1 - level) <= 0) {
+            out <- c(out, v[i] + (level - u0) / (u1 - u0) * (v[i + 1] - v[i]))
+        }
+    }
+    ## a point that sits exactly on the level is reported by the segment before
+    ## it and by the segment after it, and both give the same value
+    unique(out)
+}
+
+## the crossings of every line of the grob, one vector per line
+polyline_cross <- function(grob, axis, level) {
+    x <- as.numeric(grob$x)
+    y <- as.numeric(grob$y)
+    u <- if (axis == "x") x else y
+    v <- if (axis == "x") y else x
+    lapply(polyline_groups(grob), function(i) cross_within(u[i], v[i], level))
+}
+
+## draw the hidden piece of every line that crosses a break, see #33
+add_line_bridges <- function(pg, along) {
+    gt <- if (inherits(pg, "gtable")) pg else patchwork::patchworkGrob(pg)
+    panels <- which(grepl("^panel-[0-9]+$", gt$layout$name))
+    if (length(panels) < 2) {
+        return(pg)
+    }
+    ## `along` is the direction the windows are laid out in, which is the
+    ## direction perpendicular to the axis that was broken
+    pos <- if (along == "row") gt$layout$t[panels] else gt$layout$l[panels]
+    panels <- panels[order(pos)]
+
+    for (i in seq_len(length(panels) - 1)) {
+        a <- gt$layout[panels[i], , drop = FALSE]
+        b <- gt$layout[panels[i + 1], , drop = FALSE]
+        if (along == "row") {
+            ## the windows are stacked, so the upper one is left across its
+            ## bottom edge and the lower one is entered across its top edge
+            gap <- seq(a$b + 1, b$t - 1)
+            if (!length(gap)) next
+            axis <- "y"
+            a_level <- 0
+            b_level <- 1
+            t <- min(gap); bb <- max(gap); l <- a$l; r <- a$r
+        } else {
+            gap <- seq(a$r + 1, b$l - 1)
+            if (!length(gap)) next
+            axis <- "x"
+            a_level <- 1
+            b_level <- 0
+            t <- a$t; bb <- a$b; l <- min(gap); r <- max(gap)
+        }
+
+        a_lines <- bridge_lines(gt$grobs[[panels[i]]])
+        b_lines <- bridge_lines(gt$grobs[[panels[i + 1]]])
+        n <- min(length(a_lines), length(b_lines))
+        if (n == 0) next
+
+        for (k in seq_len(n)) {
+            ca <- polyline_cross(a_lines[[k]], axis, a_level)
+            cb <- polyline_cross(b_lines[[k]], axis, b_level)
+            ## pair the crossings line by line: one line may cross the edge
+            ## while another of the same layer does not
+            for (gi in seq_len(min(length(ca), length(cb)))) {
+                for (j in seq_len(min(length(ca[[gi]]), length(cb[[gi]])))) {
+                    seg <- if (along == "row") {
+                        grid::segmentsGrob(cb[[gi]][j], 0, ca[[gi]][j], 1,
+                                           default.units = "npc",
+                                           gp = a_lines[[k]]$gp)
+                    } else {
+                        grid::segmentsGrob(0, cb[[gi]][j], 1, ca[[gi]][j],
+                                           default.units = "npc",
+                                           gp = a_lines[[k]]$gp)
+                    }
+                    gt <- gtable::gtable_add_grob(
+                        gt, seg, t = t, b = bb, l = l, r = r, clip = "off",
+                        name = paste0("ggbreak-bridge-", i, "-", k, "-", gi, "-", j)
+                    )
+                }
+            }
+        }
+    }
+    gt
+}
