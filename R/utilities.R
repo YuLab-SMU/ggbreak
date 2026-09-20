@@ -3,17 +3,26 @@
 ggrange2 <- function (plot, var) {
     var <- paste0("panel_scales_", var)
     gb <- ggplot_build(plot)
-    limits <- gb$layout[[var]][[1]]$limits
+    scales <- gb$layout[[var]]
+    limits <- scales[[1]]$limits
     if (!is.null(limits)){
         axis_range <- limits
+    }else if (length(scales) > 1L){
+        ## `facet_grid(scales = "free_y")` gives every panel a scale of its own,
+        ## and the first of them holds the range of the first panel only.  Taking
+        ## it for the whole axis clips the data of every other panel away: the
+        ## subplots are given a window of that range, and a point outside it is
+        ## dropped.  The axis is as wide as all the panels together.
+        rng <- unlist(lapply(scales, function(s) s$range$range))
+        axis_range <- if (length(rng)) range(rng) else scales[[1]]$range$range
     }else{
-        axis_range <- gb$layout[[var]][[1]]$range$range
+        axis_range <- scales[[1]]$range$range
     }
-    flagrev <- gb$layout[[var]][[1]]$trans$name
-    transfun <- gb$layout[[var]][[1]]$trans$transform
-    inversefun <- gb$layout[[var]][[1]]$trans$inverse
+    flagrev <- scales[[1]]$trans$name
+    transfun <- scales[[1]]$trans$transform
+    inversefun <- scales[[1]]$trans$inverse
     ## only datetime scales have a timezone, it is `NULL` otherwise
-    tz <- gb$layout[[var]][[1]]$timezone
+    tz <- scales[[1]]$timezone
     list(axis_range=axis_range, flagrev=flagrev, transfun=transfun, inversefun=inversefun, tz=tz)
 }
 
