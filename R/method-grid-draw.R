@@ -231,11 +231,13 @@ newpage_if_recording <- function(recording) {
 ## Returns the figure and, separately, the legend that `patchwork` could not
 ## collect out of the pieces; the caller has to put that back after it has
 ## blanked the background of the figure.
+##
+## The nested path returns the figure already assembled as a gtable, because
+## `patchwork` cannot line the pieces up, see `nest_facet_windows()`.
 assemble_windows <- function(gglist, sizes, along, legendpos) {
     nest <- nest_facet_windows(gglist, sizes, along)
     if (!is.null(nest)) {
-        gglist <- nest$plots
-        sizes <- nest$sizes
+        return(list(plot = nest$plot, guide = nest$guide))
     }
     pg <- if (along == "row") {
         plot_list(gglist = setNames(gglist, NULL), ncol = 1, heights = sizes,
@@ -244,8 +246,7 @@ assemble_windows <- function(gglist, sizes, along, legendpos) {
         plot_list(gglist = setNames(gglist, NULL), nrow = 1, widths = sizes,
                   guides = 'collect', output = "patchwork")
     }
-    list(plot = pg & legendpos,
-         guide = if (is.null(nest)) NULL else nest$guide)
+    list(plot = pg & legendpos, guide = NULL)
 }
 
 #' @method grid.draw ggbreak

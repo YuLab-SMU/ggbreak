@@ -15,7 +15,12 @@ other_axis_limits <- function(plot, axis) {
 ## `plot.background` the user set on the plot never reaches the figure either.
 ## Blank it here: the background of the figure belongs to the outer ggplot, which
 ## is the panel that carries the assembled figure, see `set_label()`.
+##
+## The assembled gtable of the nested path has already had the cell dropped by
+## `slice_facet_gtable()`, and there is no patchwork object left to add a theme
+## to, so it is returned unchanged.
 blank_patch_background <- function(pg) {
+    if (inherits(pg, "gtable")) return(pg)
     pg & ggplot2::theme(plot.background = ggplot2::element_blank())
 }
 
@@ -56,8 +61,8 @@ facet_axis_index <- function(g, dim, k) {
     sub(prefix, "", lay$name[m][1])
 }
 
-## `gtable_filter()` matches names with a regex, so the names of the cells that
-## are kept have to be escaped before they are used as a pattern
+## The cells of a gtable are picked by name, so the names of the cells that are
+## kept have to be escaped before they are used as a pattern
 escape_regex <- function(x) {
     for (ch in c("\\", ".", "|", "(", ")", "[", "]", "{", "}", "^", "$", "*", "+", "?")) {
         x <- gsub(ch, paste0("\\", ch), x, fixed = TRUE)
@@ -78,21 +83,58 @@ slice_facet_gtable <- function(g, dim, k) {
     pats <- escape_regex(panels)
     idx <- facet_axis_index(g, dim, k)
     if (!is.null(idx)) {
+        ## a facet row draws its own y axis, a facet column its own x axis: the
+        ## bottom one, not the top one, which is blank unless the user asked for
+        ## a second axis there
         pats <- c(pats,
-                  if (dim == "row") paste0("axis-[lr]-", idx) else paste0("axis-t-", idx),
+                  if (dim == "row") paste0("axis-[lr]-", idx) else paste0("axis-b-", idx),
                   if (dim == "row") paste0("strip-r-", idx) else paste0("strip-t-", idx))
     }
     ## the cells that run along the facet grid rather than across it belong to
     ## its first or last row (column), and the subplot theme has already blanked
     ## the ones the neighbouring subplot is supposed to draw instead
+    ##
+    ## `xlab-b` is not among them even though it is the one cell of the last
+    ## facet row (column) that is missing otherwise: it spans the whole panel
+    ## area, so keeping it also keeps the panel columns and the panel spacing of
+    ## every *other* facet column alive, and the piece comes out with a gutter
+    ## the width of all of them.  The axis title of the figure is drawn by the
+    ## outer ggplot anyway, see `set_label()`.
     if (k == 1) {
         pats <- c(pats, if (dim == "row") c("strip-t-.*", "axis-t-.*") else c("axis-l-.*", "ylab-l"))
     }
     if (k == n) {
-        pats <- c(pats, if (dim == "row") c("axis-b-.*", "xlab-b")
-                             else c("axis-r-.*", "strip-r-.*", "ylab-r", "xlab-b"))
+        pats <- c(pats, if (dim == "row") "axis-b-.*"
+                             else c("axis-r-.*", "strip-r-.*", "ylab-r"))
     }
-    gtable::gtable_filter(g, paste0("^(", paste(pats, collapse = "|"), ")$"), trim = TRUE)
+    keep <- grepl(paste0("^(", paste(pats, collapse = "|"), ")$"), lay$name)
+
+    ## Drop the cells that are not kept instead of blanking them.  A blanked cell
+    ## still sits in the layout, and the panel cells of the other facet rows
+    ## (columns) would still be there to be found by name: the caller would size
+    ## them along with the ones this piece draws, and the legend would be placed
+    ## against a panel area that reaches across every facet.
+    s <- g
+    s$grobs <- s$grobs[keep]
+    s$layout <- s$layout[keep, , drop = FALSE]
+    ## collapse the rows and columns that kept nothing, so that a piece is only
+    ## as wide (tall) as what it actually draws; the ones that are kept keep
+    ## their index, which is what makes the pieces comparable
+    cols <- unlist(Map(seq, lay$l[keep], lay$r[keep]))
+    rows <- unlist(Map(seq, lay$t[keep], lay$b[keep]))
+    ## A cell that runs across the whole panel area -- the axis title -- spans
+    ## the panel cells of the other facet rows (columns) as well, and a panel
+    ## cell is flexible: letting one through would claim a share of the figure
+    ## for every facet row (column) there is instead of only for this one.
+    rest <- facet_panel_positions(g, dim)[-k]
+    if (dim == "row") {
+        rows <- setdiff(rows, rest)
+    } else {
+        cols <- setdiff(cols, rest)
+    }
+    s$widths[setdiff(seq_along(s$widths), cols)] <- grid::unit(0, "mm")
+    s$heights[setdiff(seq_along(s$heights), rows)] <- grid::unit(0, "mm")
+    s
 }
 
 ## the legend a built gtable draws, and where `ggplot2` put it
@@ -107,11 +149,39 @@ facet_guide_box <- function(g) {
     NULL
 }
 
-## Returns NULL when there is nothing to nest, otherwise the subplots to hand to
-## `plot_list()` in their place, the relative size of each of them, and the
-## legend, which the caller has to put back by hand.
+## Give the cell a piece draws its panel in the share of the figure that its
+## window is entitled to.  `rbind()` and `cbind()` collect the flexible cells of
+## every piece into one vector of `null` units, so the shares are read against
+## each other and not against the piece they came from.
+size_facet_piece <- function(g, dim, size) {
+    panels <- grepl("^panel", g$layout$name)
+    if (dim == "row") {
+        g$heights[unique(g$layout$t[panels])] <- grid::unit(size, "null")
+    } else {
+        g$widths[unique(g$layout$l[panels])] <- grid::unit(size, "null")
+    }
+    g
+}
+
+## Returns NULL when there is nothing to nest, otherwise the assembled figure
+## and the legend, which the caller has to put back by hand.
+##
+## The pieces are bound into one gtable rather than handed to `patchwork`.
+## `as.ggplot(gtable)` is one opaque panel to `patchwork`: it aligns the boxes of
+## the pieces but nothing inside them, so two pieces only line up if they happen
+## to have the same inner sizes -- and forcing that with `unit.pmax()` would also
+## force their flexible panel cells to the largest of them, which is what makes a
+## window twice as wide as its neighbour.  `rbind()` and `cbind()` align the
+## direction the pieces are *not* stacked along and leave the flexible cells
+## flexible, so every window keeps the share of the figure that `sizes` gives it.
 nest_facet_windows <- function(gglist, sizes, dim) {
     if (length(gglist) < 2L) return(NULL)
+    ## Only a facet grid is cut apart.  It is the grid that gives a plot facet
+    ## rows and facet columns for the windows to nest into; a `facet_wrap()` has
+    ## neither, and it puts a strip above every single panel, so cutting it along
+    ## the panels that happen to sit in a line would take a panel's strip away
+    ## from it and leave it on its neighbour.
+    if (!inherits(gglist[[1]]$facet, "FacetGrid")) return(NULL)
     gs <- lapply(gglist, function(p) tryCatch(ggplot2::ggplotGrob(p),
                                               error = function(e) NULL))
     if (any(vapply(gs, is.null, logical(1)))) return(NULL)
@@ -119,30 +189,28 @@ nest_facet_windows <- function(gglist, sizes, dim) {
     if (n < 2L) return(NULL)
 
     pieces <- list()
-    piece_sizes <- numeric(0)
     for (k in seq_len(n)) {
         for (j in seq_along(gs)) {
-            pieces <- c(pieces, list(slice_facet_gtable(gs[[j]], dim, k)))
-            piece_sizes <- c(piece_sizes, sizes[j] / n)
+            piece <- slice_facet_gtable(gs[[j]], dim, k)
+            pieces <- c(pieces, list(size_facet_piece(piece, dim, sizes[j])))
         }
     }
-    ## `as.ggplot(gtable)` is one opaque panel as far as `patchwork` is
-    ## concerned: it aligns the boxes of the pieces but nothing inside them, so
-    ## the panels of two pieces only line up if their columns are the same width
-    widths <- do.call(grid::unit.pmax, lapply(pieces, function(p) p$widths))
-    pieces <- lapply(pieces, function(p) { p$widths <- widths; p })
+    ## the facet row (column) is the outer loop, so the pieces of one facet row
+    ## (column) are bound next to each other and those of the next one follow
+    bound <- Reduce(if (dim == "row") rbind else cbind, pieces)
 
-    list(plots = lapply(pieces, ggplotify::as.ggplot),
-         sizes = piece_sizes,
-         guide = facet_guide_box(gs[[1]]))
+    list(plot = bound, guide = facet_guide_box(gs[[1]]))
 }
 
 ## `patchwork` cannot collect the legend of a reassembled figure: the pieces are
 ## single grobs, so they carry no guides to collect and `guides = "collect"`
 ## silently draws nothing.  Put the legend back where the plot asked for it, in a
 ## cell named `guide-box` so that `hoist_bottom_axis_title()` still finds it.
+##
+## `pg` is either the patchwork object of the ordinary path or the gtable that
+## `nest_facet_windows()` builds; the two are reduced to the same thing here.
 add_facet_guide_box <- function(pg, guide) {
-    pgt <- patchwork::patchworkGrob(pg)
+    pgt <- if (inherits(pg, "gtable")) pg else patchwork::patchworkGrob(pg)
     if (is.null(guide) || !guide$position %in% c("right", "left", "top", "bottom")) {
         return(pgt)
     }
