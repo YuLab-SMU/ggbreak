@@ -1,5 +1,8 @@
-# ggbreak 0.1.7.013
+# ggbreak 0.1.7.014
 
++ a theme that is set with `theme_set()` no longer draws a second panel border, a second pair of axis lines or a panel background around the whole figure; those elements belong to the subplots, and the outer ggplot that carries the assembled figure was taking them from the global theme by accident, so `theme_set(theme_bw())` drew a rectangle around the figure and `theme_set(theme_classic())` two extra lines outside the plot (2026-09-20, Sun, #57)
++ the assembled figure no longer paints an opaque background of its own; `patchwork` took that background from the default theme, so a broken plot could not be superimposed on another one with `annotation_custom()` (it hid whatever was drawn below it) and the `plot.background` set on the plot never reached the figure (2026-09-20, Sun, #52)
++ added regression tests that a globally set theme renders like the same theme applied to the plot, and that the assembled figure paints no background of its own (2026-09-20, Sun)
 + added a regression test that the axis title of a broken plot stays above the collected legend with `theme(legend.position = "bottom")`, for `scale_x_break()`, `scale_y_break()`, a dual break, `coord_flip()`, `scale_wrap()` and the cut scales; the report in #85 is the same defect that #53 fixed, the reporter was on an earlier version (2026-09-19, Sat, #85)
 + drawn the axis title of a broken plot above the legend when `theme(legend.position = "bottom")` is used; `patchwork` collects the legend at the bottom of the assembled figure, which is the panel of the outer ggplot that carries the axis title, so the legend used to be drawn on top of the title instead of underneath it (2026-09-18, Fri, #53)
 + `patchwork` and `gtable` are now declared in `Imports`; both were already needed at run time to assemble the subplots (2026-09-18, Fri)

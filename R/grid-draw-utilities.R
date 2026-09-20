@@ -9,6 +9,16 @@ other_axis_limits <- function(plot, axis) {
     lim[[setdiff(c("x", "y"), axis)]]
 }
 
+## `patchwork` gives the assembled figure a background of its own, taken from the
+## default theme.  That rectangle is opaque, so a broken plot hides whatever was
+## drawn below it when it is superimposed on another plot (#52), and the
+## `plot.background` the user set on the plot never reaches the figure either.
+## Blank it here: the background of the figure belongs to the outer ggplot, which
+## is the panel that carries the assembled figure, see `set_label()`.
+blank_patch_background <- function(pg) {
+    pg & ggplot2::theme(plot.background = ggplot2::element_blank())
+}
+
 ## `aplot::plot_list(guides = "collect")` hands the collected legend to
 ## `patchwork`, which draws it at the bottom of the assembled figure.  That
 ## figure becomes the *panel* of the outer ggplot returned by

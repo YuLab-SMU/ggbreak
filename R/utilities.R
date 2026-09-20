@@ -50,8 +50,29 @@ set_label <- function(p, totallabs, p2 = NULL) {
     p <- p +
          theme_fp(x=x, i=labs_params) +
          theme(axis.text = element_blank(),
-               axis.ticks = element_blank()
+               axis.ticks = element_blank(),
+               ## The outer ggplot is only the container of the assembled
+               ## subplots: the panels, their axis lines, their borders and
+               ## their backgrounds all belong to the subplots.  The elements
+               ## below are still taken from the *global* default theme for this
+               ## plot, though, so `theme_set(theme_bw())` draws a second border
+               ## around the whole figure and `theme_set(theme_classic())` a
+               ## second pair of axis lines, see #57.
+               axis.line = element_blank(),
+               axis.line.x = element_blank(),
+               axis.line.y = element_blank(),
+               panel.border = element_blank(),
+               panel.background = element_blank(),
+               panel.grid = element_blank()
                )
+
+    ## The background of the figure belongs to this outer ggplot, and it is the
+    ## one the user asked for: forward `plot.background` the way the margin is
+    ## forwarded below, so that `theme(plot.background = element_blank())` really
+    ## makes a broken plot transparent, see #52.
+    if (has_theme && !is.null(x$theme$plot.background)) {
+        p <- p + theme(plot.background = x$theme$plot.background)
+    }
 
     ## Bring the user's `theme(plot.margin = ...)` onto the outer ggplot that
     ## holds the annotation_custom, see #71. Without this the inner subplots

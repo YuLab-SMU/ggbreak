@@ -118,6 +118,7 @@ render_dual_break <- function(x, axis_break_x, axis_break_y) {
     totallabs$x <- NULL
     totallabs$y <- NULL
 
+    g <- blank_patch_background(g)
     hl <- hoist_bottom_axis_title(g, x, newxlab)
     g <- hl$plot
     newxlab <- hl$label
@@ -205,7 +206,7 @@ render_discrete_panels <- function(x, axis, idx, margin, symbol, relrange){
                         guides = 'collect', output = "patchwork") & legendpos
     }
 
-    g <- set_label(as.ggplot(pg), totallabs = totallabs, p2 = x)
+    g <- set_label(as.ggplot(blank_patch_background(pg)), totallabs = totallabs, p2 = x)
     return(g)
 }
 
@@ -446,6 +447,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     totallabs$x <- NULL
     totallabs$y <- NULL
 
+    g <- blank_patch_background(g)
     hl <- hoist_bottom_axis_title(g, x, newxlab)
     g <- hl$plot
     newxlab <- hl$label
@@ -510,6 +512,7 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
     legendpos <- check_legend_position(plot=x)
     pg <- plot_list(gglist=setNames(gg, NULL), ncol=1, guides="collect", output = "patchwork") & legendpos
 
+    pg <- blank_patch_background(pg)
     hl <- hoist_bottom_axis_title(pg, x, totallabs$x)
     pg <- hl$plot
     totallabs$x <- hl$label
@@ -618,6 +621,7 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     totallabs$x <- NULL
     totallabs$y <- NULL
 
+    g <- blank_patch_background(g)
     hl <- hoist_bottom_axis_title(g, x, newxlab)
     g <- hl$plot
     newxlab <- hl$label
