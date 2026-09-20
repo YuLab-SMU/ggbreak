@@ -19,6 +19,161 @@ blank_patch_background <- function(pg) {
     pg & ggplot2::theme(plot.background = ggplot2::element_blank())
 }
 
+## ---------------------------------------------------------------------------
+## A broken axis and a facet grid nest in opposite directions.
+##
+## `ggbreak` draws one subplot per window, and the subplot of a faceted plot
+## carries the whole facet grid, so the windows end up stacked *outside* the
+## facets and every facet row is torn away from its other windows (#55, #17):
+##
+##     A w1          A w1
+##     A w2    ->    A w2
+##     B w1          B w1
+##     B w2          B w2
+##
+## Cut every subplot along the facet grid and put the pieces back together with
+## the facet row (column) as the outer loop.  Nothing below runs unless the plot
+## is faceted along the direction the windows are stacked on, so a plot without
+## facets is assembled exactly as before.
+
+## where the panel cells sit along `dim`; more than one means the plot is
+## faceted along that direction
+facet_panel_positions <- function(g, dim) {
+    lay <- g$layout
+    pos <- if (dim == "row") lay$t else lay$l
+    sort(unique(pos[grepl("^panel", lay$name)]))
+}
+
+## The index `ggplot2` gave this facet row (column), read off the axis that is
+## drawn once per panel.  Which of the two indices of `panel-a-b` counts what
+## depends on the layout, so it is not safe to guess it from the panel names.
+facet_axis_index <- function(g, dim, k) {
+    lay <- g$layout
+    pos <- if (dim == "row") lay$t else lay$l
+    prefix <- if (dim == "row") "^axis-l-" else "^axis-b-"
+    m <- grepl(prefix, lay$name) & pos == facet_panel_positions(g, dim)[k]
+    if (!any(m)) return(NULL)
+    sub(prefix, "", lay$name[m][1])
+}
+
+## `gtable_filter()` matches names with a regex, so the names of the cells that
+## are kept have to be escaped before they are used as a pattern
+escape_regex <- function(x) {
+    for (ch in c("\\", ".", "|", "(", ")", "[", "]", "{", "}", "^", "$", "*", "+", "?")) {
+        x <- gsub(ch, paste0("\\", ch), x, fixed = TRUE)
+    }
+    x
+}
+
+## one facet row (column) of a built gtable, as a gtable of its own
+##
+## The alternatives below carry no anchors of their own: they are wrapped in
+## `^(...)$` by the caller, so a trailing `-` would be read as "the name ends
+## here" and match nothing.
+slice_facet_gtable <- function(g, dim, k) {
+    lay <- g$layout
+    n <- length(facet_panel_positions(g, dim))
+    pos <- if (dim == "row") lay$t else lay$l
+    panels <- lay$name[grepl("^panel", lay$name) & pos == facet_panel_positions(g, dim)[k]]
+    pats <- escape_regex(panels)
+    idx <- facet_axis_index(g, dim, k)
+    if (!is.null(idx)) {
+        pats <- c(pats,
+                  if (dim == "row") paste0("axis-[lr]-", idx) else paste0("axis-t-", idx),
+                  if (dim == "row") paste0("strip-r-", idx) else paste0("strip-t-", idx))
+    }
+    ## the cells that run along the facet grid rather than across it belong to
+    ## its first or last row (column), and the subplot theme has already blanked
+    ## the ones the neighbouring subplot is supposed to draw instead
+    if (k == 1) {
+        pats <- c(pats, if (dim == "row") c("strip-t-.*", "axis-t-.*") else c("axis-l-.*", "ylab-l"))
+    }
+    if (k == n) {
+        pats <- c(pats, if (dim == "row") c("axis-b-.*", "xlab-b")
+                             else c("axis-r-.*", "strip-r-.*", "ylab-r", "xlab-b"))
+    }
+    gtable::gtable_filter(g, paste0("^(", paste(pats, collapse = "|"), ")$"), trim = TRUE)
+}
+
+## the legend a built gtable draws, and where `ggplot2` put it
+facet_guide_box <- function(g) {
+    lay <- g$layout
+    for (j in grep("^guide-box", lay$name)) {
+        if (!inherits(g$grobs[[j]], "zeroGrob")) {
+            return(list(grob = g$grobs[[j]],
+                        position = sub("^guide-box-?", "", lay$name[j])))
+        }
+    }
+    NULL
+}
+
+## Returns NULL when there is nothing to nest, otherwise the subplots to hand to
+## `plot_list()` in their place, the relative size of each of them, and the
+## legend, which the caller has to put back by hand.
+nest_facet_windows <- function(gglist, sizes, dim) {
+    if (length(gglist) < 2L) return(NULL)
+    gs <- lapply(gglist, function(p) tryCatch(ggplot2::ggplotGrob(p),
+                                              error = function(e) NULL))
+    if (any(vapply(gs, is.null, logical(1)))) return(NULL)
+    n <- length(facet_panel_positions(gs[[1]], dim))
+    if (n < 2L) return(NULL)
+
+    pieces <- list()
+    piece_sizes <- numeric(0)
+    for (k in seq_len(n)) {
+        for (j in seq_along(gs)) {
+            pieces <- c(pieces, list(slice_facet_gtable(gs[[j]], dim, k)))
+            piece_sizes <- c(piece_sizes, sizes[j] / n)
+        }
+    }
+    ## `as.ggplot(gtable)` is one opaque panel as far as `patchwork` is
+    ## concerned: it aligns the boxes of the pieces but nothing inside them, so
+    ## the panels of two pieces only line up if their columns are the same width
+    widths <- do.call(grid::unit.pmax, lapply(pieces, function(p) p$widths))
+    pieces <- lapply(pieces, function(p) { p$widths <- widths; p })
+
+    list(plots = lapply(pieces, ggplotify::as.ggplot),
+         sizes = piece_sizes,
+         guide = facet_guide_box(gs[[1]]))
+}
+
+## `patchwork` cannot collect the legend of a reassembled figure: the pieces are
+## single grobs, so they carry no guides to collect and `guides = "collect"`
+## silently draws nothing.  Put the legend back where the plot asked for it, in a
+## cell named `guide-box` so that `hoist_bottom_axis_title()` still finds it.
+add_facet_guide_box <- function(pg, guide) {
+    pgt <- patchwork::patchworkGrob(pg)
+    if (is.null(guide) || !guide$position %in% c("right", "left", "top", "bottom")) {
+        return(pgt)
+    }
+    lay <- pgt$layout
+    panels <- grepl("^panel", lay$name)
+    if (!any(panels)) return(pgt)
+    top <- min(lay$t[panels]); bottom <- max(lay$b[panels])
+    left <- min(lay$l[panels]); right <- max(lay$r[panels])
+
+    if (guide$position %in% c("right", "left")) {
+        size <- grid::convertWidth(grid::grobWidth(guide$grob), "mm", valueOnly = TRUE)
+        pgt <- gtable::gtable_add_cols(
+            pgt, grid::unit(size, "mm"),
+            pos = if (guide$position == "right") -1 else 0)
+        col <- if (guide$position == "right") ncol(pgt) else 1
+        pgt <- gtable::gtable_add_grob(pgt, guide$grob, t = top, b = bottom,
+                                       l = col, r = col, clip = "off",
+                                       name = "guide-box")
+    } else {
+        size <- grid::convertHeight(grid::grobHeight(guide$grob), "mm", valueOnly = TRUE)
+        pgt <- gtable::gtable_add_rows(
+            pgt, grid::unit(size, "mm"),
+            pos = if (guide$position == "bottom") -1 else 0)
+        row <- if (guide$position == "bottom") nrow(pgt) else 1
+        pgt <- gtable::gtable_add_grob(pgt, guide$grob, t = row, b = row,
+                                       l = left, r = right, clip = "off",
+                                       name = "guide-box")
+    }
+    pgt
+}
+
 ## `aplot::plot_list(guides = "collect")` hands the collected legend to
 ## `patchwork`, which draws it at the bottom of the assembled figure.  That
 ## figure becomes the *panel* of the outer ggplot returned by
@@ -50,7 +205,7 @@ hoist_bottom_axis_title <- function(pg, plot, label) {
     if (is.null(label) || !bottom_legend(plot)) {
         return(list(plot = pg, label = label))
     }
-    pgt <- patchwork::patchworkGrob(pg)
+    pgt <- if (inherits(pg, "gtable")) pg else patchwork::patchworkGrob(pg)
     i <- which(pgt$layout$name == "guide-box")
     if (!length(i)) {
         return(list(plot = pg, label = label))

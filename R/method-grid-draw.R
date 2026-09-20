@@ -221,6 +221,33 @@ newpage_if_recording <- function(recording) {
     if (recording) grid::grid.newpage()
 }
 
+## Assemble the window subplots into one figure.
+##
+## `along` says which way the windows are stacked: "row" for `ncol = 1`, "col"
+## for `nrow = 1`.  When the plot is faceted along that same direction the
+## subplots are cut along the facet grid first, so that the windows of a facet
+## row (column) stay together, see `nest_facet_windows()` and #55.
+##
+## Returns the figure and, separately, the legend that `patchwork` could not
+## collect out of the pieces; the caller has to put that back after it has
+## blanked the background of the figure.
+assemble_windows <- function(gglist, sizes, along, legendpos) {
+    nest <- nest_facet_windows(gglist, sizes, along)
+    if (!is.null(nest)) {
+        gglist <- nest$plots
+        sizes <- nest$sizes
+    }
+    pg <- if (along == "row") {
+        plot_list(gglist = setNames(gglist, NULL), ncol = 1, heights = sizes,
+                  guides = 'collect', output = "patchwork")
+    } else {
+        plot_list(gglist = setNames(gglist, NULL), nrow = 1, widths = sizes,
+                  guides = 'collect', output = "patchwork")
+    }
+    list(plot = pg & legendpos,
+         guide = if (is.null(nest)) NULL else nest$guide)
+}
+
 #' @method grid.draw ggbreak
 #' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
@@ -287,6 +314,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     otherlim <- other_axis_limits(x, axis)
     relrange <- compute_relative_range(breaks=breaks, scales=scales, rng=rng)
     legendpos <- check_legend_position(plot=x)
+    facet_guide <- NULL
     if (!rng$flagrev %in% c("identity","reverse")){
         breaks <- lapply(breaks, function(i)rng$inversefun(i))
     }
@@ -373,16 +401,14 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
             #      )
         }
         
-        g <- switch(coord_fun,
-                    coord_flip = plot_list(gglist=setNames(c(list(pp2), rev(pp1), list(p1)), NULL),
-                                           ncol=1,
-                                           heights=c(rev(relrange[-1]), relrange[1]),
-                                           guides = 'collect', output = "patchwork") & legendpos,
-                    coord_cartesian = plot_list(gglist=setNames(c(list(p1), pp1, list(pp2)), NULL), 
-                                                nrow=1, 
-                                                widths=relrange,
-                                                guides = 'collect', output = "patchwork") & legendpos
-                    )
+        aw <- if (coord_fun == "coord_flip") {
+            assemble_windows(c(list(pp2), rev(pp1), list(p1)),
+                             c(rev(relrange[-1]), relrange[1]), "row", legendpos)
+        } else {
+            assemble_windows(c(list(p1), pp1, list(pp2)), relrange, "col", legendpos)
+        }
+        g <- aw$plot
+        facet_guide <- aw$guide
     } else {
         breaks <- rev(breaks)
         ticklabs <- rev(ticklabs)
@@ -432,22 +458,23 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
             #      )
         }
         
-        g <- switch(coord_fun,
-                    coord_flip = plot_list(gglist=setNames(c(list(p1), rev(pp1), list(pp2)), NULL), 
-                                           nrow=1, 
-                                           widths=relrange,
-                                           guides = 'collect', output = "patchwork") & legendpos,
-                    coord_cartesian = plot_list(gglist=setNames(c(list(pp2), pp1, list(p1)), NULL), 
-                                                ncol=1, 
-                                                heights=c(rev(relrange[-1]), relrange[1]),
-                                                guides = 'collect', output = "patchwork") & legendpos
-               )
+        aw <- if (coord_fun == "coord_flip") {
+            assemble_windows(c(list(p1), rev(pp1), list(pp2)), relrange, "col", legendpos)
+        } else {
+            assemble_windows(c(list(pp2), pp1, list(p1)),
+                             c(rev(relrange[-1]), relrange[1]), "row", legendpos)
+        }
+        g <- aw$plot
+        facet_guide <- aw$guide
     }
 
     totallabs$x <- NULL
     totallabs$y <- NULL
 
     g <- blank_patch_background(g)
+    if (!is.null(facet_guide)) {
+        g <- add_facet_guide_box(g, facet_guide)
+    }
     hl <- hoist_bottom_axis_title(g, x, newxlab)
     g <- hl$plot
     newxlab <- hl$label
@@ -573,6 +600,7 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     newxlab <- switch(coord_fun, coord_flip=totallabs$y, coord_cartesian=totallabs$x)
     newylab <- switch(coord_fun, coord_flip=totallabs$x, coord_cartesian=totallabs$y)
     legendpos <- check_legend_position(plot=x)
+    facet_guide <- NULL
     ## `breaks` is a list of intervals at this point, so the inverse of the
     ## transform has to be applied to each end of each interval.  Calling it on
     ## the list itself failed with "non-numeric argument to binary operator" as
@@ -589,16 +617,13 @@ grid.draw.ggcut <- function(x, recording=TRUE){
                             subplottheme2))
         pp2 <- suppressMessages(x + do.call(coord_fun, list(xlim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]), ylim = otherlim)) +
                subplottheme3)
-        g <- switch(coord_fun,
-                    coord_flip = plot_list(gglist=setNames(c(list(pp2), rev(pp1), list(p1)), NULL),
-                                           ncol=1,
-                                           heights=relrange,#c(rev(relrange[-1]), relrange[1]),
-                                           guides = 'collect', output = "patchwork") & legendpos, 
-                    coord_cartesian = plot_list(gglist=setNames(c(list(p1), pp1, list(pp2)), NULL),
-                                                nrow=1,
-                                                widths=relrange,
-                                                guides = 'collect', output = "patchwork") & legendpos
-                    )
+        aw <- if (coord_fun == "coord_flip") {
+            assemble_windows(c(list(pp2), rev(pp1), list(p1)), relrange, "row", legendpos)
+        } else {
+            assemble_windows(c(list(p1), pp1, list(pp2)), relrange, "col", legendpos)
+        }
+        g <- aw$plot
+        facet_guide <- aw$guide
     } else {
         breaks <- rev(breaks)
         p1 <- suppressMessages(x + do.call(coord_fun, list(ylim = c(breaks[[nbreaks]][1], breaks[[nbreaks]][2]), xlim = otherlim)) + subplottheme1)
@@ -607,21 +632,21 @@ grid.draw.ggcut <- function(x, recording=TRUE){
                             subplottheme2))
         pp2 <- suppressMessages(x + do.call(coord_fun, list(ylim = c(breaks[[1]][1], breaks[[1]][2]), xlim = otherlim)) +
                subplottheme3)
-        g <- switch(coord_fun,
-                    coord_flip = plot_list(gglist=setNames(c(list(p1), rev(pp1), list(pp2)), NULL),
-                                           nrow=1,
-                                           widths=relrange,
-                                           guides = 'collect', output = "patchwork") & legendpos,
-                    coord_cartesian = plot_list(gglist=setNames(c(list(pp2), pp1, list(p1)), NULL),
-                                                ncol=1,
-                                                heights=relrange,#c(rev(relrange[-1]), relrange[1]),
-                                                guides = 'collect', output = "patchwork") & legendpos
-               )
+        aw <- if (coord_fun == "coord_flip") {
+            assemble_windows(c(list(p1), rev(pp1), list(pp2)), relrange, "col", legendpos)
+        } else {
+            assemble_windows(c(list(pp2), pp1, list(p1)), relrange, "row", legendpos)
+        }
+        g <- aw$plot
+        facet_guide <- aw$guide
     }
     totallabs$x <- NULL
     totallabs$y <- NULL
 
     g <- blank_patch_background(g)
+    if (!is.null(facet_guide)) {
+        g <- add_facet_guide_box(g, facet_guide)
+    }
     hl <- hoist_bottom_axis_title(g, x, newxlab)
     g <- hl$plot
     newxlab <- hl$label

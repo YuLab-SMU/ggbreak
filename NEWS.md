@@ -1,5 +1,7 @@
-# ggbreak 0.1.7.014
+# ggbreak 0.1.7.015
 
++ a broken facet grid no longer separates a facet row from its other windows; the subplot of a faceted plot carries the whole facet grid, so the windows used to be stacked *outside* the facets and the rows came out A B A B instead of A A B B, for `facet_grid()` and for `facet_wrap()` whenever the panels run along the broken axis, and with `coord_flip()` the facet columns are kept together instead, which is the case reported in #55 and #17 (2026-09-20, Sun, #55, #17)
++ added regression tests that the windows of a facet row (column) stay together, that a plot which is not faceted along the broken axis is assembled as before, and that the legend is still drawn exactly once when the pieces are reassembled (2026-09-20, Sun)
 + a theme that is set with `theme_set()` no longer draws a second panel border, a second pair of axis lines or a panel background around the whole figure; those elements belong to the subplots, and the outer ggplot that carries the assembled figure was taking them from the global theme by accident, so `theme_set(theme_bw())` drew a rectangle around the figure and `theme_set(theme_classic())` two extra lines outside the plot (2026-09-20, Sun, #57)
 + the assembled figure no longer paints an opaque background of its own; `patchwork` took that background from the default theme, so a broken plot could not be superimposed on another one with `annotation_custom()` (it hid whatever was drawn below it) and the `plot.background` set on the plot never reached the figure (2026-09-20, Sun, #52)
 + added regression tests that a globally set theme renders like the same theme applied to the plot, and that the assembled figure paints no background of its own (2026-09-20, Sun)
