@@ -12,6 +12,47 @@
 #' @importFrom aplot plot_list
 #' @importFrom stats setNames
 
+## A plot can carry more than one of the scales `ggbreak` adds, because each of
+## them is recorded in the class of the plot.  Only two combinations of them can
+## be drawn: a break on the x axis together with a break on the y axis
+## (`render_dual_break()`), and a single scale on one axis.  Every other
+## combination used to reach `aplot::plot_list()` with the second class still on
+## the subplots, and `plot_list()` *draws* a plot that still carries one of these
+## classes -- `ggfun::is.ggbreak()` is TRUE for all three of them, so it calls
+## `ggbreak2ggplot()` on it -- instead of treating it as a plain plot.  The
+## figure came out as a rendering of one scale nested inside the windows of the
+## other, announced by nothing but a "Coordinate system already present"
+## message: a wrong figure, and a silently wrong one.  Say what is supported
+## instead, see #31.
+check_scale_combination <- function(plot, drawn) {
+    other <- setdiff(intersect(class(plot), ggbreak_scale_class), drawn)
+    if (!length(other)) {
+        return(invisible(NULL))
+    }
+    abort(c(
+        paste0(scale_label(plot, drawn), " cannot be combined with ",
+               scale_label(plot, other[1L]), "."),
+        i = paste0("A plot can be broken on both axes (`scale_x_break()` with ",
+                   "`scale_y_break()`) and one axis can be cut, but a ",
+                   "wrapping, breaking or cutting scale cannot be used ",
+                   "together with a different one of them.")
+    ))
+}
+
+ggbreak_scale_class <- c("ggbreak", "ggwrap", "ggcut")
+
+## The scale a class stands for, written the way the user wrote it.
+scale_label <- function(plot, cls) {
+    if (identical(cls, "ggwrap")) {
+        return("`scale_wrap()`")
+    }
+    if (identical(cls, "ggcut")) {
+        axis <- attr(plot, "axis_cut")$axis
+        return(paste0("`scale_", if (is.null(axis)) "x" else axis, "_cut()`"))
+    }
+    if (is.null(attr(plot, "axis_break_x"))) "`scale_y_break()`" else "`scale_x_break()`"
+}
+
 ## Dual-axis break rendering: creates an Nx * Ny 2D grid of subplots
 render_dual_break <- function(x, axis_break_x, axis_break_y) {
     # Process x-axis breaks
@@ -256,6 +297,7 @@ assemble_windows <- function(gglist, sizes, along, legendpos) {
 #' @export
 grid.draw.ggbreak <- function(x, recording = TRUE) {
     newpage_if_recording(recording)
+    check_scale_combination(x, "ggbreak")
     class(x) <- class(x)[class(x) != "ggbreak"]
     x <- check_xy_intercept(plot=x)
 
@@ -521,6 +563,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
 #' @export
 grid.draw.ggwrap <- function(x, recording=TRUE){
     newpage_if_recording(recording)
+    check_scale_combination(x, "ggwrap")
     class(x) <- class(x)[class(x) != "ggwrap"]
     x <- check_xy_intercept(plot=x)
     axis_wrap <- attr(x, "axis_wrap")
@@ -572,6 +615,7 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
 #' @export
 grid.draw.ggcut <- function(x, recording=TRUE){
     newpage_if_recording(recording)
+    check_scale_combination(x, "ggcut")
     class(x) <- class(x)[class(x) != "ggcut"]
     x <- check_xy_intercept(plot=x)
     axis_cut <- attr(x, "axis_cut")

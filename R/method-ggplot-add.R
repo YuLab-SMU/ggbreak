@@ -35,6 +35,20 @@ ggplot_add.wrap_params <- function(object, plot, ...){
 #' @method ggplot_add ggcut_params
 #' @export
 ggplot_add.ggcut_params <- function(object, plot, ...){
+    ## A cut is stored as a single attribute, so a second cut on the other axis
+    ## would replace the first one and the plot would come out cut on one axis
+    ## only, without a word about the cut that was dropped.  A break does keep
+    ## both axes (`axis_break_x` and `axis_break_y` are separate), a cut does
+    ## not, see #31.
+    existing <- attr(plot, "axis_cut")
+    if (!is.null(existing) && !identical(existing$axis, object$axis)) {
+        abort(c(
+            paste0("`scale_", existing$axis, "_cut()` cannot be combined with ",
+                   "`scale_", object$axis, "_cut()`."),
+            i = paste0("Only one axis can be cut, and the second cut would ",
+                       "replace the first one.")
+        ))
+    }
     attr(plot, "axis_cut") <- object
     class(plot) <- c("ggcut", class(plot))
     return (plot)
