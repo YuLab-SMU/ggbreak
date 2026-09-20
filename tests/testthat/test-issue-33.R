@@ -154,3 +154,16 @@ test_that('a faceted plot along the broken axis is left alone (#33)', {
 
     expect_silent(bridges_of(p + scale_y_break(c(500, 750), bridge = TRUE)))
 })
+
+test_that('a break on a discrete axis is left alone (#33)', {
+    ## the levels of a window are subset, so its line stops at its own levels
+    ## and never reaches the edge of the panel -- there is nothing to read the
+    ## hidden piece off
+    dat <- data.frame(x = factor(c("low", "medium", "high"),
+                                 levels = c("low", "medium", "high")),
+                      y = c(10, 20, 30))
+    p <- ggplot(dat, aes(x, y, group = 1)) + geom_line() + geom_point()
+
+    expect_length(bridges_of(p + scale_x_break(c("low", "medium"),
+                                               bridge = TRUE)), 0)
+})

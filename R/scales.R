@@ -25,7 +25,9 @@
 #' @param bridge whether to draw the piece of a line that the break hides, so
 #' that a line crossing the break reads as one line instead of two, default is
 #' FALSE. Only the lines of \code{geom_line()}, \code{geom_path()} and
-#' \code{geom_step()} are bridged, and only for a single break.
+#' \code{geom_step()} are bridged, and only for a single break on a continuous
+#' axis; a break on a discrete axis and a plot that is faceted along the broken
+#' axis are left alone.
 #' @return gg object
 #' @export
 #' @author Guangchuang Yu

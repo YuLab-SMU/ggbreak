@@ -206,10 +206,13 @@ render_discrete_panels <- function(x, axis, idx, margin, symbol, relrange){
                         guides = 'collect', output = "patchwork") & legendpos
     }
 
+    ## a line that crosses the gap between two levels is hidden the same way as
+    ## one that crosses a break interval, but there is nothing to read the
+    ## hidden piece off here: the levels of a window are subset, so the line of a
+    ## panel stops at its own levels and never reaches the edge, see #33
     g <- set_label(as.ggplot(blank_patch_background(pg)), totallabs = totallabs, p2 = x)
     return(g)
 }
-
 ## Start a new page *before* the subplots are built.
 ##
 ## Building a ggplot on a device that has no current page makes R start one:
