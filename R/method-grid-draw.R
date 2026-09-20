@@ -267,7 +267,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     if (has_x && has_y) {
         g <- render_dual_break(x, axis_break_x, axis_break_y)
         if (recording) {
-            grid::grid.draw(ggplot2::ggplotGrob(g))
+            grid::grid.draw(drawable_grob(g))
         }
         return(invisible(g))
     }
@@ -287,7 +287,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     if (is.null(rng$flagrev)){
         g <- render_discrete_break(x, axis_break)
         if (recording){
-            grid::grid.draw(ggplot2::ggplotGrob(g))
+            grid::grid.draw(drawable_grob(g))
         }
         return(invisible(g))
     }
@@ -512,7 +512,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     # }
 
     if (recording){
-        grid::grid.draw(ggplot2::ggplotGrob(g))
+        grid::grid.draw(drawable_grob(g))
     }
     invisible(g)
 }
@@ -561,7 +561,7 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
 
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
     if (recording){
-        grid::grid.draw(ggplot2::ggplotGrob(g))
+        grid::grid.draw(drawable_grob(g))
     }
 
     invisible(g)
@@ -594,7 +594,7 @@ grid.draw.ggcut <- function(x, recording=TRUE){
                                     margin = axis_cut$space,
                                     symbol = NULL, relrange = relrange)
         if (recording){
-            grid::grid.draw(ggplot2::ggplotGrob(g))
+            grid::grid.draw(drawable_grob(g))
         }
         return(invisible(g))
     }
@@ -669,7 +669,7 @@ grid.draw.ggcut <- function(x, recording=TRUE){
     g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
     g <- set_label(g, totallabs = totallabs, p2 = x)
     if (recording){
-        grid::grid.draw(ggplot2::ggplotGrob(g))
+        grid::grid.draw(drawable_grob(g))
     }
     
     invisible(g)

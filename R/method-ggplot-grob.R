@@ -55,7 +55,9 @@ ggplot_gtable.ggbreak_built <- function(data) {
     outer <- ggplot2::ggplotGrob(
         suppressWarnings(grid::grid.draw(attr(data, "ggbreak_plot"), recording = FALSE))
     )
-    align_assembled_figure(outer)
+    ## a plot that is handed to `patchwork` or `cowplot` goes to the device the
+    ## same way, so the geometry its panels hide is cut back here as well, #16
+    clamp_panel_geometry(align_assembled_figure(outer))
 }
 
 ## The figure that carries the assembled windows, dug out of the grob tree of a

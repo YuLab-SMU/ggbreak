@@ -1221,3 +1221,205 @@ add_line_bridges <- function(pg, along) {
     }
     gt
 }
+
+## A break is drawn by clipping, not by cutting the data: every window is handed
+## the whole dataset and each panel hides the part that belongs to the other
+## windows.  The hidden geometry is still handed to the device, and a vector
+## device writes it into the file.  The bar plot of #16 is the clearest case --
+## a bar from 0 to 990 is a rectangle as tall as the unbroken axis in *both*
+## windows, and in the window that shows its top the rectangle reaches about 1.8
+## panel heights above the top of the panel it is drawn in.  Illustrator refuses
+## to paste such a file ("the requested transformation would make some objects
+## too large"), which is what the reporter saw next to the clip paths.
+##
+## None of that geometry is ever visible, the panel clips it away, so it can be
+## cut back to the panel without moving a single pixel.  Cutting it back in the
+## *data* is not an option: dropping the row of a bar drops the whole bar, and
+## cutting a line at the edge of the panel changes the slope of the segment that
+## crosses it.  Only geometry that is a slab along the axis can be cut back
+## safely, so this handles `rect` (a bar, a column, a tile, the box of a
+## boxplot) and `segments` (a whisker, an error bar, the median of a boxplot).
+## A path is deliberately left alone: the piece of a line that the break hides
+## has to stay in the grob to be drawn in the gap between the windows, see
+## `add_line_bridges()` and #33.
+##
+## `margin` is how far outside the panel a slab is still allowed to reach.  It
+## only has to be wide enough for the border of a bar to fall outside the panel,
+## so that the border is clipped away exactly as it was before.
+clamp_panel_geometry <- function(g, margin = 0.05) {
+    if (inherits(g, "rect")) {
+        for (axis in list(list(pos = "x", size = "width", just = 1L),
+                          list(pos = "y", size = "height", just = 2L))) {
+            cut <- clamp_slab(g[[axis$pos]], g[[axis$size]],
+                              just_side(g$just, axis$just), margin)
+            if (is.null(cut)) next
+            g[[axis$pos]] <- cut$pos
+            g[[axis$size]] <- cut$size
+        }
+        return(g)
+    }
+    if (inherits(g, "segments")) {
+        return(clamp_segment_grob(g, margin))
+    }
+    if (inherits(g, "polygon")) {
+        return(clamp_polygon_grob(g, margin))
+    }
+    if (!is.null(g$children)) {
+        g$children <- map_grobs(g$children, margin)
+    }
+    if (!is.null(g$grobs)) {
+        g$grobs <- map_grobs(g$grobs, margin)
+    }
+    g
+}
+
+## `lapply()` drops the class of a `gList`, which makes the whole grob a
+## different object even when nothing inside it changed, so the attributes of
+## the list are put back
+map_grobs <- function(kids, margin) {
+    out <- lapply(kids, clamp_panel_geometry, margin = margin)
+    attributes(out) <- attributes(kids)
+    out
+}
+
+## one side of a `just`, the way `grid` reads it: a single value applies to both
+## axes, otherwise the first is horizontal and the second vertical
+just_side <- function(just, which) {
+    if (is.null(just)) return("centre")
+    just <- as.character(just)
+    if (length(just) == 1L) just else just[[which]]
+}
+
+## the two ends of a slab, from the `pos`/`size` pair a grob keeps
+slab_ends <- function(pos, size, side) {
+    switch(side,
+           centre = list(lo = pos - size / 2, hi = pos + size / 2),
+           left = , bottom = list(lo = pos, hi = pos + size),
+           list(lo = pos - size, hi = pos))
+}
+
+## and back again
+slab_restore <- function(lo, hi, side) {
+    switch(side,
+           centre = list(pos = (lo + hi) / 2, size = hi - lo),
+           left = , bottom = list(pos = lo, size = hi - lo),
+           list(pos = hi, size = hi - lo))
+}
+
+## `pos`/`size` of a slab cut back to `[-margin, 1 + margin]`, or NULL when
+## there is nothing to cut.  Only `native` coordinates can be compared against
+## the edges of a panel -- a background is `npc` and is left alone -- and only
+## finite ones can be compared at all.
+clamp_slab <- function(pos, size, side, margin) {
+    pos <- native_coords(pos)
+    size <- native_coords(size)
+    if (is.null(pos) || is.null(size)) return(NULL)
+    ends <- slab_ends(pos, size, side)
+    ## a slab that lies beyond the panel altogether is pulled back to the margin,
+    ## so that nothing is left with a coordinate far outside the panel; it stays
+    ## outside it, and the panel clips it away just as it did before
+    lo <- pmin(pmax(ends$lo, -margin), 1 + margin)
+    hi <- pmax(pmin(ends$hi, 1 + margin), lo)
+    if (isTRUE(all.equal(lo, ends$lo)) && isTRUE(all.equal(hi, ends$hi))) return(NULL)
+    cut <- slab_restore(lo, hi, side)
+    list(pos = grid::unit(cut$pos, "native"), size = grid::unit(cut$size, "native"))
+}
+
+## Cut a segment back only when it already runs along an axis.  Shortening a
+## vertical segment keeps it vertical and keeps the piece of it that is inside
+## the panel, so nothing moves; the same holds for a horizontal one, and moving
+## one of them sideways keeps it outside the panel.  A slanted segment is left
+## alone, cutting it would move the point where it enters the panel and change
+## its slope.
+clamp_segment_grob <- function(g, margin) {
+    x0 <- native_coords(g$x0)
+    x1 <- native_coords(g$x1)
+    y0 <- native_coords(g$y0)
+    y1 <- native_coords(g$y1)
+    if (is.null(x0) || is.null(x1) || is.null(y0) || is.null(y1)) return(g)
+
+    runs <- abs(x0 - x1) < 1e-9 | abs(y0 - y1) < 1e-9
+    if (!any(runs)) return(g)
+
+    cut <- clamp_segment_ends(x0, x1, runs, margin)
+    if (!is.null(cut)) {
+        g$x0 <- grid::unit(cut$first, "native")
+        g$x1 <- grid::unit(cut$second, "native")
+    }
+    cut <- clamp_segment_ends(y0, y1, runs, margin)
+    if (!is.null(cut)) {
+        g$y0 <- grid::unit(cut$first, "native")
+        g$y1 <- grid::unit(cut$second, "native")
+    }
+    g
+}
+
+## the two ends of a segment cut back to `[-margin, 1 + margin]`, or NULL when
+## the ends that may be cut are already inside it.  Only the segments marked in
+## `runs` are cut.
+clamp_segment_ends <- function(first, second, runs, margin) {
+    lo <- pmin(pmax(pmin(first, second), -margin), 1 + margin)
+    hi <- pmax(pmin(pmax(first, second), 1 + margin), lo)
+    cut <- runs & (abs(pmax(first, second) - hi) > 1e-9 |
+                   abs(pmin(first, second) - lo) > 1e-9)
+    if (!any(cut)) return(NULL)
+    low <- pmin(first, second) == first
+    list(first = ifelse(cut & low, lo, ifelse(cut, hi, first)),
+         second = ifelse(cut & low, hi, ifelse(cut, lo, second)))
+}
+
+## the numbers of a grob field that is in `native` units, or NULL when it is not
+## a unit, is in another unit, or holds a value that cannot be compared
+native_coords <- function(u) {
+    if (is.null(u) || !inherits(u, "unit")) return(NULL)
+    if (!all(grid::unitType(u) == "native")) return(NULL)
+    u <- as.numeric(u)
+    if (!length(u) || !all(is.finite(u))) return(NULL)
+    u
+}
+
+## A polygon can be cut back when it is a slab along the axis: every vertex of it
+## lies on one of two levels, so it covers one interval of the axis and nothing
+## else.  That is what a rectangle drawn as a polygon is, the box of a boxplot
+## among others, and cutting the interval back keeps the part of it that is
+## inside the panel.  A polygon whose vertices take other values -- a ribbon, an
+## area -- is left alone: there the boundary meets the edge of the panel at a
+## point that cutting would move.
+clamp_polygon_grob <- function(g, margin) {
+    for (axis in c("y", "x")) {
+        values <- native_coords(g[[axis]])
+        if (is.null(values)) next
+        touched <- FALSE
+        for (group in polyline_groups(g)) {
+            levels <- unique(values[group])
+            if (length(levels) > 2L) next
+            cut <- clamp_levels(levels, margin)
+            if (is.null(cut)) next
+            values[group] <- cut[match(values[group], levels)]
+            touched <- TRUE
+        }
+        if (touched) g[[axis]] <- grid::unit(values, "native")
+    }
+    g
+}
+
+## the one or two levels of a slab cut back to `[-margin, 1 + margin]`, in the
+## order they came in, or NULL when they are already inside it
+clamp_levels <- function(levels, margin) {
+    lo <- pmin(pmax(min(levels), -margin), 1 + margin)
+    hi <- pmax(pmin(max(levels), 1 + margin), lo)
+    if (isTRUE(all.equal(lo, min(levels))) && isTRUE(all.equal(hi, max(levels)))) {
+        return(NULL)
+    }
+    if (length(levels) == 1L) return(lo)
+    if (levels[1] < levels[2]) c(lo, hi) else c(hi, lo)
+}
+
+## The assembled figure as it goes to a device: the gtable of the outer ggplot
+## with the geometry its panels hide cut back, see `clamp_panel_geometry()`.
+## Every drawing path goes through here, so `print()`, `grid.draw()` and
+## `ggsave()` all write the trimmed geometry and none of them draws anything
+## differently.
+drawable_grob <- function(g) {
+    clamp_panel_geometry(ggplot2::ggplotGrob(g))
+}
