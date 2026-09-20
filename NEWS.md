@@ -1,5 +1,6 @@
-# ggbreak 0.1.7.012
+# ggbreak 0.1.7.013
 
++ added a regression test that the axis title of a broken plot stays above the collected legend with `theme(legend.position = "bottom")`, for `scale_x_break()`, `scale_y_break()`, a dual break, `coord_flip()`, `scale_wrap()` and the cut scales; the report in #85 is the same defect that #53 fixed, the reporter was on an earlier version (2026-09-19, Sat, #85)
 + drawn the axis title of a broken plot above the legend when `theme(legend.position = "bottom")` is used; `patchwork` collects the legend at the bottom of the assembled figure, which is the panel of the outer ggplot that carries the axis title, so the legend used to be drawn on top of the title instead of underneath it (2026-09-18, Fri, #53)
 + `patchwork` and `gtable` are now declared in `Imports`; both were already needed at run time to assemble the subplots (2026-09-18, Fri)
 + document how to make the ticks line up across the subplots: the `breaks` argument of `scale_x_break()`/`scale_y_break()` is the place where the axis is cut, and the ticks are set with `breaks` in the continuous scale, which every subplot then filters to its own range (2026-09-18, Fri, #66)
