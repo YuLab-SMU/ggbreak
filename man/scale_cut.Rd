@@ -34,6 +34,9 @@ scale_x_cut
 
 scale_y_cut
 }
+\details{
+A plot can be broken on both axes (\code{scale_x_break()} with \code{scale_y_break()}), but a wrapping, breaking or cutting scale cannot be combined with a different one of them.
+}
 \examples{
 library(ggplot2)
 library(ggbreak)

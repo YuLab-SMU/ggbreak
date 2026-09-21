@@ -15,6 +15,9 @@ gg object
 \description{
 This scale function wraps a 'gg' plot over multiple rows to make plots with long x axes easier to read.
 }
+\details{
+A plot can be broken on both axes (\code{scale_x_break()} with \code{scale_y_break()}), but a wrapping, breaking or cutting scale cannot be combined with a different one of them.
+}
 \examples{
 library(ggplot2)
 library(ggbreak)

@@ -27,23 +27,27 @@ export(scale_y_break)
 export(scale_y_cut)
 import(yulab.utils)
 importFrom(aplot,plot_list)
-importFrom(ggfun,ggbreak2ggplot)
-importFrom(ggfun,is.ggbreak)
-importFrom(ggplot2,coord_cartesian)
-importFrom(ggplot2,coord_flip)
-importFrom(ggplot2,element_blank)
-importFrom(ggplot2,element_grob)
-importFrom(ggplot2,element_text)
-importFrom(ggplot2,ggplot_add)
-importFrom(ggplot2,ggplot_build)
-importFrom(ggplot2,ggplot_gtable)
-importFrom(ggplot2,labs)
-importFrom(ggplot2,margin)
-importFrom(ggplot2,scale_x_continuous)
-importFrom(ggplot2,scale_y_continuous)
-importFrom(ggplot2,theme)
-importFrom(ggplot2,xlab)
-importFrom(ggplot2,ylab)
+importFrom(ggfun,
+  ggbreak2ggplot,
+  is.ggbreak
+)
+importFrom(ggplot2,
+  coord_cartesian,
+  coord_flip,
+  element_blank,
+  element_grob,
+  element_text,
+  ggplot_add,
+  ggplot_build,
+  ggplot_gtable,
+  labs,
+  margin,
+  scale_x_continuous,
+  scale_y_continuous,
+  theme,
+  xlab,
+  ylab
+)
 importFrom(ggplotify,as.ggplot)
 importFrom(grid,grid.draw)
 importFrom(rlang,abort)

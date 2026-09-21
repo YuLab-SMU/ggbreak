@@ -65,7 +65,7 @@ gg object
 Set an axis break point for a 'gg' plot
 }
 \details{
-This scale function set an axis break point for a 'gg' plot. Either 'x' and 'y' axes are supported. The result is still a 'gg' object and user can progressively add layers to it.
+This scale function set an axis break point for a 'gg' plot. Either 'x' and 'y' axes are supported. The result is still a 'gg' object and user can progressively add layers to it. A plot can be broken on both axes (\code{scale_x_break()} with \code{scale_y_break()}), but a wrapping, breaking or cutting scale cannot be combined with a different one of them.
 }
 \examples{
 require(ggplot2 )

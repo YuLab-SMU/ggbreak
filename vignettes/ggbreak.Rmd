@@ -482,6 +482,19 @@ The legend is extracted from the original plot, the broken plot is turned into a
 
 The features we introduced for `scale_x_break` and `scale_y_break` also work for `scale_wrap`, `scale_x_cut` and `scale_y_cut`. That includes the transformed and reverse scales, `coord_flip()`, faceting, dual axes, `patchwork`, and the discrete and date or datetime axes, so the choice between the five scale functions is only about how the axis should be rearranged and never about what is supported. The `symbol` argument is the exception: it marks the break on the axis and belongs to `scale_x_break()` and `scale_y_break()` only.
 
+A plot can carry two of these scales, but only one pair of them: a break on the x axis together with a break on the y axis (`scale_x_break()` with `scale_y_break()`, see Feature 3). A wrapping, breaking or cutting scale cannot be used together with a different one of them, and a cut cannot be combined with anything at all. A wrap and a break both rearrange their own axis and both want to stack their windows along the figure, so the two of them together have no single layout the call could mean: one y break inside each wrap window, or one wrap window beside the other within each y window. Rather than draw a figure that looks plausible and is not, combining them is an error that names the two scales.
+
+```{r, eval=FALSE}
+p + scale_wrap(n = 2) + scale_y_break(c(10, 90))
+#> Error in `check_scale_combination()`:
+#> ! `scale_y_break()` cannot be combined with `scale_wrap()`.
+#> ℹ A plot can be broken on both axes (`scale_x_break()` with `scale_y_break()`)
+#>   and one axis can be cut, but a wrapping, breaking or cutting scale cannot be
+#>   used together with a different one of them.
+```
+
+A broken plot is drawn by clipping rather than by cutting the data: every window is given the whole dataset and its panel hides the part that belongs to the other windows. What a panel hides is not written to the file, so a PDF or an SVG written from a broken plot holds no object larger than the figure and can be pasted into an editor such as Adobe Illustrator, which refuses a file whose objects are too large to paste.
+
 ## FAQ
 
 1. Incompatible with functions that arrange multiple plots

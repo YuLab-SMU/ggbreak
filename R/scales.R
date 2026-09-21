@@ -1,6 +1,6 @@
 #' Set an axis break point for a 'gg' plot
 #'
-#' This scale function set an axis break point for a 'gg' plot. Either 'x' and 'y' axes are supported. The result is still a 'gg' object and user can progressively add layers to it.
+#' This scale function set an axis break point for a 'gg' plot. Either 'x' and 'y' axes are supported. The result is still a 'gg' object and user can progressively add layers to it. A plot can be broken on both axes (`scale_x_break()` with `scale_y_break()`), but a wrapping, breaking or cutting scale cannot be combined with a different one of them.
 #' @title scale_x_break
 #' @rdname scale_break
 #' @param breaks break point. For a discrete axis these are the names of two
@@ -58,6 +58,8 @@ scale_y_break <- function(breaks, scales="fixed", ticklabels=NULL, expand=TRUE, 
 
 #' This scale function wraps a 'gg' plot over multiple rows to make plots with long x axes easier to read.
 #'
+#' A plot can be broken on both axes (`scale_x_break()` with `scale_y_break()`), but a wrapping, breaking or cutting scale cannot be combined with a different one of them.
+#'
 #' 
 #' @title scale-wrap
 #' @rdname scale-wrap
@@ -77,6 +79,7 @@ scale_wrap <- function(n){
 
 
 #' @title scale_x_cut
+#' @details A plot can be broken on both axes (`scale_x_break()` with `scale_y_break()`), but a wrapping, breaking or cutting scale cannot be combined with a different one of them.
 #' @param breaks a numeric or numeric vector, the points to be divided
 #' @param which integer, the position of subplots to scales, started from left to right or top to bottom.
 #' @param scales numeric, relative width or height of subplots.
