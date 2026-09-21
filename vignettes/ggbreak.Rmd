@@ -407,6 +407,32 @@ ggplot(d4, aes(x, y)) +
 
 The points above the break are labelled `m` to `x` and the points below it are labelled `a` to `l`, and no label of one group shows up in the subplot of the other. `ggrepel` keeps pushing the labels of a subplot apart as usual, so a crowded panel is still readable. The `seed` argument of `ggrepel` is honoured, which makes such a plot reproducible.
 
+### Feature 18: Join up a line that crosses a break
+
+A break hides a range of the axis and draws what is left in separate subplots, so a line that runs across the break stops at the edge of one subplot and starts again at the edge of the next. The two ends sit at different positions along the broken axis, because the piece that joins them lies in the range the break hides and no subplot is drawn there. A line keeps its whole geometry until it is drawn, though, so where it leaves one subplot and enters the next can be read off it, and the blank space that `space` opens between the subplots is exactly where that piece belongs.
+
+`scale_x_break()` and `scale_y_break()` take a `bridge` argument, off by default. Without it, a connected scatter plot reads as two lines.
+
+```{r fig.width=7, fig.height=4}
+d5 <- data.frame(x = 1:10, y = c(1, 2, 3, 4, 5, 50, 55, 60, 65, 70))
+
+ggplot(d5, aes(x, y)) +
+    geom_point() +
+    geom_line() +
+    scale_y_break(c(10, 45), space = 0.5)
+```
+
+With `bridge = TRUE` the piece the break hides is drawn in the gap, so the line runs from the first point to the last one, with a short flatter segment where the break is.
+
+```{r fig.width=7, fig.height=4}
+ggplot(d5, aes(x, y)) +
+    geom_point() +
+    geom_line() +
+    scale_y_break(c(10, 45), space = 0.5, bridge = TRUE)
+```
+
+The bridge is drawn in the space between the subplots, so a larger `space` makes it more visible. The lines of `geom_line()`, `geom_path()` and `geom_step()` are bridged, and only for a single break on a continuous axis. On a discrete axis a subplot keeps only its own levels, so its line stops at its own levels and never reaches the edge of the panel; a plot that is faceted along the broken axis binds the subplots into a facet grid rather than stacking them, so the two ends are not across from each other. Points and ribbons are not bridged.
+
 ## Wrap plot
 
 The `scale_wrap()` function wraps a 'gg' plot over multiple rows to make plots with long x-axes easier to read. It is the complement of `scale_x_break()`: a break hides a range of the axis and draws what is left next to each other, while a wrap keeps the whole axis and splits it into `n` consecutive windows of the same width, one per row. Each window is drawn at the full width of the figure, so a long series becomes readable without dropping anything from it.
