@@ -88,11 +88,15 @@ scale_wrap(n)
   Edit the roxygen in `R/*.R` and run `make rd`. It re-flows `importFrom` into one block
   per package and bumps `Config/roxygen2/version` to 8.1.0 — that is pure formatting,
   commit it rather than reverting.
-- **`tests/testthat.R` does not exist**, so `R CMD check` never runs the testthat suite.
-  "Status: OK" does **not** mean the tests pass. Run the suite yourself:
-  `testthat::test_dir("tests/testthat")`.
-- `tests/testthat/test-api-attributes.R:18` already fails on master. It is not caused by
-  your change; don't chase it.
+- **The suite runs under `R CMD check`** — the `tests/testthat.R` driver was added in
+  `61e6ee8`. Until then the 22 files shipped in the tarball and were executed by nothing:
+  the check log had **no "checking tests" line at all**, so "Status: OK" said nothing about
+  them, and `test_dir()` was the only way to run them. Locally:
+  `testthat::test_dir("tests/testthat")` (about 2m40s; check is ~4m31s in total). The suite
+  is **0 failed / 0 warning / 0 skipped** as of `61e6ee8`, so a failure is yours — there is
+  no known-failing test to step over any more. `test-api-attributes.R:18` used to fail, and
+  it was a wrong assertion rather than a known-bad test; do not take a red test for granted
+  without checking the contract it claims to pin down.
 - After adding an S3 method, check the "S3 generic/method consistency" result —
   `ggplot_build`'s generic is `function(plot, ...)`, so a method written as
   `function(plot)` raises a WARNING.
