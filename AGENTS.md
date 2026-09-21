@@ -198,9 +198,16 @@ Two things that will waste your afternoon:
   one line of code: `nest_facet_windows()` returns `NULL` unless the facet
   `inherits(..., "FacetGrid")`, because a wrap has no facet rows or columns to nest into
   and puts a strip above every panel. Pre-existing, not a regression — 0.1.7.13 and 0.2.0
-  render it identically (0 px apart). **Open question, raised but not decided:** should a
-  wrap nest like a grid? It is the same family as #55 / #17, but it needs a target layout
-  agreed on first, so do not "fix" it on your own initiative.
+  render it identically (0 px apart).
+- **The wrap's `a b c | a b c` is the layout to keep -- do not "fix" it to nest.** Measured
+  by letting `FacetWrap` through that one line in an isolated install: the `nrow = 1` wrap
+  then renders **identically** to `facet_grid(. ~ g)` (0 px apart, same bytes), i.e.
+  `a a | b b | c c`, where the x axis restarts once per group although the data holds one
+  break. At `nrow = 2` it is worse than that -- the figure comes out **mangled**, the first
+  row losing its strips while the second row's survive, which is exactly what the comment
+  above `nest_facet_windows()` warns about. So the exclusion is right for two independent
+  reasons, and nesting a wrap is **not** #55 / #17 left unfinished: those were about
+  `facet_grid`, and the grid case is the one that was broken.
 - `facet_grid()` is the one #55 / #17 fixed — before it, the strips were crammed into
   comma-joined cells and the rows came out `A B A B`.
 - **`vignettes/ggbreak.Rmd` is CRLF, so edit it as bytes.** A plain text write
