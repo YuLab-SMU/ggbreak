@@ -1,4 +1,4 @@
-# ggbreak 0.1.7.023
+# ggbreak 0.2.0
 
 + the vignette and the help pages now say which of the five scales can be combined: a plot can be broken on the x axis and on the y axis at the same time, and that is the only combination, so a wrapping, breaking or cutting scale cannot be used together with a different one of them, and the error that is raised when they are names both scales. The vignette also says that a broken plot is drawn by clipping rather than by cutting the data, and that what a panel hides is not written to the file, so a PDF or an SVG written from a broken plot holds no object larger than the figure and can be pasted into Adobe Illustrator (2026-09-21, Mon, #16, #31)
 
