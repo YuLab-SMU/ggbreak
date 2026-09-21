@@ -5,3 +5,4 @@ README.Rmd
 .dev
 .workbuddy-ai/
 ^Rplots\.pdf$
+^AGENTS\.md$
