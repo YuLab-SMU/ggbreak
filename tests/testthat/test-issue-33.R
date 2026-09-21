@@ -164,6 +164,13 @@ test_that('a break on a discrete axis is left alone (#33)', {
                       y = c(10, 20, 30))
     p <- ggplot(dat, aes(x, y, group = 1)) + geom_line() + geom_point()
 
-    expect_length(bridges_of(p + scale_x_break(c("low", "medium"),
-                                               bridge = TRUE)), 0)
+    ## `suppressWarnings()` here for the same reason `print.ggbreak()` and the
+    ## `ggplotGrob()` method use it: a window keeps only its own levels, so the
+    ## rows of the other levels fall outside its scale and ggplot2 warns
+    ## "Removed N rows containing missing values or values outside the scale
+    ## range".  That is what a break *is* in this package.  `assembled_gtable()`
+    ## reaches the figure through `grid.draw(..., recording = FALSE)`, the one
+    ## entry point that does not wrap the drawing, so the call site has to.
+    expect_length(suppressWarnings(
+        bridges_of(p + scale_x_break(c("low", "medium"), bridge = TRUE))), 0)
 })
