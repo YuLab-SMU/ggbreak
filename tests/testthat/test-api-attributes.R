@@ -15,11 +15,25 @@ test_that("Multiple breaks on same axis are stored correctly", {
   p3 <- ggplot(mpg, aes(displ, hwy)) + geom_point() +
     scale_x_break(c(3, 4)) + scale_x_break(c(5, 6))
   ab3 <- attr(p3, "axis_break_x")
-  expect_s3_class(ab3, "ggbreak_params")
-  # Depending on implementation, it might be a list of params or a specific class
-  # Based on ggbreak implementation, multiple breaks might be stored in a list structure
-  # But here we just verify it exists.
+
+  # A single break stores one `ggbreak_params`.  Asking for a second one on the
+  # same axis stores a plain list of them: the container carries no class, and
+  # `extract_axis_break()` reads the list by position (`object[[1]]`,
+  # `object[[length(object)]]`), so the class belongs to the elements.
   expect_false(is.null(ab3))
+  expect_length(ab3, 2)
+  expect_true(all(vapply(ab3, inherits, logical(1), "ggbreak_params")))
+  expect_equal(lapply(ab3, `[[`, "breaks"), list(c(3, 4), c(5, 6)))
+
+  # `scale_x_break(c(3, 4, 5, 6))` is the documented way to ask for two breaks on
+  # one axis, and it stores a single `ggbreak_params` holding all four numbers
+  # rather than a list of two.  Both shapes reach `extract_axis_break()`, so both
+  # are pinned down here.
+  p3b <- ggplot(mpg, aes(displ, hwy)) + geom_point() +
+    scale_x_break(c(3, 4, 5, 6))
+  ab3b <- attr(p3b, "axis_break_x")
+  expect_s3_class(ab3b, "ggbreak_params")
+  expect_equal(ab3b$breaks, c(3, 4, 5, 6))
 })
 
 test_that("Dual axis breaks are stored correctly (x + y)", {
