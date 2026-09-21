@@ -204,6 +204,17 @@ Two things that will waste your afternoon:
   retires a workaround, grep the vignette for it in the same commit. Two chunks
   are `eval=FALSE` (lines 487, 514) and therefore run for nobody.
 
+- **Only two entry points suppress warnings; a raw `grid.draw()` does not.** A broken plot
+  legitimately drops rows that fall outside a window's scale, so ggplot2 says
+  "Removed N rows containing missing values or values outside the scale range". Both
+  user-facing paths wrap the drawing -- `print.ggbreak()`/`ggwrap`/`ggcut` in
+  `R/method-print.R`, and the `ggplotGrob()` method at `R/method-ggplot-grob.R:56` -- so
+  `print()`, `ggsave()`, `ggplotGrob()`, `patchwork` and `cowplot` are all quiet. A direct
+  `grid::grid.draw(p, recording = FALSE)` is *not* wrapped, and that is the path the tests
+  use, so a test that hits it must wrap the call itself (`suppressWarnings()`), as
+  `test-issue-68.R` and the discrete-axis test of `test-issue-33.R` do. Measured: 0
+  warnings from every entry point above, 4 from the raw draw of a discrete break.
+
 ## Environment
 
 - R 4.6.1; ggplot2 4.0.3, patchwork 1.3.2, cowplot 1.2.0, aplot 0.3.1, ggfun 0.2.1,
