@@ -82,6 +82,15 @@ scale_wrap(n)
 
 `space` is in centimetres and is the blank space inserted between windows.
 
+**How to read a break back off a plot.** `scale_x_break()`/`scale_y_break()` return the
+`ggbreak_params` object itself, and `ggplot_add.ggbreak_params()` keeps it in an
+**attribute** of the plot -- `attr(p, "axis_break_x")` / `attr(p, "axis_break_y")` -- not as a
+scale. On a `ggbreak` plot `length(p$scales$scales)` is **0**, so filtering the scales list
+for `ggbreak_params` finds nothing. `extract_axis_break()` takes that params object, or a
+`list` of them when there is more than one break on the same axis, and is the adapter to
+use. Handing it a *plot* instead dies in `S7::prop(x, "meta")`, because the plot falls
+through to `object[[1]]`.
+
 ## Build and test
 
 - `make rd` runs `devtools::document()`. **Never hand-edit `man/*.Rd` or `NAMESPACE`.**
