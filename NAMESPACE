@@ -36,7 +36,6 @@ importFrom(ggplot2,
   coord_flip,
   element_blank,
   element_grob,
-  element_text,
   ggplot_add,
   ggplot_build,
   ggplot_gtable,
@@ -52,5 +51,4 @@ importFrom(ggplotify,as.ggplot)
 importFrom(grid,grid.draw)
 importFrom(rlang,abort)
 importFrom(stats,setNames)
-importFrom(utils,packageDescription)
 importFrom(yulab.utils,yulab_msg)

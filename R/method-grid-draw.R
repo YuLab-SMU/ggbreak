@@ -6,7 +6,6 @@
 #' @importFrom ggplot2 ylab
 #' @importFrom ggplot2 theme
 #' @importFrom ggplot2 element_blank
-#' @importFrom ggplot2 element_text
 #' @importFrom ggplot2 scale_x_continuous
 #' @importFrom ggplot2 scale_y_continuous
 #' @importFrom aplot plot_list
