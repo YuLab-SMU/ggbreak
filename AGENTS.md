@@ -179,9 +179,16 @@ Two things that will waste your afternoon:
   `$layout`.
 - Cells in one row/column share positions (`panel-1`, `axis-l-1`, `ylab-l-1`), so
   selecting by `t == r & b == r` picks the wrong ones — select by `$layout$name`.
-- `facet_wrap()` **repeats its strip in every window** when a break is present. This is
-  pre-existing, not a regression: 0.1.7.13 and 0.2.0 render it identically (0 px apart).
-  `facet_grid()` is the one #55 / #17 fixed — before it, the strips were crammed into
+- `facet_wrap()` **is not nested, so the whole wrap is repeated once per window.** A
+  `facet_wrap(~ g, nrow = 1) + scale_x_break(c(6, 16))` draws `a b c | a b c` (6 panels,
+  6 strips) where the equivalent `facet_grid(. ~ g)` draws `a a | b b | c c`. The reason is
+  one line of code: `nest_facet_windows()` returns `NULL` unless the facet
+  `inherits(..., "FacetGrid")`, because a wrap has no facet rows or columns to nest into
+  and puts a strip above every panel. Pre-existing, not a regression — 0.1.7.13 and 0.2.0
+  render it identically (0 px apart). **Open question, raised but not decided:** should a
+  wrap nest like a grid? It is the same family as #55 / #17, but it needs a target layout
+  agreed on first, so do not "fix" it on your own initiative.
+- `facet_grid()` is the one #55 / #17 fixed — before it, the strips were crammed into
   comma-joined cells and the rows came out `A B A B`.
 - **`vignettes/ggbreak.Rmd` is CRLF, so edit it as bytes.** A plain text write
   (`open(p, "w")`, most editors) rewrites every line ending and turns a
