@@ -183,6 +183,19 @@ Two things that will waste your afternoon:
   pre-existing, not a regression: 0.1.7.13 and 0.2.0 render it identically (0 px apart).
   `facet_grid()` is the one #55 / #17 fixed — before it, the strips were crammed into
   comma-joined cells and the rows came out `A B A B`.
+- **`vignettes/ggbreak.Rmd` is CRLF, so edit it as bytes.** A plain text write
+  (`open(p, "w")`, most editors) rewrites every line ending and turns a
+  one-paragraph edit into a **1038-line** diff on a 520-line file. HEAD holds 520
+  CRLF / 0 bare LF; read and write `"rb"`/`"wb"` and repair with
+  `d.replace(b"\n", b"\r\n")` if you slipped. Check `git diff --stat` after
+  every edit to this file — a diff far larger than the edit means this, not a
+  real change.
+- **The vignette's FAQ is a documentation surface that drifts.** `R CMD check`
+  only proves the vignette *builds*, so its prose can keep teaching a workaround
+  that `NEWS.md` for the same version calls fixed — 0.2.0 shipped a FAQ that still
+  told users to `print()` before `cowplot::plot_grid()`. When a NEWS entry
+  retires a workaround, grep the vignette for it in the same commit. Two chunks
+  are `eval=FALSE` (lines 487, 514) and therefore run for nobody.
 
 ## Environment
 

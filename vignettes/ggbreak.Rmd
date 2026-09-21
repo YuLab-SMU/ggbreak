@@ -499,9 +499,7 @@ A broken plot is drawn by clipping rather than by cutting the data: every window
 
 1. Incompatible with functions that arrange multiple plots
 
-You can use `aplot::plot_list()` to arrange `ggbreak` objects with other `ggplot` objects. For other functions, such as `cowplot::plot_grid()` and `gridExtra::grid.arrange()`, you need to explictly call `print()` to `ggbreak` object, see also <https://github.com/YuLab-SMU/ggbreak/issues/36>.
-
-Using `print()` is a secret magic to make `ggbreak` compatible with other packages, including [export](https://github.com/YuLab-SMU/ggbreak/issues/37). 
+You can use `aplot::plot_list()` to arrange `ggbreak` objects with other `ggplot` objects, and `patchwork`, `cowplot::plot_grid()` and `gridExtra::grid.arrange()` work directly as well since `ggbreak` 0.2.0. Before 0.2.0 these functions took the plot through `ggplotGrob()`, which built it without the break, so the break was dropped without a warning and the workaround was to call `print()` on the `ggbreak` object first, see also <https://github.com/YuLab-SMU/ggbreak/issues/36> and <https://github.com/YuLab-SMU/ggbreak/issues/37>.
 
 2. `Some breaks are not in the plot range. Please check all breaks!`
 
