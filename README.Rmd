@@ -1,6 +1,6 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# ggbreak: set axis breaks for 'ggplot2'
+# `ggbreak`: set axis breaks for 'ggplot2'
 
 
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/ggbreak?color=green)](https://cran.r-project.org/package=ggbreak)
@@ -11,31 +11,96 @@
 
 
 ```{r comment="", echo=FALSE, results='asis'}
-cat(packageDescription('ggbreak')$Description)
+cat(read.dcf("DESCRIPTION", fields = "Description")[1, 1])
 ```
 
 
 
-## :writing_hand: Authors
+## :bulb: Overview
 
-Guangchuang YU & Shuangbin XU
+Some datasets are not normally distributed and hold outliers that are
+meaningful.  A bar plot of one of them is a few readable bars and one that
+is a thousand times taller: the bulk of the data is flattened into a line at
+the bottom of the panel and the reader learns nothing from it.  A
+logarithmic axis is the usual answer, and it is the right one when the data
+is log-normal, but it cannot be used when the values include zero or
+negative ones, and even where it can be used it changes what the reader
+sees -- equal ratios become equal distances, and the outliers stop looking
+like outliers.
 
-School of Basic Medical Sciences, Southern Medical University
+`ggbreak` takes the other way out.  It keeps the scale the data is on and
+makes the *axis* discontinuous: a range that holds no interesting value is
+hidden, and the rest of the axis is drawn in separate panels that sit next
+to each other with a small gap between them.  The bulk of the data is then
+drawn at a size that can be read, and the outliers are still there, at the
+end of the axis, with the gap telling the reader that the axis does not run
+straight.
 
-<https://yulab-smu.top>
+The scale functions are ordinary `ggplot2` scales, so `+` keeps working
+after one of them is added: a broken plot is still a `gg` plot that more
+layers can be added to, and it takes the same themes, labels, legends,
+`coord_flip()` and scale transformations as any other.  A plot can be broken
+on the x axis and on the y axis at the same time, and that is the only
+combination that is allowed -- a break, a cut and a wrap cannot be mixed,
+and a plot that asks for two of them says which two it was given instead of
+drawing something wrong.
 
+### Clipping, not cutting
 
-[![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://saythanks.io/to/GuangchuangYu)
-`r badger::badge_custom("follow me on", "WeChat", "green", "https://guangchuangyu.github.io/blog_images/biobabble.jpg")`
+A break is drawn by **clipping**.  Every panel is given the whole dataset and
+hides the part of it that belongs to the other panels, rather than the data
+being divided between them.  Two consequences are worth knowing.  A point or
+a line that crosses the break is drawn into both of the panels that meet
+there, so a trend that runs across the break keeps the piece that joins it
+up, and a line can be bridged across the gap with `bridge = TRUE`.  And what
+a panel hides is not written to the file, so a PDF or an SVG written from a
+broken plot holds no object larger than the figure and can be pasted into
+Adobe Illustrator -- before 0.2.0 a bar reaching from 0 to 990 was written
+out at its full height in the panel that shows its top.
 
-## :books: Citation
-If you use `ggbreak` in published research, please cite the following paper:
+## :sparkles: Features
 
-+ S Xu<sup>#</sup>, M Chen<sup>#</sup>, T Feng, L Zhan, L Zhou, __G Yu__<sup>\*</sup>. Use ggbreak to effectively utilize plotting space to deal with large datasets and outliers. __*Frontiers in Genetics*__. 2021, 12:774846. doi: [10.3389/fgene.2021.774846](https://www.frontiersin.org/articles/10.3389/fgene.2021.774846)
-    - Supplemental file: <https://github.com/YuLab-SMU/supplemental-ggbreak>.
+Five scales, for the three ways of bringing a long axis under control:
+
+| Function | What it draws |
+| --- | --- |
+| `scale_x_break()`, `scale_y_break()` | a **gap plot** |
+| `scale_x_cut()`, `scale_y_cut()` | a **cut plot** |
+| `scale_wrap(n = )` | a **wrap plot** |
+
+A **gap plot** hides a range of the axis and draws what is left in panels
+next to each other, with a gap between them.  A **cut plot** cuts the axis
+into slices at the given points, and the points are the boundaries of the
+slices, so the data next to a boundary is kept in both of the slices that
+meet there and a trend can be followed across it; `which` selects the slices
+to resize and `scales` says by how much.  A **wrap plot** keeps the whole
+axis and splits it into `n` consecutive windows of the same width, one per
+row, so a long series becomes readable without dropping anything from it.
+
+Between them the scales also support:
+
+- **any number of break points** on an axis, and a break on each axis at
+  once;
+- **a discrete axis**, and **a date or datetime axis**;
+- **`space`**, the gap between the panels, in centimetres;
+- **`symbol = "slash"`**, which marks the break on the axis;
+- **`ticklabels`**, the tick labels of the panels;
+- **`scales`**, the relative size of the panels: `"fixed"` (the default)
+  gives each panel a share proportional to the range it covers, `"free"`
+  gives them equal shares, and a number is a multiple of the first panel;
+- **`bridge = TRUE`**, which joins up a line that crosses a break, so a
+  connected scatter plot reads as one line instead of two.
+
+A broken plot works with:
+
+- `facet_grid()` and `facet_wrap()`;
+- `coord_flip()`, reverse scales and scale transformations;
+- secondary axes;
+- legends, and every label of the plot;
+- `ggrepel`;
+- a `patchwork`, `cowplot` or `gridExtra` layout.
 
 ## :arrow_double_down: Installation
-
 
 Get the released version from CRAN:
 
@@ -44,13 +109,37 @@ install.packages("ggbreak")
 ```
 
 
-
 Or the development version from github:
 
 ```r
+## install.packages("remotes")
 remotes::install_github("YuLab-SMU/ggbreak")
 ```
 
-## :u6307: Vignette
+## :books: Documentation
 
-For more details, please refer to the [online vignette](https://cran.r-project.org/web/packages/ggbreak/vignettes/ggbreak.html).
+- The [vignette](https://cran.r-project.org/web/packages/ggbreak/vignettes/ggbreak.html)
+  works through the scales and what each of them can do, with a figure for
+  every feature.  It opens with the
+  [introduction](https://cran.r-project.org/web/packages/ggbreak/vignettes/ggbreak.html#introduction)
+  and closes with a [FAQ](https://cran.r-project.org/web/packages/ggbreak/vignettes/ggbreak.html#faq)
+  of the questions that come up most often.
+- The help pages of the scales: `?scale_x_break`, `?scale_x_cut`,
+  `?scale_wrap`.
+- The [issues](https://github.com/YuLab-SMU/ggbreak/issues) are the place to
+  ask about anything the vignette does not answer.
+
+## :page_facing_up: Citation
+
+If you use `ggbreak` in published research, please cite the following paper:
+
++ S Xu<sup>#</sup>, M Chen<sup>#</sup>, T Feng, L Zhan, L Zhou, __G Yu__<sup>\*</sup>. Use ggbreak to effectively utilize plotting space to deal with large datasets and outliers. __*Frontiers in Genetics*__. 2021, 12:774846. doi: [10.3389/fgene.2021.774846](https://www.frontiersin.org/articles/10.3389/fgene.2021.774846)
+    - Supplemental file: <https://github.com/YuLab-SMU/supplemental-ggbreak>.
+
+## :writing_hand: Authors
+
+Guangchuang YU & Shuangbin XU
+
+School of Basic Medical Sciences, Southern Medical University
+
+<https://yulab-smu.top>
