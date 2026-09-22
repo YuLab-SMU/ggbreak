@@ -10,7 +10,6 @@
 ## `scale_wrap()` and the cut scales, which each build their figure in their own
 ## `grid.draw()` method.
 
-suppressMessages(pkgload::load_all(quiet = TRUE))
 suppressMessages(library(ggplot2))
 suppressMessages(library(testthat))
 

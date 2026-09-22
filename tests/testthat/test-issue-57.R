@@ -12,7 +12,6 @@
 ## border, a background and axis lines at the outer level, so the two signatures
 ## differed.
 
-suppressMessages(pkgload::load_all(quiet = TRUE))
 suppressMessages(library(ggplot2))
 suppressMessages(library(testthat))
 

@@ -106,6 +106,17 @@ through to `object[[1]]`.
   no known-failing test to step over any more. `test-api-attributes.R:18` used to fail, and
   it was a wrong assertion rather than a known-bad test; do not take a red test for granted
   without checking the contract it claims to pin down.
+- **A test file must not call `pkgload::load_all()`.** It works under
+  `testthat::test_dir()` from the package root and **aborts under `R CMD check`**, where the
+  tests are run from a directory that holds no DESCRIPTION
+  (`cli::cli_abort(..., class = "pkgload_no_desc")` at the top of the file, so the whole file
+  reports as one failure). Three files did this and the suite read **FAIL 3** under check
+  while `test_dir()` said 0. `pkgload` is not in `Suggests` either, so it was also an
+  unstated dependency. The tests run against the **installed** package -- that is what CRAN
+  checks, and it is what the other 19 files already do -- so `:::` works without it.
+  Consequence for the local workflow: `test_dir()` now exercises whatever is installed, so
+  `make install` first, or a fix that is committed but not installed will pass against the
+  stale build.
 - After adding an S3 method, check the "S3 generic/method consistency" result —
   `ggplot_build`'s generic is `function(plot, ...)`, so a method written as
   `function(plot)` raises a WARNING.

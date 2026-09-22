@@ -9,7 +9,6 @@
 ## The contract these tests pin: the assembled figure paints no background of its
 ## own, and the background of the figure is the one the user asked for.
 
-suppressMessages(pkgload::load_all(quiet = TRUE))
 suppressMessages(library(ggplot2))
 suppressMessages(library(testthat))
 
