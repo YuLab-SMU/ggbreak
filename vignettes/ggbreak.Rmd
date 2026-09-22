@@ -35,7 +35,7 @@ library(yulab.utils)
 
 ## Introduction
 
-This package was first designed to set breakpoints for truncating the plot as I need to [shrink outlier long branch of a phylogenetic tree](https://yulab-smu.top/treedata-book/faq.html#shrink-outlier-long-branch).
+This package was first designed to set breakpoints for truncating the plot as I need to shrink outlier long branch of a phylogenetic tree.
 
 
 Axis break or a so-called gap plot is useful for large datasets that are not normally distributed and contain outliers. Sometimes we can transform the data (e.g. using log-transformation if the data was log-normal distributed) to solve this problem. But this is not always granted. The data may just simply contain outliers and these outliers are meaningful. A simple gap plot can solve this issue well to present the data in detail with both normal and extreme data. 
