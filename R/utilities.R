@@ -97,7 +97,13 @@ set_label <- function(p, totallabs, p2 = NULL) {
 }
 
 extract_totallabs <- function(plot){
-    alllabs <- ggplot_build(plot)$plot$labels
+    ## `ggplot_build(plot)$plot$labels` only holds what `labs()` set plus the
+    ## aesthetic defaults, so the title of `scale_x_continuous("test")` still
+    ## reads "x" here while the plot draws "test" -- a position scale resolves
+    ## its `name` into the label later, in the layout.  `get_labs()` returns the
+    ## completed labels, which is what `set_label()` has to hand to `labs()` for
+    ## the assembled figure to carry the title the user asked for (#85).
+    alllabs <- ggplot2::get_labs(plot)
     totallabs <- alllabs[names(alllabs) %in% c("x", "y", "title", "subtitle", "caption", "tag")]
     totallabs
 }
@@ -345,14 +351,14 @@ check_axis_title <- function(plot, axis, coord_fun, axis.title, axis.sec.title, 
             plot <- plot + ggplot2::guides(y.sec = ggplot2::guide_axis(title=axis.sec.title))
         }
     }
-    if (!is.null(axis.title)){
-        if (axis == "x"){
-            plot <- plot + ggplot2::guides(x = ggplot2::guide_axis(title=axis.title))
-        }
-        if (axis == "y"){
-            plot <- plot + ggplot2::guides(y = ggplot2::guide_axis(title=axis.title))
-        }
-    }
+    ## The primary axis title is deliberately *not* re-added here.  It already
+    ## reaches the outer ggplot through `xlab()`/`ylab()` (and, for a bottom
+    ## legend, through `hoist_bottom_axis_title()`); drawing it again with
+    ## `guides(x = guide_axis(title =))` lands it on the `xlab-b` row that sits
+    ## *below* `guide-box`, so a plot whose title comes from a scale `name` was
+    ## labelled twice -- once above the legend and once below it (#85).  Only the
+    ## secondary-axis title is left here, because it cannot be expressed with
+    ## `labs()` and #64 depends on it.
     return (plot)
 }
 

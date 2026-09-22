@@ -304,7 +304,7 @@ subplot_theme <- function(plot, axis, type, margin = .2, rev, symbol = NULL){
                      last = last_margin_theme(axis = axis, margin = margin, rev=rev),
                      #internalfirst = axis_theme(plot=plot, axis=axis) +
                      #    strip_theme(plot=plot, axis=axis),
-                     internallast = list())        
+                     internallast = theme())        
     }else if (axis.pos == 'another.secondary.axis'){
         te <- switch(type,
                      first = axis_theme(plot = plot, axis = axis, secondary.axis = TRUE) +
@@ -333,9 +333,19 @@ subplot_theme <- function(plot, axis, type, margin = .2, rev, symbol = NULL){
                             last_margin_theme(axis = axis, margin = margin, rev=rev),
                      #internalfirst = axis_theme(plot=plot, axis=axis) + 
                      #    strip_theme(plot=plot, axis=axis),
-                     internallast = list())
+                     internallast = theme())
     } 
     #te <- te + theme_no_margin()
+    ## A window never carries the axis title of the figure: the outer ggplot that
+    ## holds the assembled figure draws it once, through `xlab()`/`ylab()` or, for
+    ## a bottom legend, through `hoist_bottom_axis_title()`.  `axis_theme()` and
+    ## `remove_axis_title()` blank it with `guides(x = guide_axis(title = NULL))`,
+    ## but that only suppresses a label `labs()` set -- it does not beat the
+    ## `name` of a position scale, so a window drawn from
+    ## `scale_x_continuous("test")` still printed "test".  Blanking the element
+    ## suppresses the scale name as well (#85).
+    te <- te + theme(axis.title.x = element_blank(),
+                     axis.title.y = element_blank())
     if (!is.null(symbol)) {
         border_te <- .symbol_theme(te, plot, axis, type, symbol, rev)
         if (!is.null(border_te)) {
@@ -683,7 +693,10 @@ convert_expand <- function(expand){
 ## col_type: "first" (left), "other" (middle), "last" (right) — controls y-axis visibility
 ## row_type: "first" (bottom), "other" (middle), "last" (top) — controls x-axis visibility
 subplot_theme_2d <- function(plot, col_type, row_type, margin_x, margin_y, rev_x, rev_y, symbol_x = NULL, symbol_y = NULL) {
-    te <- theme()
+    ## a window of a 2d break never draws the axis title of the figure either; the
+    ## outer ggplot draws it once (see `subplot_theme()`, #85)
+    te <- theme(axis.title.x = element_blank(),
+                axis.title.y = element_blank())
 
     # Y-axis visibility: hide for non-first columns
     if (col_type %in% c("other", "last")) {

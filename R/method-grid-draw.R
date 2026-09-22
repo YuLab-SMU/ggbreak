@@ -593,13 +593,26 @@ grid.draw.ggwrap <- function(x, recording=TRUE){
         limits <- split_discrete_range(x = rng, n = nstep) 
         gg <- lapply(limits, split_discrete_scale, plot=x, axis='x')
     }
+    ## the windows of a wrap carry no axis title of their own -- the outer ggplot
+    ## draws it once, below the figure or hoisted above a bottom legend.  The
+    ## windows are built with no `subplot_theme()`, so the titles have to be
+    ## blanked here; `theme(axis.title.* = element_blank())` also suppresses the
+    ## `name` of a position scale, which `.remove_axis_lab()`'s `labs()` cannot
+    ## (#85).
+    blank_axis_titles <- theme(axis.title.x = element_blank(),
+                               axis.title.y = element_blank())
+    gg <- lapply(gg, function(w) w + blank_axis_titles)
     legendpos <- check_legend_position(plot=x)
     pg <- plot_list(gglist=setNames(gg, NULL), ncol=1, guides="collect", output = "patchwork") & legendpos
 
     pg <- blank_patch_background(pg)
     hl <- hoist_bottom_axis_title(pg, x, totallabs$x)
     pg <- hl$plot
-    totallabs$x <- hl$label
+    ## assigning `NULL` to `$x` *removes* the element, so `do.call(labs, totallabs)`
+    ## never sets `x` and the outer ggplot falls back to the aesthetic default and
+    ## prints a stray "x" under the legend.  Keep the name with a `NULL` value so
+    ## the hoisted (or otherwise suppressed) title stays suppressed (#85).
+    totallabs["x"] <- list(hl$label)
 
     g <- set_label(as.ggplot(pg), totallabs=totallabs, p2=x)
     if (recording){

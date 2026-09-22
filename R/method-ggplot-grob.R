@@ -171,5 +171,33 @@ align_assembled_figure <- function(outer) {
             outer$heights[outer$layout$t[target]] <- sum(inner$heights[taken])
         }
     }
+
+    ## the title of the figure has to leave the panel as well, for a different
+    ## reason than the axes: with `theme(legend.position = "bottom")`
+    ## `hoist_bottom_axis_title()` gives it a row of its own *below* the panels,
+    ## so that the collected legend cannot be drawn on top of it, and that row is
+    ## outside the panel area `rows` spans -- `gtable_piece()` keeps a cell only
+    ## when both of its rows lie in them -- so the piece taken above left the
+    ## title behind and a broken plot handed to `patchwork` or `cowplot` came out
+    ## without it.  The row cannot simply be added to `rows` either: everything
+    ## between the outermost panels is the plot area as far as the layout is
+    ## concerned, so a plot aligned next to this one would be sized against the
+    ## title too.  `xlab-b` is the cell `ggplot2` itself keeps the bottom title
+    ## in, so the piece moves there and the cell takes the height the row had
+    ## inside the figure, the same bookkeeping the axis cells get above.  The
+    ## `guide-box` is deliberately not lifted along with it: this path drops the
+    ## collected legend too, which is a separate defect and only must not be made
+    ## worse here, #85.
+    i <- which(inner$layout$name == "ggbreak-axis-title")[1]
+    target <- which(outer$layout$name == "xlab-b")[1]
+    if (!is.na(i) && !is.na(target)) {
+        r <- seq(inner$layout$t[i], inner$layout$b[i])
+        cc <- seq(inner$layout$l[i], inner$layout$r[i])
+        piece <- gtable_piece(inner, r, cc)
+        if (!is.null(piece)) {
+            outer$grobs[[target]] <- piece
+            outer$heights[outer$layout$t[target]] <- sum(inner$heights[r])
+        }
+    }
     outer
 }

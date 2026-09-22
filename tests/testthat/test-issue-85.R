@@ -143,3 +143,112 @@ test_that("a plot that carries no title gets no title row, #85", {
     expect_length(rows$title, 0L)
     expect_null(outer_lab(p, "x"))
 })
+
+## The follow-up report in #85: the same defect only shows when the title comes
+## from the `name` of a position scale -- `scale_x_continuous("test")` -- rather
+## than from `labs()`.  Three things used to go wrong together: `extract_totallabs()`
+## read the raw `plot$labels` and saw the aesthetic default "x" instead of "test";
+## `check_axis_title()` re-added "test" to the outer ggplot, which draws below the
+## collected legend; and the windows did not blank a scale `name`, so `scale_wrap()`
+## and the cut scales printed "test" once per panel.  These assert the fix on the
+## grob tree -- not on pixels -- the way the tests above do.
+
+## how many times a string is drawn in the whole figure; a correct figure draws
+## its title exactly once, no matter how many windows the break is built from
+drawn_text_count <- function(plot, text) {
+    gt <- grid::grid.force(
+        ggplot2::ggplotGrob(grid::grid.draw(plot, recording = FALSE))
+    )
+    sum(grob_texts(gt) == text)
+}
+
+test_that("an x title from a scale name is hoisted, once, above the legend, #85", {
+    p <- base85 + theme(legend.position = "bottom") +
+         scale_x_continuous("test") + scale_y_break(c(2, 9))
+    ## one title row above the legend, carrying the scale name, and no stray
+    ## default "x" left on the outer ggplot
+    expect_title_above_legend(p, "test")
+    ## not the pre-fix "x" from `ggplot_build()$plot$labels`
+    rows <- nested_axis_title_and_legend(p)
+    expect_false("x" %in% rows$text)
+    ## drawn exactly once across the whole figure -- the duplicate below the
+    ## legend and the check_axis_title() copy are gone
+    expect_identical(drawn_text_count(p, "test"), 1L)
+    expect_identical(drawn_text_count(p, "x"), 0L)
+})
+
+test_that("a scale name and xlab() agree on a single title, #85", {
+    p <- base85 + theme(legend.position = "bottom") +
+         scale_x_continuous("test") + xlab("test") + scale_y_break(c(2, 9))
+    expect_title_above_legend(p, "test")
+    expect_identical(drawn_text_count(p, "test"), 1L)
+})
+
+test_that("each scale name lands on its own axis, distinct titles, #85", {
+    p <- base85 + theme(legend.position = "bottom") +
+         scale_x_continuous("XL") + scale_y_continuous("YL") +
+         scale_y_break(c(2, 9))
+    rows <- nested_axis_title_and_legend(p)
+    expect_false(is.null(rows))
+    ## the hoisted (bottom) title is the x one, and it is not swapped with the y
+    expect_true("XL" %in% rows$text)
+    expect_false("YL" %in% rows$text)
+    ## both titles drawn exactly once, none repeated per window
+    expect_identical(drawn_text_count(p, "XL"), 1L)
+    expect_identical(drawn_text_count(p, "YL"), 1L)
+})
+
+test_that("wrap and cut draw a scale-name title once, not per window, #85", {
+    broken <- list(
+        wrap = base85 + scale_wrap(n = 3),
+        xcut = base85 + scale_x_cut(breaks = c(3, 7)),
+        ycut = base85 + scale_y_cut(breaks = c(2, 9))
+    )
+    for (nm in names(broken)) {
+        p <- broken[[nm]] + scale_x_continuous("test") +
+             theme(legend.position = "bottom")
+        ## with three windows a scale `name` used to be printed in each of them
+        expect_identical(drawn_text_count(p, "test"), 1L,
+                         info = paste("scale:", nm))
+        rows <- nested_axis_title_and_legend(p)
+        expect_false(is.null(rows), info = paste("scale:", nm))
+        expect_length(rows$title, 1L)
+        expect_true("test" %in% rows$text, info = paste("scale:", nm))
+    }
+})
+
+test_that("a scale-name title with a non-bottom legend is drawn once on the axis, #85", {
+    p <- base85 + theme(legend.position = "right") +
+         scale_x_continuous("test") + scale_y_break(c(2, 9))
+    ## nothing is hoisted, the outer ggplot carries the resolved title
+    rows <- nested_axis_title_and_legend(p)
+    expect_false(is.null(rows))
+    expect_length(rows$title, 0L)
+    expect_identical(outer_lab(p, "x"), "test")
+    expect_identical(drawn_text_count(p, "test"), 1L)
+})
+
+## `patchwork` and `cowplot` never reach `grid.draw()`; they call `ggplotGrob()`,
+## which assembles the figure through `ggplot_gtable()` and rebuilds it in
+## `align_assembled_figure()`.  That rebuild keeps the cells of the panel area, and
+## the row `hoist_bottom_axis_title()` gives the title lies *below* the panels, so
+## a broken plot with a bottom legend used to be handed over without its title --
+## once the title also stopped being re-added to the outer ggplot by
+## `check_axis_title()`, nothing was left to draw it.  Assert on the text, not on
+## the row name: on this path the title is moved out of the `ggbreak-axis-title`
+## row into the cell `ggplot2` keeps for the bottom axis title.
+test_that("ggplotGrob() keeps the hoisted title of a broken plot, #85", {
+    for (nm in c("break", "wrap")) {
+        p <- if (nm == "break") {
+                 base85 + theme(legend.position = "bottom") +
+                     scale_x_continuous("test") + scale_y_break(c(2, 9))
+             } else {
+                 base85 + theme(legend.position = "bottom") +
+                     scale_wrap(n = 3) + scale_x_continuous("test")
+             }
+        gt <- grid::grid.force(ggplot2::ggplotGrob(p))
+        expect_identical(sum(grob_texts(gt) == "test"), 1L, info = nm)
+        ## and not the aesthetic default it used to report
+        expect_identical(sum(grob_texts(gt) == "x"), 0L, info = nm)
+    }
+})
