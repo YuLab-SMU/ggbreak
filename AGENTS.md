@@ -231,6 +231,13 @@ Two things that will waste your afternoon:
   above `nest_facet_windows()` warns about. So the exclusion is right for two independent
   reasons, and nesting a wrap is **not** #55 / #17 left unfinished: those were about
   `facet_grid`, and the grid case is the one that was broken.
+- **A nested facet is bound facet by facet** (#86): `nest_facet_windows()` binds the
+  windows of one facet first, `merge_facet_strips()` stretches one strip across them,
+  and `panel.spacing` is added between facets. `slice_facet_gtable()` must keep the
+  `plot.margin` row/column along `dim` (it carries `space`) and the spacing between
+  the panels it keeps across `dim` -- zeroing "everything not kept" glued windows and
+  facets together. `assemble_windows()` returns `nested`; gate on that, not on
+  `is.null(facet_guide)`, which is also NULL for a nested plot without a legend.
 - `facet_grid()` is the one #55 / #17 fixed — before it, the strips were crammed into
   comma-joined cells and the rows came out `A B A B`.
 - **`vignettes/ggbreak.Rmd` is CRLF, so edit it as bytes.** A plain text write

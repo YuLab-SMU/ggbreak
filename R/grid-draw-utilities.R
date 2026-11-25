@@ -127,14 +127,56 @@ slice_facet_gtable <- function(g, dim, k) {
     ## cell is flexible: letting one through would claim a share of the figure
     ## for every facet row (column) there is instead of only for this one.
     rest <- facet_panel_positions(g, dim)[-k]
+    ## the panel spacing between the facets *across* `dim` sits in cells that
+    ## hold nothing, and collapsing them glued those facets together (#86)
+    pk <- keep & grepl("^panel", lay$name)
     if (dim == "row") {
         rows <- setdiff(rows, rest)
+        cols <- union(cols, seq(min(lay$l[pk]), max(lay$r[pk])))
     } else {
         cols <- setdiff(cols, rest)
+        rows <- union(rows, seq(min(lay$t[pk]), max(lay$b[pk])))
     }
     s$widths[setdiff(seq_along(s$widths), cols)] <- grid::unit(0, "mm")
     s$heights[setdiff(seq_along(s$heights), rows)] <- grid::unit(0, "mm")
+    ## ... but keep the plot margin along `dim`: the window theme puts the
+    ## `space` of the break there, half on either side of the gap, and dropping it
+    ## glued the windows of a facet row (column) together (#86)
+    if (dim == "row") {
+        ends <- c(1L, length(g$heights))
+        s$heights[ends] <- g$heights[ends]
+    } else {
+        ends <- c(1L, length(g$widths))
+        s$widths[ends] <- g$widths[ends]
+    }
     s
+}
+
+## The windows of one facet row (column) are separate pieces, and every piece
+## carries the strip of that facet, so the label came out cut into one segment
+## per window (#86).  Keep one strip and stretch it across all of the pieces.
+merge_facet_strips <- function(g, dim) {
+    lay <- g$layout
+    i <- which(grepl(if (dim == "row") "^strip-r-" else "^strip-t-", lay$name))
+    if (length(i) < 2L) return(g)
+    drawn <- i[!vapply(g$grobs[i], inherits, logical(1), "zeroGrob")]
+    keep <- if (length(drawn)) drawn[1] else i[1]
+    if (dim == "row") {
+        lay$t[keep] <- min(lay$t[i]); lay$b[keep] <- max(lay$b[i])
+    } else {
+        lay$l[keep] <- min(lay$l[i]); lay$r[keep] <- max(lay$r[i])
+    }
+    drop <- setdiff(i, keep)
+    g$layout <- lay[-drop, , drop = FALSE]
+    g$grobs <- g$grobs[-drop]
+    g
+}
+
+## the space `ggplot2` puts between two facet rows (columns) of the plot
+facet_spacing <- function(plot, dim) {
+    th <- ggplot2::complete_theme(plot$theme)
+    u <- ggplot2::calc_element(if (dim == "row") "panel.spacing.y" else "panel.spacing.x", th)
+    if (is.null(u) || !grid::is.unit(u)) grid::unit(5.5, "pt") else u
 }
 
 ## the legend a built gtable draws, and where `ggplot2` put it
@@ -174,7 +216,7 @@ size_facet_piece <- function(g, dim, size) {
 ## window twice as wide as its neighbour.  `rbind()` and `cbind()` align the
 ## direction the pieces are *not* stacked along and leave the flexible cells
 ## flexible, so every window keeps the share of the figure that `sizes` gives it.
-nest_facet_windows <- function(gglist, sizes, dim) {
+nest_facet_windows <- function(gglist, sizes, dim, marks = FALSE) {
     if (length(gglist) < 2L) return(NULL)
     ## Only a facet grid is cut apart.  It is the grid that gives a plot facet
     ## rows and facet columns for the windows to nest into; a `facet_wrap()` has
@@ -188,16 +230,27 @@ nest_facet_windows <- function(gglist, sizes, dim) {
     n <- length(facet_panel_positions(gs[[1]], dim))
     if (n < 2L) return(NULL)
 
-    pieces <- list()
+    bind <- if (dim == "row") rbind else cbind
+    spacing <- facet_spacing(gglist[[1]], dim)
+    groups <- list()
     for (k in seq_len(n)) {
-        for (j in seq_along(gs)) {
-            piece <- slice_facet_gtable(gs[[j]], dim, k)
-            pieces <- c(pieces, list(size_facet_piece(piece, dim, sizes[j])))
+        pieces <- lapply(seq_along(gs), function(j) {
+            size_facet_piece(slice_facet_gtable(gs[[j]], dim, k), dim, sizes[j])
+        })
+        ## the facet row (column) is the outer loop: the windows of one facet
+        ## are bound next to each other and share one strip (#86) ...
+        grp <- merge_facet_strips(Reduce(bind, pieces), dim)
+        ## inside one facet every gap along `dim` is a break, so the marks can
+        ## be drawn here and never between two facets (#87)
+        if (marks) grp <- add_break_marks(grp, gglist[[1]], dim)
+        ## ... and the facets are set apart the way `ggplot2` sets them apart
+        if (k < n) {
+            grp <- if (dim == "row") gtable::gtable_add_rows(grp, spacing, pos = -1)
+                   else gtable::gtable_add_cols(grp, spacing, pos = -1)
         }
+        groups[[k]] <- grp
     }
-    ## the facet row (column) is the outer loop, so the pieces of one facet row
-    ## (column) are bound next to each other and those of the next one follow
-    bound <- Reduce(if (dim == "row") rbind else cbind, pieces)
+    bound <- Reduce(bind, groups)
 
     list(plot = bound, guide = facet_guide_box(gs[[1]]))
 }
@@ -1021,8 +1074,9 @@ add_break_marks <- function(pg, plot, gaps) {
     gt <- if (inherits(pg, "gtable")) pg else patchwork::patchworkGrob(pg)
     lay <- gt$layout
     ## a window is one panel cell, or, for a faceted window, one cell that
-    ## holds all of its panels ("panel; panel-1-1, panel-2-1, ...")
-    panels <- which(grepl("^panel(-[0-9]+$|;)", lay$name))
+    ## holds all of its panels ("panel; panel-1-1, panel-2-1, ..."); the facet
+    ## group of `nest_facet_windows()` keeps the panels of `ggplot2` ("panel-1-2")
+    panels <- which(grepl("^panel(-[0-9]+)+$|^panel;", lay$name))
     if (length(panels) < 2) {
         return(pg)
     }

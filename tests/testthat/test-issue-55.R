@@ -146,9 +146,11 @@ test_that("a window keeps the share of the figure it is given (#55)", {
 })
 
 test_that("the windows of a facet row stay together (#55)", {
+    ## the windows of a facet row share one strip since #86, so a row torn away
+    ## from its other window would show up as `A B A B`
     p <- facet_plot(row ~ col)
     expect_equal(strips_of(p + scale_y_break(c(7, 17), scales = "free"), c("A", "B")),
-                 c("A", "A", "B", "B"))
+                 c("A", "B"))
     ## the column strips are still drawn once, at the top
     expect_equal(strips_of(p + scale_y_break(c(7, 17), scales = "free"), c("C", "D")),
                  c("C", "D"))
@@ -158,7 +160,7 @@ test_that("the windows of a facet column stay together (#55)", {
     p <- ggplot2::ggplot(facet_data(), ggplot2::aes(x, y)) +
         ggplot2::geom_col() + ggplot2::facet_grid(. ~ col) + ggplot2::theme_bw()
     expect_equal(strips_of(p + scale_x_break(c(7, 14)), c("C", "D")),
-                 c("C", "C", "D", "D"))
+                 c("C", "D"))
 })
 
 test_that("`coord_flip()` nests along the direction the windows are stacked on", {
@@ -166,13 +168,13 @@ test_that("`coord_flip()` nests along the direction the windows are stacked on",
     ## columns that have to stay together, and that is the reporter's example
     p <- facet_plot(row ~ col) + ggplot2::coord_flip()
     expect_equal(strips_of(p + scale_y_break(c(7, 17), scales = "free"), c("C", "D")),
-                 c("C", "C", "D", "D"))
+                 c("C", "D"))
 })
 
 test_that("`scale_y_cut()` nests like `scale_y_break()`", {
     p <- facet_plot(row ~ col)
     expect_equal(strips_of(p + scale_y_cut(breaks = c(3, 6), which = c(1, 2)), c("A", "B")),
-                 c("A", "A", "A", "B", "B", "B"))
+                 c("A", "B"))
 })
 
 test_that("the legend is still drawn once when the figure is reassembled", {

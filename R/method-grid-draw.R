@@ -280,10 +280,10 @@ newpage_if_recording <- function(recording) {
 ##
 ## The nested path returns the figure already assembled as a gtable, because
 ## `patchwork` cannot line the pieces up, see `nest_facet_windows()`.
-assemble_windows <- function(gglist, sizes, along, legendpos) {
-    nest <- nest_facet_windows(gglist, sizes, along)
+assemble_windows <- function(gglist, sizes, along, legendpos, marks = FALSE) {
+    nest <- nest_facet_windows(gglist, sizes, along, marks = marks)
     if (!is.null(nest)) {
-        return(list(plot = nest$plot, guide = nest$guide))
+        return(list(plot = nest$plot, guide = nest$guide, nested = TRUE))
     }
     pg <- if (along == "row") {
         plot_list(gglist = setNames(gglist, NULL), ncol = 1, heights = sizes,
@@ -292,7 +292,7 @@ assemble_windows <- function(gglist, sizes, along, legendpos) {
         plot_list(gglist = setNames(gglist, NULL), nrow = 1, widths = sizes,
                   guides = 'collect', output = "patchwork")
     }
-    list(plot = pg & legendpos, guide = NULL)
+    list(plot = pg & legendpos, guide = NULL, nested = FALSE)
 }
 
 #' @method grid.draw ggbreak
@@ -344,6 +344,7 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     scales <- axis_breaks$scales
     ticklabs <- axis_breaks$ticklabs
     bridge <- axis_breaks$bridge
+    marks <- !is.null(axis_breaks$symbol)
     res <- combine_range(breaks, rng, scales, ticklabs)
     breaks <- res$breaks
     scales <- res$scales
@@ -452,13 +453,14 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         
         aw <- if (coord_fun == "coord_flip") {
             assemble_windows(c(list(pp2), rev(pp1), list(p1)),
-                             c(rev(relrange[-1]), relrange[1]), "row", legendpos)
+                             c(rev(relrange[-1]), relrange[1]), "row", legendpos, marks)
         } else {
-            assemble_windows(c(list(p1), pp1, list(pp2)), relrange, "col", legendpos)
+            assemble_windows(c(list(p1), pp1, list(pp2)), relrange, "col", legendpos, marks)
         }
         along <- if (coord_fun == "coord_flip") "row" else "col"
         g <- aw$plot
         facet_guide <- aw$guide
+        nested <- aw$nested
     } else {
         breaks <- rev(breaks)
         ticklabs <- rev(ticklabs)
@@ -509,14 +511,15 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         }
         
         aw <- if (coord_fun == "coord_flip") {
-            assemble_windows(c(list(p1), rev(pp1), list(pp2)), relrange, "col", legendpos)
+            assemble_windows(c(list(p1), rev(pp1), list(pp2)), relrange, "col", legendpos, marks)
         } else {
             assemble_windows(c(list(pp2), pp1, list(p1)),
-                             c(rev(relrange[-1]), relrange[1]), "row", legendpos)
+                             c(rev(relrange[-1]), relrange[1]), "row", legendpos, marks)
         }
         along <- if (coord_fun == "coord_flip") "col" else "row"
         g <- aw$plot
         facet_guide <- aw$guide
+        nested <- aw$nested
     }
 
     totallabs$x <- NULL
@@ -528,12 +531,12 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     ## the assembled figure as `patchwork` hands it over, and the nested facet
     ## path is left alone: there the windows are bound into a facet grid instead
     ## of being stacked, so the two ends of a line are not across from each other
-    if (bridge && is.null(facet_guide)) {
+    if (bridge && !nested) {
         g <- add_line_bridges(g, along)
     }
-    ## break marks go in the same cells; a nested facet grid is left alone for
-    ## the same reason, its gaps between facets are not breaks (#87)
-    if (!is.null(axis_breaks$symbol) && is.null(facet_guide)) {
+    ## break marks go in the same cells; a nested facet grid has drawn its own,
+    ## one facet at a time, because its gaps between facets are not breaks (#87)
+    if (marks && !nested) {
         g <- add_break_marks(g, x, along)
     }
     if (!is.null(facet_guide)) {

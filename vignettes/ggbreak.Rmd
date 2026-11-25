@@ -120,14 +120,12 @@ ggplot(df, aes(x, y, color = group)) +
 
 ### Feature 4: Axis break symbols
 
-You can mark where an axis is broken with a double slash `//` by using `symbol = "slash"`. The mark is drawn at the two ends of the interrupted line, in the colour and width of that line, and only along the edges the plot actually draws: with `theme_classic()` or `theme_minimal()` only the axes are marked, with a boxed theme such as `theme_bw()` the opposite border as well. It works for single and dual axis breaks, discrete axes, `coord_flip()` and axes drawn at the top or the right.
+You can add standard axis break symbols (like a double-slash `//`) to the axes where they are broken by using the `symbol` parameter. This visual cue helps readers quickly identify that the axis is discontinuous. Currently, `symbol = "slash"` is supported, and it works for both single and dual axis breaks.
 
 ```{r fig.width=8, fig.height=4}
 ggplot(mpg, aes(displ, hwy)) +
     geom_point() +
-    scale_x_break(c(3, 4), symbol = "slash") +
-    scale_y_break(c(25, 30), symbol = "slash") +
-    theme_classic()
+    scale_x_break(c(3, 4), symbol = "slash")
 ```
 
 ### Feature 5: Zoom in or zoom out of subplots
@@ -194,6 +192,22 @@ pg <- p +
   scale_y_break(c(7, 17), scales="free") +
   scale_y_break(c(19, 21), scales="free")
 print(pg)
+```
+
+```{r message=FALSE, fig.width=6, fig.height=5}
+d2 <- data.frame(
+  x   = rep(1:4, 4),
+  y   = c(10, 50, 80, 300, 20, 60, 90, 250,
+          15, 40, 70, 400, 5, 30, 95, 350),
+  row = rep(c("A", "B"), each = 8),
+  col = rep(rep(c("C", "D"), each = 4), 2)
+)
+
+ggplot(d2, aes(x, y)) +
+  geom_point() +
+  facet_grid(row ~ col) +
+  scale_y_break(c(100, 200), scales = 0.25, symbol = "slash") +
+  theme_bw()
 ```
 
 
