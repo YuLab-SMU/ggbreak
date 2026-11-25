@@ -289,7 +289,7 @@ hoist_bottom_axis_title <- function(pg, plot, label) {
     list(plot = pgt, label = NULL)
 }
 
-subplot_theme <- function(plot, axis, type, margin = .2, rev, symbol = NULL){
+subplot_theme <- function(plot, axis, type, margin = .2, rev){
     type <- check_strip_pos(plot=plot, type=type)
     axis.pos <- check_another_position(plot = plot, axis = axis)
     axis <- check_theme_coflip(plot=plot, axis=axis)
@@ -346,57 +346,7 @@ subplot_theme <- function(plot, axis, type, margin = .2, rev, symbol = NULL){
     ## suppresses the scale name as well (#85).
     te <- te + theme(axis.title.x = element_blank(),
                      axis.title.y = element_blank())
-    if (!is.null(symbol)) {
-        border_te <- .symbol_theme(te, plot, axis, type, symbol, rev)
-        if (!is.null(border_te)) {
-            te <- te + border_te
-        }
-    }
     return(te)
-}
-
-.symbol_theme <- function(te, plot, axis, type, symbol, rev) {
-    full_theme <- ggplot2::theme_get() + plot$theme + te
-    border <- full_theme$panel.border
-    
-    # We should only draw symbols on the edges that actually have a border or axis line.
-    # To keep it robust, we can use the `sides` parameter to specifically target `top`, `bottom`, `left`, `right`.
-    # For 1D break, if it's an X-axis break, we typically only want symbols on the bottom (or top if there's an axis/border there).
-    # Since `ggbreak` handles top/bottom via `first`/`last`/`other` for strips and axes,
-    # let's assume we want to draw symbols on the broken edges.
-    
-    sides <- character(0)
-    if (axis == "x") {
-        # The break gap is vertical, so the symbols should be drawn on the top and bottom borders.
-        # But we only want them on the side where the break happens.
-        # Wait, if X is broken, the left panel's right edge is broken, and the right panel's left edge is broken.
-        # So we want symbols on the top-right & bottom-right of the left panel,
-        # and top-left & bottom-left of the right panel.
-        if (type == "first") {
-            sides <- if (rev == "reverse") "left" else "right"
-        } else if (type == "last") {
-            sides <- if (rev == "reverse") "right" else "left"
-        } else if (type == "other") {
-            sides <- c("left", "right")
-        }
-    } else if (axis == "y") {
-        # The break gap is horizontal.
-        if (type == "first") {
-            sides <- if (rev == "reverse") "bottom" else "top"
-        } else if (type == "last") {
-            sides <- if (rev == "reverse") "top" else "bottom"
-        } else if (type == "other") {
-            sides <- c("top", "bottom")
-        }
-    }
-    
-    if (length(sides) > 0) {
-        # By default, we will just pass these sides. 
-        # But `element_break_symbol` should be smart enough to only draw where there is an actual border.
-        # Actually, let's just pass `axis` so the grob knows if it's an X or Y break.
-        return(theme(panel.border = element_break_symbol(symbol = symbol, sides = sides, base_border = border, axis = axis)))
-    }
-    return(NULL)
 }
 
 axis_theme <- function(plot, axis, secondary.axis=FALSE, type='first'){
@@ -692,7 +642,7 @@ convert_expand <- function(expand){
 ## Theme for 2D grid cells (dual-axis breaks)
 ## col_type: "first" (left), "other" (middle), "last" (right) — controls y-axis visibility
 ## row_type: "first" (bottom), "other" (middle), "last" (top) — controls x-axis visibility
-subplot_theme_2d <- function(plot, col_type, row_type, margin_x, margin_y, rev_x, rev_y, symbol_x = NULL, symbol_y = NULL) {
+subplot_theme_2d <- function(plot, col_type, row_type, margin_x, margin_y, rev_x, rev_y) {
     ## a window of a 2d break never draws the axis title of the figure either; the
     ## outer ggplot draws it once (see `subplot_theme()`, #85)
     te <- theme(axis.title.x = element_blank(),
@@ -736,292 +686,9 @@ subplot_theme_2d <- function(plot, col_type, row_type, margin_x, margin_y, rev_x
         te <- te + border_te
     }
 
-    # Add break symbols if requested
-    if (!is.null(symbol_x) || !is.null(symbol_y)) {
-        sym_te <- .symbol_theme_2d(te, plot, col_type, row_type, symbol_x, symbol_y, rev_x, rev_y)
-        if (!is.null(sym_te)) {
-            te <- te + sym_te
-        }
-    }
-
     return(te)
 }
 
-.symbol_theme_2d <- function(te, plot, col_type, row_type, symbol_x, symbol_y, rev_x, rev_y) {
-    # Determine the current border from the composed theme or plot theme
-    full_theme <- ggplot2::theme_get() + plot$theme + te
-    border <- full_theme$panel.border
-
-    sides_x <- character(0)
-    if (!is.null(symbol_x)) {
-        # Only add X symbols on the top/bottom outer edges, so we check row_type
-        # For X-break (vertical gap), we want symbols on the top/bottom edges of the gap.
-        # But in a 2D grid, the gap exists between columns.
-        # So we want symbols on the top/bottom edges of the *plot*, at the column boundaries.
-        # The column boundaries are between col_type="first" and "other", etc.
-        # Wait, if we attach the symbol to the panel border, it will draw on the panel's edge.
-        # If we attach to col="first", side="right", it draws on the right edge of the first column.
-        # We only want to draw this IF this panel is at the top row or bottom row.
-        
-        if (row_type == "first" || row_type == "last") {
-            # Only draw X-break symbols if we are in the top or bottom row
-            if (col_type == "first") {
-                sides_x <- if (rev_x == "reverse") "left" else "right"
-            } else if (col_type == "last") {
-                sides_x <- if (rev_x == "reverse") "right" else "left"
-            } else if (col_type == "other") {
-                sides_x <- c("left", "right")
-            }
-        }
-    }
-
-    sides_y <- character(0)
-    if (!is.null(symbol_y)) {
-        # Only add Y symbols on the left/right outer edges, so we check col_type
-        if (col_type == "first" || col_type == "last") {
-            # Only draw Y-break symbols if we are in the left or right column
-            if (row_type == "first") {
-                sides_y <- if (rev_y == "reverse") "bottom" else "top"
-            } else if (row_type == "last") {
-                sides_y <- if (rev_y == "reverse") "top" else "bottom"
-            } else if (row_type == "other") {
-                sides_y <- c("top", "bottom")
-            }
-        }
-    }
-    
-    # However, `element_break_symbol` logic for "dual" axis currently draws on BOTH top and bottom corners
-    # if `axis="dual"` or "x".
-    # If we are in the top row (row_type="last"), we only want the TOP symbol if there is a border,
-    # and maybe we don't want the bottom symbol because the bottom symbol is "inside" the plot?
-    # No, for X-break, the gap is vertical. The symbol should appear on the X-axis line.
-    # In a 2D grid, the X-axis is usually at the bottom of the bottom row.
-    # So for `row_type="first"` (bottom row), we want the symbol on the BOTTOM edge.
-    # For `row_type="last"` (top row), we generally don't have an X-axis unless it's `scale_x_top`.
-    # But if there is a full border (boxed), we might want it on the top edge of the top row too.
-    # Crucially, we do NOT want symbols on the top edge of the bottom row, or bottom edge of the top row (internal edges).
-    
-    # We need to pass more info to `element_break_symbol` or refine `sides`.
-    # Let's refine `sides` to be very specific: "bottom-right", "top-right", etc?
-    # `element_break_symbol` uses "right", "left", "top", "bottom" to choose which GROBS to generate.
-    # If we pass "right", it generates both top-right and bottom-right slashes (if boxed) or just bottom-right (if not boxed).
-    # But here we need finer control.
-    # If row_type="first" (bottom), and we have an X-break on the right edge, we ONLY want the BOTTOM-right slash.
-    # If row_type="last" (top), and we have an X-break on the right edge, we ONLY want the TOP-right slash (and only if boxed).
-    
-    # The current `element_break_symbol` implementation for `axis="dual"` or "x":
-    # if "right" in sides: draws bottom-right. If has_border, also draws top-right.
-    # This "automagic" behavior is causing the issue. It assumes if you are on the right edge, you want both corners if boxed.
-    # But in the middle of the plot (internal edges), we might have a border but we don't want the internal corner symbol.
-    
-    # To fix this without changing `element_break_symbol` structure too much:
-    # We can pass a new argument `corner_mask` or `draw_top`/`draw_bottom`.
-    # Or, simpler:
-    # We can define `sides` more granularly in `element_break_symbol`? No, it expects standard side names.
-    
-    # Let's modify `element_break_symbol` to accept `clip_corners` or similar?
-    # Or just let `.symbol_theme_2d` decide exactly which corners.
-    
-    # Let's change the logic in `element_break_symbol` to strictly follow what we need.
-    # Actually, we can use `axis="x_bottom"` or `axis="x_top"`?
-    
-    # Let's update `element_break_symbol` to handle `which` argument?
-    # Or we can just be smart in `.symbol_theme_2d` and passing a custom `axis` string is a hacky but effective way.
-    # e.g. axis="x_bottom" -> only draw bottom corners.
-    
-    # Let's refine `.symbol_theme_2d` logic:
-    
-    sides <- c()
-    specific_axis <- "dual" # default
-    
-    # We need to separate X and Y symbol addition or combine them carefully.
-    # Actually, we can return a list of theme elements or combine them.
-    # But `panel.border` is unique.
-    
-    # Strategy:
-    # 1. Calculate which specific corners need symbols.
-    # 2. Pass this specific instruction to `element_break_symbol`.
-    
-    # Let's allow `element_break_symbol` to take a `corners` argument? 
-    # e.g. corners = c("tr", "br", "tl", "bl")
-    
-    # Let's update `element_break_symbol` first (I will do this in the next step).
-    # Here I will prepare the logic to determine corners.
-    
-    corners <- character(0)
-    
-    # Logic for X-breaks (vertical gaps between cols)
-    if (!is.null(symbol_x)) {
-        # We only care if we are in the bottom row (standard x-axis) or top row (if boxed).
-        # We NEVER want symbols on the internal horizontal edges (top of bottom row, bottom of top row).
-        
-        is_bottom_row <- (row_type == "first")
-        is_top_row <- (row_type == "last")
-        
-        if (is_bottom_row || is_top_row) {
-            # Determine which vertical edge has the break
-            edge <- NULL
-            if (col_type == "first") edge <- if (rev_x == "reverse") "left" else "right"
-            else if (col_type == "last") edge <- if (rev_x == "reverse") "right" else "left"
-            else if (col_type == "other") edge <- c("left", "right")
-            
-            if (!is.null(edge)) {
-                if ("right" %in% edge) {
-                    if (is_bottom_row) corners <- c(corners, "x_bottom_right")
-                    if (is_top_row) corners <- c(corners, "x_top_right")
-                }
-                if ("left" %in% edge) {
-                    if (is_bottom_row) corners <- c(corners, "x_bottom_left")
-                    if (is_top_row) corners <- c(corners, "x_top_left")
-                }
-            }
-        }
-    }
-    
-    # Logic for Y-breaks (horizontal gaps between rows)
-    if (!is.null(symbol_y)) {
-        # We only care if we are in the left col (standard y-axis) or right col (if boxed).
-        
-        is_left_col <- (col_type == "first")
-        is_right_col <- (col_type == "last")
-        
-        if (is_left_col || is_right_col) {
-            # Determine which horizontal edge has the break
-            edge <- NULL
-            if (row_type == "first") edge <- if (rev_y == "reverse") "bottom" else "top"
-            else if (row_type == "last") edge <- if (rev_y == "reverse") "top" else "bottom"
-            else if (row_type == "other") edge <- c("top", "bottom")
-            
-            if (!is.null(edge)) {
-                if ("top" %in% edge) {
-                    if (is_left_col) corners <- c(corners, "y_top_left")
-                    if (is_right_col) corners <- c(corners, "y_top_right")
-                }
-                if ("bottom" %in% edge) {
-                    if (is_left_col) corners <- c(corners, "y_bottom_left")
-                    if (is_right_col) corners <- c(corners, "y_bottom_right")
-                }
-            }
-        }
-    }
-    
-    if (length(corners) > 0) {
-        # Pass the calculated corners to the element
-        symbol <- if (!is.null(symbol_x)) symbol_x else symbol_y
-        return(theme(panel.border = element_break_symbol(symbol = symbol, corners = corners, base_border = border, axis = "dual_custom")))
-    }
-    return(NULL)
-}
-
-## Custom theme element: break symbol
-element_break_symbol <- function(symbol = "slash", colour = "black", linewidth = 0.5,
-                                 linetype = 1, sides = "right", base_border = NULL, axis = "x", corners = NULL) {
-    structure(
-        list(symbol = symbol, colour = colour, linewidth = linewidth, linetype = linetype,
-             sides = sides, base_border = base_border, axis = axis, corners = corners, fill = NA, inherit.blank = FALSE),
-        class = c("element_break_symbol", "element_rect", "element")
-    )
-}
-
-#' @method element_grob element_break_symbol
-#' @export
-element_grob.element_break_symbol <- function(element, ...) {
-    grobs <- list()
-    has_border <- !is.null(element$base_border) && !inherits(element$base_border, "element_blank")
-    if (has_border) {
-        grobs <- c(grobs, list(ggplot2::element_grob(element$base_border, ...)))
-    }
-    
-    gp <- grid::gpar(
-        col = element$colour,
-        lwd = element$linewidth * 72.27 / 25.4,   # mm -> points
-        lty = element$linetype
-    )
-    
-    sides <- element$sides
-    symbol <- element$symbol
-    axis <- element$axis
-    corners <- element$corners
-    
-    if (symbol == "slash") {
-        # Modified slash style: slant is adjusted to 0.5mm to be nearly vertical/horizontal
-        slant <- grid::unit(0.6, "mm") 
-        height <- grid::unit(3.5, "mm") # y displacement
-        shift <- grid::unit(1.0, "mm")  # separation
-
-        # Helper function to add a pair of slashes at a given corner
-        add_slash <- function(x_npc, y_npc, orient = "vertical") {
-            if (orient == "vertical") {
-                # For X-break gap (vertical gap), the slash crosses horizontally
-                list(
-                    grid::segmentsGrob(
-                        x0 = grid::unit(x_npc, "npc") - shift - slant, y0 = grid::unit(y_npc, "npc") - height,
-                        x1 = grid::unit(x_npc, "npc") - shift + slant, y1 = grid::unit(y_npc, "npc") + height,
-                        gp = gp),
-                    grid::segmentsGrob(
-                        x0 = grid::unit(x_npc, "npc") + shift - slant, y0 = grid::unit(y_npc, "npc") - height,
-                        x1 = grid::unit(x_npc, "npc") + shift + slant, y1 = grid::unit(y_npc, "npc") + height,
-                        gp = gp)
-                )
-            } else {
-                # For Y-break gap (horizontal gap), the slash crosses vertically
-                list(
-                    grid::segmentsGrob(
-                        x0 = grid::unit(x_npc, "npc") - height, y0 = grid::unit(y_npc, "npc") - shift - slant,
-                        x1 = grid::unit(x_npc, "npc") + height, y1 = grid::unit(y_npc, "npc") - shift + slant,
-                        gp = gp),
-                    grid::segmentsGrob(
-                        x0 = grid::unit(x_npc, "npc") - height, y0 = grid::unit(y_npc, "npc") + shift - slant,
-                        x1 = grid::unit(x_npc, "npc") + height, y1 = grid::unit(y_npc, "npc") + shift + slant,
-                        gp = gp)
-                )
-            }
-        }
-
-        # If "corners" are provided (Dual Axis 2D mode with precise control)
-        if (!is.null(corners) && axis == "dual_custom") {
-            # X-axis symbols (Vertical cut)
-            if ("x_bottom_right" %in% corners) grobs <- c(grobs, add_slash(1, 0, "vertical"))
-            if ("x_top_right" %in% corners) grobs <- c(grobs, add_slash(1, 1, "vertical"))
-            if ("x_bottom_left" %in% corners) grobs <- c(grobs, add_slash(0, 0, "vertical"))
-            if ("x_top_left" %in% corners) grobs <- c(grobs, add_slash(0, 1, "vertical"))
-            
-            # Y-axis symbols (Horizontal cut)
-            if ("y_top_left" %in% corners) grobs <- c(grobs, add_slash(0, 1, "horizontal"))
-            if ("y_top_right" %in% corners) grobs <- c(grobs, add_slash(1, 1, "horizontal"))
-            if ("y_bottom_left" %in% corners) grobs <- c(grobs, add_slash(0, 0, "horizontal"))
-            if ("y_bottom_right" %in% corners) grobs <- c(grobs, add_slash(1, 0, "horizontal"))
-        } else {
-            # Standard 1D behavior (fallback)
-            if (axis %in% c("x", "dual")) {
-                if ("right" %in% sides) {
-                    grobs <- c(grobs, add_slash(1, 0, "vertical"))
-                    if (has_border) grobs <- c(grobs, add_slash(1, 1, "vertical"))
-                }
-                if ("left" %in% sides) {
-                    grobs <- c(grobs, add_slash(0, 0, "vertical"))
-                    if (has_border) grobs <- c(grobs, add_slash(0, 1, "vertical"))
-                }
-            }
-            
-            if (axis %in% c("y", "dual")) {
-                if ("top" %in% sides) {
-                    grobs <- c(grobs, add_slash(0, 1, "horizontal"))
-                    if (has_border) grobs <- c(grobs, add_slash(1, 1, "horizontal"))
-                }
-                if ("bottom" %in% sides) {
-                    grobs <- c(grobs, add_slash(0, 0, "horizontal"))
-                    if (has_border) grobs <- c(grobs, add_slash(1, 0, "horizontal"))
-                }
-            }
-        }
-    } else if (symbol == "zigzag") {
-        # Optional
-    }
-
-    if (length(grobs) == 0) return(grid::nullGrob())
-    do.call(grid::grobTree, grobs)
-}
 ## Used for panel.border in 2D break grids to avoid doubled borders.
 ## Useful for for theme where there is a panel border (e.g. theme_bw, linedraw) and we want to avoid drawing borders on internal edges of the 2D grid.
 element_partial_rect <- function(colour = "grey20", linewidth = 0.5,
@@ -1231,6 +898,193 @@ add_line_bridges <- function(pg, along) {
                 }
             }
         }
+    }
+    gt
+}
+
+## ---------------------------------------------------------------------------
+## Break marks, `symbol = "slash"` (#87).
+##
+## A mark says that a *line* is interrupted, so it belongs where a line or an
+## axis actually runs across a break, and nowhere else.  It used to be drawn by
+## every window as part of its `panel.border`, which knows neither of those
+## things: it marked the top and right edges of a `theme_minimal()` plot, which
+## draws no line there, marked the edges between the panels of a facet, and was
+## half clipped away because the panel clips what it draws.
+##
+## The marks are now drawn on the assembled figure, in the cell that separates
+## two windows -- the same cell `add_line_bridges()` draws in -- so they are
+## never clipped and sit exactly at the two ends of the interrupted line,
+## whatever `space` is.  An edge is marked only if it is an outer edge of the
+## figure and the figure draws something along it there: an axis (the grob of
+## that side has an extent) or a panel border.  The decision is read off the
+## gtable, so a secondary axis, `position = "top"`, `coord_flip()` and any
+## theme are handled the same way.  The marks take the colour and the width of
+## the line they interrupt.
+
+break_symbols <- c("slash")
+
+check_break_symbol <- function(symbol) {
+    if (is.null(symbol)) {
+        return(invisible(NULL))
+    }
+    if (!is.character(symbol) || length(symbol) != 1L ||
+        !symbol %in% break_symbols) {
+        abort(paste0("`symbol` must be NULL or one of ",
+                     paste0('"', break_symbols, '"', collapse = ", "), "."))
+    }
+    invisible(NULL)
+}
+
+## does the figure draw anything along `side` of the panel in row `k` of the
+## layout: a non-empty axis next to it on that side, or a panel border.  The
+## axis is found by position, not by name: a faceted window reaches the
+## assembled figure as one cell whose name lists all of its panels and axes.
+edge_is_drawn <- function(gt, k, side) {
+    lay <- gt$layout
+    pk <- lay[k, , drop = FALSE]
+    cand <- which(startsWith(lay$name, paste0("axis-", substr(side, 1, 1))))
+    cand <- cand[switch(side,
+        bottom = lay$l[cand] == pk$l & lay$r[cand] == pk$r & lay$t[cand] > pk$b,
+        top    = lay$l[cand] == pk$l & lay$r[cand] == pk$r & lay$b[cand] < pk$t,
+        left   = lay$t[cand] == pk$t & lay$b[cand] == pk$b & lay$r[cand] < pk$l,
+        right  = lay$t[cand] == pk$t & lay$b[cand] == pk$b & lay$l[cand] > pk$r)]
+    if (length(cand)) {
+        dist <- switch(side,
+            bottom = lay$t[cand] - pk$b, top = pk$t - lay$b[cand],
+            left = pk$l - lay$r[cand], right = lay$l[cand] - pk$r)
+        ax <- gt$grobs[[cand[which.min(dist)]]]
+        if (!inherits(ax, "zeroGrob")) {
+            ext <- if (side %in% c("bottom", "top")) {
+                grid::convertHeight(grid::grobHeight(ax), "mm", valueOnly = TRUE)
+            } else {
+                grid::convertWidth(grid::grobWidth(ax), "mm", valueOnly = TRUE)
+            }
+            if (isTRUE(ext > 0.01)) return(TRUE)
+        }
+    }
+    has_panel_border(gt$grobs[[k]])
+}
+
+has_panel_border <- function(g) {
+    if (!is.null(g$name) && grepl("^panel\\.border", g$name)) {
+        return(!inherits(g, "zeroGrob"))
+    }
+    kids <- if (inherits(g, "gtable")) g$grobs else if (inherits(g, "gTree")) g$children
+    for (ch in kids) {
+        if (has_panel_border(ch)) return(TRUE)
+    }
+    FALSE
+}
+
+## colour and width of the line a mark interrupts: the axis line of that side,
+## else the panel border, else the ticks
+break_mark_gp <- function(plot, side) {
+    th <- ggplot2::complete_theme(plot$theme)
+    xy <- if (side %in% c("bottom", "top")) "x" else "y"
+    for (el in c(paste0("axis.line.", xy, ".", side), "panel.border",
+                 paste0("axis.ticks.", xy, ".", side))) {
+        e <- tryCatch(ggplot2::calc_element(el, th), error = function(e) NULL)
+        if (is.null(e) || inherits(e, "element_blank")) next
+        col <- e$colour
+        lw <- e$linewidth
+        if (is.null(col) || is.na(col)) next
+        if (is.null(lw)) lw <- 0.5
+        return(grid::gpar(col = col, lwd = lw * ggplot2::.pt, lineend = "butt"))
+    }
+    grid::gpar(col = "black", lwd = 0.5 * ggplot2::.pt, lineend = "butt")
+}
+
+## one stroke of a slash centred at (`x`, `y`), in npc of the gap cell; `gap`
+## is "col" for windows side by side (the interrupted line is horizontal) and
+## "row" for stacked windows (the interrupted line is vertical)
+slash_stroke <- function(x, y, gap, gp, size = 1.6, angle = 65) {
+    a <- angle * pi / 180
+    du <- size * cos(a)
+    dv <- size * sin(a)
+    if (gap == "col") {
+        dx <- grid::unit(du, "mm"); dy <- grid::unit(dv, "mm")
+    } else {
+        dx <- grid::unit(dv, "mm"); dy <- grid::unit(du, "mm")
+    }
+    x <- grid::unit(x, "npc")
+    y <- grid::unit(y, "npc")
+    grid::segmentsGrob(x - dx, y - dy, x + dx, y + dy, gp = gp)
+}
+
+## `gaps` names the gaps to mark: "col" for the gaps between windows laid side
+## by side, "row" for those between stacked windows
+add_break_marks <- function(pg, plot, gaps) {
+    if (!length(gaps)) {
+        return(pg)
+    }
+    gt <- if (inherits(pg, "gtable")) pg else patchwork::patchworkGrob(pg)
+    lay <- gt$layout
+    ## a window is one panel cell, or, for a faceted window, one cell that
+    ## holds all of its panels ("panel; panel-1-1, panel-2-1, ...")
+    panels <- which(grepl("^panel(-[0-9]+$|;)", lay$name))
+    if (length(panels) < 2) {
+        return(pg)
+    }
+    p <- lay[panels, , drop = FALSE]
+    gps <- list()
+    gp_of <- function(side) {
+        if (is.null(gps[[side]])) gps[[side]] <<- break_mark_gp(plot, side)
+        gps[[side]]
+    }
+    marks <- list()
+    add <- function(grob, side, t, b, l, r) {
+        marks[[length(marks) + 1L]] <<- list(grob = grob, side = side,
+                                              t = t, b = b, l = l, r = r)
+    }
+
+    for (i in seq_along(panels)) {
+        ## the window to the right of this one, in the same row
+        right <- which(p$t == p$t[i] & p$l > p$r[i])
+        if ("col" %in% gaps && length(right)) {
+            j <- right[which.min(p$l[right])]
+            if (p$l[j] - p$r[i] > 1) {
+                for (side in c("bottom", "top")) {
+                    outer <- if (side == "bottom") p$b[i] == max(p$b) else p$t[i] == min(p$t)
+                    if (!outer) next
+                    if (!edge_is_drawn(gt, panels[i], side) &&
+                        !edge_is_drawn(gt, panels[j], side)) next
+                    y <- if (side == "bottom") 0 else 1
+                    gp <- gp_of(side)
+                    add(grid::gList(slash_stroke(0, y, "col", gp),
+                                    slash_stroke(1, y, "col", gp)), side,
+                        p$t[i], p$b[i], p$r[i] + 1, p$l[j] - 1)
+                }
+            }
+        }
+        ## the window below this one, in the same column
+        below <- which(p$l == p$l[i] & p$t > p$b[i])
+        if ("row" %in% gaps && length(below)) {
+            j <- below[which.min(p$t[below])]
+            if (p$t[j] - p$b[i] > 1) {
+                for (side in c("left", "right")) {
+                    outer <- if (side == "left") p$l[i] == min(p$l) else p$r[i] == max(p$r)
+                    if (!outer) next
+                    if (!edge_is_drawn(gt, panels[i], side) &&
+                        !edge_is_drawn(gt, panels[j], side)) next
+                    x <- if (side == "left") 0 else 1
+                    gp <- gp_of(side)
+                    add(grid::gList(slash_stroke(x, 1, "row", gp),
+                                    slash_stroke(x, 0, "row", gp)), side,
+                        p$b[i] + 1, p$t[j] - 1, p$l[i], p$r[i])
+                }
+            }
+        }
+    }
+    if (!length(marks)) {
+        return(pg)
+    }
+    for (k in seq_along(marks)) {
+        m <- marks[[k]]
+        gt <- gtable::gtable_add_grob(
+            gt, grid::gTree(children = m$grob), t = m$t, b = m$b, l = m$l, r = m$r,
+            clip = "off", z = Inf, name = paste0("ggbreak-mark-", m$side, "-", k)
+        )
     }
     gt
 }

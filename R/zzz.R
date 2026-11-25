@@ -28,6 +28,7 @@ ggbreak_citation <- function() {
             stop("invalid called.")
         }
     }
+    check_break_symbol(symbol)
 
     structure(list(axis = axis, breaks = breaks, scales=scales,
                    ticklabels=ticklabels, expand = expand, space = space, symbol = symbol,

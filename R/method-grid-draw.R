@@ -131,8 +131,7 @@ render_dual_break <- function(x, axis_break_x, axis_break_y) {
                 plot = x,
                 col_type = col_type, row_type = row_type,
                 margin_x = margin_x, margin_y = margin_y,
-                rev_x = rng_x$flagrev, rev_y = rng_y$flagrev,
-                symbol_x = xb$symbol, symbol_y = yb$symbol
+                rev_x = rng_x$flagrev, rev_y = rng_y$flagrev
             )
 
             plots[[idx]] <- suppressMessages(
@@ -159,16 +158,16 @@ render_dual_break <- function(x, axis_break_x, axis_break_y) {
     totallabs$y <- NULL
 
     g <- blank_patch_background(g)
+    ## the x breaks separate the columns of the grid, the y breaks its rows
+    ## (every cell is drawn with `coord_cartesian()`), see #87
+    gaps <- c(if (!is.null(xb$symbol)) "col", if (!is.null(yb$symbol)) "row")
+    g <- add_break_marks(g, x, gaps)
     hl <- hoist_bottom_axis_title(g, x, newxlab)
     g <- hl$plot
     newxlab <- hl$label
 
     g <- ggplotify::as.ggplot(g) + xlab(newxlab) + ylab(newylab)
     g <- set_label(g, totallabs = totallabs, p2 = x)
-
-    # if (!is.null(axis_break_x$symbol) || !is.null(axis_break_y$symbol)) {
-    #     g <- add_symbol_annotation(g, axis_break_x, axis_break_y, margin_x, margin_y, rng_x, rng_y, nx, ny, "dual")
-    # }
 
     return(g)
 }
@@ -201,14 +200,14 @@ render_discrete_break <- function(x, axis_break){
         axis    = axis,
         idx     = idx,
         margin  = axis_breaks$space,
-        symbol  = axis_breaks$symbol,
+        marks   = !is.null(axis_breaks$symbol),
         relrange = discrete_relative_range(idx, axis_breaks$scales)
     )
 }
 
 ## Lay out the panels of a discrete axis.  `idx` holds, for every panel, the
 ## positions of the levels it shows, in the order in which they are drawn.
-render_discrete_panels <- function(x, axis, idx, margin, symbol, relrange){
+render_discrete_panels <- function(x, axis, idx, margin, marks = FALSE, relrange){
     nbreaks <- length(idx)
     levels <- ggrange2(plot = x, var = axis)$axis_range
     coord_fun <- check_coord_flip(plot = x)
@@ -224,7 +223,7 @@ render_discrete_panels <- function(x, axis, idx, margin, symbol, relrange){
         suppressMessages(
             split_discrete_scale(levels[idx[[i]]], plot = x, axis = axis) +
             subplot_theme(plot = x, axis = axis, type = type, margin = margin,
-                          rev = "", symbol = symbol)
+                          rev = "")
         )
     })
 
@@ -250,7 +249,11 @@ render_discrete_panels <- function(x, axis, idx, margin, symbol, relrange){
     ## one that crosses a break interval, but there is nothing to read the
     ## hidden piece off here: the levels of a window are subset, so the line of a
     ## panel stops at its own levels and never reaches the edge, see #33
-    g <- set_label(as.ggplot(blank_patch_background(pg)), totallabs = totallabs, p2 = x)
+    pg <- blank_patch_background(pg)
+    if (marks) {
+        pg <- add_break_marks(pg, x, if (vertical) "row" else "col")
+    }
+    g <- set_label(as.ggplot(pg), totallabs = totallabs, p2 = x)
     return(g)
 }
 ## Start a new page *before* the subplots are built.
@@ -352,9 +355,9 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
         x <- .remove_axis_lab(x, totallabs)
     }
     nbreaks <- length(breaks)
-    subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first", margin = margin, rev = rng$flagrev, symbol = axis_breaks$symbol)
-    subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other", margin = margin, rev = rng$flagrev, symbol = axis_breaks$symbol)
-    subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last", margin = margin, rev = rng$flagrev, symbol = axis_breaks$symbol)
+    subplottheme1 <- subplot_theme(plot=x, axis=axis, type="first", margin = margin, rev = rng$flagrev)
+    subplottheme2 <- subplot_theme(plot=x, axis=axis, type="other", margin = margin, rev = rng$flagrev)
+    subplottheme3 <- subplot_theme(plot=x, axis=axis, type="last", margin = margin, rev = rng$flagrev)
     coord_fun <- check_coord_flip(plot=x)
     ## the limits of the axis that is *not* being broken, #59
     otherlim <- other_axis_limits(x, axis)
@@ -528,6 +531,11 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
     if (bridge && is.null(facet_guide)) {
         g <- add_line_bridges(g, along)
     }
+    ## break marks go in the same cells; a nested facet grid is left alone for
+    ## the same reason, its gaps between facets are not breaks (#87)
+    if (!is.null(axis_breaks$symbol) && is.null(facet_guide)) {
+        g <- add_break_marks(g, x, along)
+    }
     if (!is.null(facet_guide)) {
         g <- add_facet_guide_box(g, facet_guide)
     }
@@ -547,10 +555,6 @@ grid.draw.ggbreak <- function(x, recording = TRUE) {
          )
 
     g <- set_label(g, totallabs = totallabs, p2 = x)
-
-    # if (!is.null(axis_breaks$symbol)) {
-    #     g <- add_symbol_annotation(g, axis_breaks, NULL, margin, NULL, rng, NULL, nbreaks + 1, 1, axis)
-    # }
 
     if (recording){
         grid::grid.draw(drawable_grob(g))
@@ -648,7 +652,7 @@ grid.draw.ggcut <- function(x, recording=TRUE){
         relrange <- discrete_cut_relative_range(idx, axis_cut$which, axis_cut$scales)
         g <- render_discrete_panels(x = x, axis = axis, idx = idx,
                                     margin = axis_cut$space,
-                                    symbol = NULL, relrange = relrange)
+                                    relrange = relrange)
         if (recording){
             grid::grid.draw(drawable_grob(g))
         }

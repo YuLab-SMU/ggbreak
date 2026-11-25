@@ -120,12 +120,14 @@ ggplot(df, aes(x, y, color = group)) +
 
 ### Feature 4: Axis break symbols
 
-You can add standard axis break symbols (like a double-slash `//`) to the axes where they are broken by using the `symbol` parameter. This visual cue helps readers quickly identify that the axis is discontinuous. Currently, `symbol = "slash"` is supported, and it works for both single and dual axis breaks.
+You can mark where an axis is broken with a double slash `//` by using `symbol = "slash"`. The mark is drawn at the two ends of the interrupted line, in the colour and width of that line, and only along the edges the plot actually draws: with `theme_classic()` or `theme_minimal()` only the axes are marked, with a boxed theme such as `theme_bw()` the opposite border as well. It works for single and dual axis breaks, discrete axes, `coord_flip()` and axes drawn at the top or the right.
 
 ```{r fig.width=8, fig.height=4}
 ggplot(mpg, aes(displ, hwy)) +
     geom_point() +
-    scale_x_break(c(3, 4), symbol = "slash")
+    scale_x_break(c(3, 4), symbol = "slash") +
+    scale_y_break(c(25, 30), symbol = "slash") +
+    theme_classic()
 ```
 
 ### Feature 5: Zoom in or zoom out of subplots

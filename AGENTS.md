@@ -132,8 +132,14 @@ Install the before and after builds into two separate libraries and diff the ima
 ```bash
 git archive <rev> | tar -x -C /tmp/before
 mkdir -p /tmp/Rlib-before && R CMD INSTALL --library=/tmp/Rlib-before /tmp/before
-R_LIBS=/tmp/Rlib-before Rscript render-battery.R   # writes /tmp/out/before/*.png
+Rscript render-battery.R /tmp/Rlib-before            # writes /tmp/out/before/*.png
 ```
+
+**`R_LIBS=/tmp/Rlib-before Rscript ...` does not work here**: `R_LIBS_USER=~/Rlib`
+wins and both runs load the same installed ggbreak, so every diff is 0 px and looks
+like a pass. Prepend the library inside the script --
+`.libPaths(c(commandArgs(TRUE)[1], .libPaths()))` -- and print
+`find.package("ggbreak")` so the log proves which build was drawn.
 
 then compare the two sets, e.g.
 
@@ -164,6 +170,12 @@ Two things that will waste your afternoon:
 - **`geom_col()`'s rect uses `just = c("left", "top")`, so `y` is the TOP EDGE, not the
   centre.** Reading it as the centre moves every bar by half its height — measured
   **15903 px** of difference. Restore by `just`: handle `centre`, `left|bottom` and `top`.
+- **Break marks (`symbol`) are drawn on the assembled figure, not by the windows**
+  (`add_break_marks()`, #87), in the same gap cells as the bridges. An edge is marked
+  only if it is an outer edge and an axis (found by *position* -- a faceted window is
+  one `panel; panel-1-1, ...` cell) or a `panel.border` is drawn there. The old
+  `panel.border` element marked edges with nothing on them and was half clipped; do not
+  move marks back into a theme element.
 - **Lines are deliberately never clamped.** `bridge` reads the hidden piece off the
   `polylineGrob`; clamping it would break #33. Only rects, axis-aligned segments and
   two-level polygons are clamped.

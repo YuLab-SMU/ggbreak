@@ -248,7 +248,9 @@ extract_axis_break <- function(object){
         breaks <- lapply(object, function(i)i$breaks)
         scales <- lapply(object, function(i)i$scales)
         ticklabs <- lapply(object, function(i)i$ticklabels)
-        symbol <- object[[1]]$symbol
+        ## marks belong to the axis: any of its breaks asking for them marks
+        ## every gap of the axis (#87)
+        symbol <- Find(Negate(is.null), lapply(object, function(i) i$symbol))
         bridge <- object[[1]]$bridge
     }
     return(list(

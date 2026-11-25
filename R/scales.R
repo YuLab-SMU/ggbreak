@@ -21,7 +21,12 @@
 #' by 5% on each side for continuous variables. If it is logical, the \code{TRUE} means
 #' the default of \code{ggplot2} (foregoing statement), and \code{FALSE} means no expand for the plot.
 #' @param space the blank space among the subplots after break, default is 0.1 (cm).
-#' @param symbol the break symbol, default is NULL, could be 'slash'.
+#' @param symbol the mark drawn where the break interrupts an axis, default is
+#' NULL (no mark); \code{"slash"} draws a \code{//} at the two ends of the
+#' interrupted line. A mark is drawn only along the edges the plot actually
+#' draws, an axis or a panel border, and takes the colour and the width of
+#' that line. With more than one break on an axis, a symbol on any of them
+#' marks every gap of the axis.
 #' @param bridge whether to draw the piece of a line that the break hides, so
 #' that a line crossing the break reads as one line instead of two, default is
 #' FALSE. Only the lines of \code{geom_line()}, \code{geom_path()} and
