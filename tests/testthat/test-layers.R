@@ -1,5 +1,6 @@
 library(grid)
 library(ggplot2)
+library(ggbreak)
 
 ## #35: `geom_text_repel()` lays its labels out in the coordinate system of the
 ## panel and keeps them inside it, so a label whose point lies outside the window

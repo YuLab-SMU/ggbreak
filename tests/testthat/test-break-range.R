@@ -1,5 +1,6 @@
 library(grid)
 library(ggplot2)
+library(ggbreak)
 
 ## #43: the subplot ranges are built by splicing the break points into the axis
 ## range, which assumes that the break points are inside that range.  A break

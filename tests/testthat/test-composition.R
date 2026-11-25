@@ -1,3 +1,7 @@
+library(grid)
+library(ggplot2)
+library(ggbreak)
+
 ## #46: a broken plot that is combined with other plots came out with no break at
 ## all.  `patchwork` and `cowplot` do not draw a plot the way `print()` does --
 ## they call `ggplotGrob()`, which is `ggplot_gtable(ggplot_build(x))` -- and
@@ -10,10 +14,6 @@
 ## well -- otherwise a plot drawn next to it is aligned against a panel that
 ## already carries the axis labels and comes out wider than the plot it sits
 ## beside, which is the misalignment the report is actually about.
-
-library(grid)
-library(ggplot2)
-library(ggbreak)
 
 ## the assembled figure is made of one panel per window, so it holds far more
 ## grobs than the plain plot it was built from

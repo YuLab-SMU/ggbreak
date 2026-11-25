@@ -1,3 +1,5 @@
+library(ggbreak)
+
 ## `coord_cartesian()`/`coord_flip()` limits are kept, #59.
 ##
 ## `ggbreak` gives every subplot a fresh coord so that the broken axis can be

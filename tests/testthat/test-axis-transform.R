@@ -1,5 +1,6 @@
 library(grid)
 library(ggplot2)
+library(ggbreak)
 
 ## A transformed axis, e.g. `scale_y_log10()`, stores its breaks in transformed
 ## units, so the ends of the subplot intervals have to be mapped back one by one.

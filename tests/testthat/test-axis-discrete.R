@@ -1,5 +1,6 @@
 library(grid)
 library(ggplot2)
+library(ggbreak)
 
 ## #68: a discrete axis has no transform, so `ggrange2()` returns
 ## `flagrev = NULL` for it and `grid.draw.ggbreak()` died with

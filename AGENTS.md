@@ -103,7 +103,7 @@ through to `object[[1]]`.
   them, and `test_dir()` was the only way to run them. Locally:
   `testthat::test_dir("tests/testthat")` (about 2m40s; check is ~4m31s in total). The suite
   is **0 failed / 0 warning / 0 skipped** as of `61e6ee8`, so a failure is yours — there is
-  no known-failing test to step over any more. `test-api-attributes.R:18` used to fail, and
+  no known-failing test to step over any more. A test in `test-api-attributes.R` (now `test-scale-api.R`) used to fail, and
   it was a wrong assertion rather than a known-bad test; do not take a red test for granted
   without checking the contract it claims to pin down.
 - **A test file must not call `pkgload::load_all()`.** It works under
@@ -124,6 +124,33 @@ through to `object[[1]]`.
   `--as-cran` when offline.
 - `R CMD check <tarball>` needs an **absolute** path, because the tarball lands in the
   package directory rather than the working directory.
+
+## Test layout: one file per feature, not per issue
+
+The suite is organised by **what is tested**, not by the issue that prompted it:
+
+| File | Feature |
+|---|---|
+| `test-scale-api.R` | what the scales record on the plot; which scales can be combined (#31) |
+| `test-break-range.R` | break points outside the plot range; the range of all panels (#43) |
+| `test-axis-discrete.R` / `-datetime.R` / `-transform.R` / `-secondary.R` | the axis types (#68, #83, #84, #64) |
+| `test-dual-break.R` | x and y broken together |
+| `test-facets.R` | facet grid nesting and one strip per facet (#55, #17, #86) |
+| `test-coord.R` | coord limits and `coord_flip()` (#59) |
+| `test-layers.R` | layers that need special care, e.g. `ggrepel` (#35) |
+| `test-break-marks.R` / `test-bridge.R` | `symbol` (#87) and `bridge` (#33) |
+| `test-theme.R` / `test-axis-titles.R` | global themes, background, margin (#57, #52, #71); axis titles and bottom legend (#53, #85) |
+| `test-print.R` / `test-composition.R` / `test-vector-output.R` | pages (#73), `ggplotGrob()`/patchwork/cowplot (#46), clamped geometry (#16) |
+
+- **A fix goes into the feature file it belongs to**, as a new `test_that()` whose name
+  ends with the issue number (`"... (#86)"`) -- the number stays traceable without
+  owning a file. Open a new `test-<feature>.R` only for a feature none of these covers.
+- Merged files are split into sections by a `## ----` banner; a section's helpers stay
+  next to the tests that use them. Helper names repeat across files with different
+  bodies (`axis_tick_labels`), so do not hoist one into a `helper-*.R` without
+  checking every caller.
+- The reorganisation was verified by running the suite before and after: the same
+  128 tests with the same expectation counts (526), 0 failed.
 
 ## Any change to rendering needs a pixel regression
 
@@ -262,7 +289,7 @@ Two things that will waste your afternoon:
   `print()`, `ggsave()`, `ggplotGrob()`, `patchwork` and `cowplot` are all quiet. A direct
   `grid::grid.draw(p, recording = FALSE)` is *not* wrapped, and that is the path the tests
   use, so a test that hits it must wrap the call itself (`suppressWarnings()`), as
-  `test-issue-68.R` and the discrete-axis test of `test-issue-33.R` do. Measured: 0
+  `test-axis-discrete.R` and the discrete-axis test of `test-bridge.R` do. Measured: 0
   warnings from every entry point above, 4 from the raw draw of a discrete break.
 
 ## Environment

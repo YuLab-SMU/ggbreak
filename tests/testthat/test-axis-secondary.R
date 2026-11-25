@@ -1,5 +1,6 @@
 library(grid)
 library(ggplot2)
+library(ggbreak)
 
 ## collect the paths of all axis text grobs of a rendered plot
 collect_axis_paths_64 <- function(grob, path = '') {

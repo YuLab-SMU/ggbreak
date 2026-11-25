@@ -1,3 +1,5 @@
+library(ggbreak)
+
 ## Saving a broken plot with pdf() used to produce an extra blank page, #73.
 ##
 ## ggbreak builds the subplots while the device is already open; building a

@@ -1,3 +1,7 @@
+library(grid)
+library(ggplot2)
+library(ggbreak)
+
 ## #16: a break is drawn by clipping, not by cutting the data.  Every window is
 ## handed the whole dataset and each panel hides the part that belongs to the
 ## other windows, but the hidden geometry is still handed to the device and a
@@ -12,10 +16,6 @@
 ## drawn differently -- the panel clips the hidden part away -- so the tests
 ## below pin down both halves: the geometry handed to the device is bounded, and
 ## the part of it that *is* visible does not move.
-
-library(grid)
-library(ggplot2)
-library(ggbreak)
 
 ## Every piece of geometry a panel can hide, as the ends of the slab it draws
 ## along the y axis, in panel heights (a panel is `[0, 1]`).  One grob can hold

@@ -1,3 +1,7 @@
+library(grid)
+library(ggplot2)
+library(ggbreak)
+
 ## #33: a line that crosses a break is not drawn in the break interval, because
 ## the break interval is what separates the two windows and there is no panel to
 ## draw in.  The line therefore stops at the edge of one window and starts again
@@ -11,10 +15,6 @@
 ##
 ## This is off by default, so the tests below also pin down that nothing moves
 ## unless it is asked for.
-
-library(grid)
-library(ggplot2)
-library(ggbreak)
 
 ## the figure that carries the assembled windows, dug out of the grob tree of a
 ## broken plot; the outer gtable has a cell *called* `panel` as well, so the
